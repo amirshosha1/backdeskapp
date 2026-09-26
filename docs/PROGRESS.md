@@ -1,7 +1,7 @@
 # PROGRESS — Safi (صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-09-26 (kickoff and approval round).
+> Last updated: 2026-09-26 (kickoff and two approval rounds).
 
 ## Current status
 
@@ -21,7 +21,7 @@
 | 2 — Free calculator | Not started |
 | 3 — Setup guide, checklists, Setup Kit, minimal `units` table | Not started |
 | ⛔ Validation Gate | Waiting for 20 pre-orders paid by InstaPay (tracked by Amir outside the app) and the exact line `Gate passed: {number} paid pre-orders.` |
-| 5 — ERP core | Blocked by the gate |
+| 5 — ERP core (+ basic team invitations) | Blocked by the gate |
 | 6 — Payout import | Not started |
 | 7 — Reports and owner statements | Not started |
 | 8 — Smart entry and alerts | Not started |
@@ -56,6 +56,7 @@
   - Pages live under `/demo`, with fixtures taken from the worked examples.
   - Every demo screen shows a "بيانات تجريبية" banner, and `/demo` is `noindex` until launch.
   - The `/demo` calculator is read-only (one sample scenario, no inputs) until the engine is wired.
+- Phase P also sets up ESLint, Vitest and the `lint`, `typecheck` and `test` scripts, so the end-of-phase checks work before Phase 0a adds CI.
 - **Phase 1** runs right after P because the engine needs no database or auth. At the end of Phase 1, the `/demo` calculator is wired to the real engine.
 - Phase 0 is split into 0a and 0b. The entitlements service moves from old Phase 4 to 0b.
 - No payment integration until just before launch: Phase 4 runs after Phase 8. Launch comes after Phase 10, and **Phase 9 is post-launch growth**.
@@ -65,6 +66,8 @@
   - The Setup Kit and the founding pre-order are sold and granted manually until Phase 4.
 - Terms, privacy policy and refund policy are drafted in Phase 4, for legal review.
 - Curated benchmarks are imported in Phase 2 so the paid comparison has data at launch. Aggregated benchmarks come in Phase 9.
+- **Benchmarks:** paying users never see SAMPLE benchmarks. If `data/seed/benchmarks.csv` has no sourced figures at launch, the benchmark feature (paid comparison and Free teaser) is hidden.
+- **Team seats:** basic invitations move into Phase 5. An owner or admin invites by email as admin, member or accountant, so every person has their own login and `audit_log` attribution stays correct; shared logins are not supported. The owner portal stays in Phase 9.
 
 ### Workflow: cloud-first
 - No Docker, WSL or local Supabase.
@@ -103,7 +106,7 @@
 - **Example A:** the owner bears all costs.
 - **Per-month stay allocations** are computed by the engine and stored.
 - **Worked examples A–K** are in BUILD_PLAN §4.6 (A2, E2 and G–K were added at kickoff).
-- **Units table:** a minimal `units` table is created in Phase 3, and Phase 5 extends the same table. There is never a second units table.
+- **Units table:** a minimal `units` table is created in Phase 3, with plan unit limits enforced from then on, and Phase 5 extends the same table. There is never a second units table.
 
 ### Security and privacy
 - Owner access uses an owner-grant table and signed, expiring links.
@@ -119,8 +122,6 @@
   - Does Serwist work with the current Next.js bundler? (Phase 0a)
   - Does IBM Plex Sans Arabic, as served, expose tabular numerals? (Phase P)
   - Format Western digits in Arabic with `ar-EG-u-nu-latn`. (Phase P)
-- **Worth confirming:** team seats arrive in Phase 9, after launch, so Business-tier companies are single-login at launch.
-
 ## How to resume in a fresh session (including Claude Code on the web)
 
 1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.

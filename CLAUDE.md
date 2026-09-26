@@ -12,7 +12,7 @@
 - No booking engine, calendar, availability, iCal or channel-manager sync, guest messaging, or price pushing to OTAs. Blocked nights are a manual number per unit per month, not a calendar.
 - No storage of guest personal data. Payout files are parsed in the browser; guest names, phones and emails never reach the server, and the file itself is never stored.
 - No tax, legal or investment advice. Tax rates are user-configured settings, never hardcoded claims.
-- No invented market data. Any default, preset, price or benchmark without a real source is labelled `SAMPLE` in data and UI.
+- No invented market data. Any default, preset, price or benchmark without a real source is labelled `SAMPLE` in data and UI. Paying users never see SAMPLE benchmarks: if there are no sourced benchmark figures, the benchmark feature is hidden.
 
 ## 3. Stack
 
