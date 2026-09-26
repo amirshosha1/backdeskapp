@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* Every money column gets tabular numerals (CLAUDE.md §7). The Western
+     digits IBM Plex Sans Arabic serves already have equal advance widths, so
+     this is a defensive default rather than a fix. */
+  .tabular-nums-money {
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -1,21 +1,21 @@
 # PROGRESS — Safi (صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-09-26 (kickoff and two approval rounds).
+> Last updated: 2026-09-26 (Phase P built).
 
 ## Current status
 
-- **Kickoff is complete and the docs are approved.** The plan was reviewed, Amir answered every question and approved the docs with a second round of changes; everything is recorded in `CLAUDE.md` and `docs/BUILD_PLAN.md`. No app code exists yet.
-- **Next step:** Phase **P** (clickable prototype). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = P`.
-- **Before Phase P can deploy:** Amir connects the GitHub repo to Vercel.
+- **Phase P (clickable prototype) is built** on branch `claude/phase-p-clickable-prototype-wxl8za`: scaffold, design tokens, i18n, all 9 screens, fixtures, and the lint/typecheck/unit/e2e test suites all pass. See "Phase P build notes" below for what a fresh session needs to know before touching this code.
+- **Next step:** Phase **1** (finance engine). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`.
+- **Before Amir can review on a phone:** Amir connects the GitHub repo to Vercel (still not done) and, once the preview is live, sets `NEXT_PUBLIC_PREORDER_URL` and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` as Vercel env vars. Per the Phase P decision below, the prototype is for Amir's review only until Phase 1 lands — no pre-order push yet.
 
 ## Phase checklist (in execution order)
 
 | Phase | Status |
 |---|---|
 | Kickoff: review, decisions, docs | ✅ Done (2026-09-26) |
-| P — Clickable prototype | ⏭ Next |
-| 1 — Finance engine (+ wire the `/demo` calculator to it) | Not started |
+| P — Clickable prototype | ✅ Built (2026-09-26); awaiting Amir's review on a Vercel preview |
+| 1 — Finance engine (+ wire the `/demo` calculator to it) | ⏭ Next |
 | 0a — App shell, i18n, PWA, CI | Not started |
 | 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project |
 | 2 — Free calculator | Not started |
@@ -37,6 +37,7 @@
 - Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
 - Supabase: no Safi project exists yet. The dev project (Frankfurt, free plan, Amir's last free slot) is created in Phase 0b only after approval. **Amir's other Supabase projects are off-limits.**
 - Not set up yet: Vercel ↔ repo connection, Resend sending domain, PostHog, Google OAuth client, Paymob, Anthropic key, prod Supabase project.
+- Phase P was built from a Claude Code on the web session (cloud container, Node 22.22, pnpm 10.33 available there — `package.json` still pins `packageManager: pnpm@9.15.0` to match Amir's machine; both installed the same lockfile cleanly). `pnpm dev`, `build`, `lint`, `typecheck`, `test` and `test:e2e` all exist now.
 
 ## Decisions (2026-09-26)
 
@@ -108,6 +109,36 @@
 - **Worked examples A–K** are in BUILD_PLAN §4.6 (A2, E2 and G–K were added at kickoff).
 - **Units table:** a minimal `units` table is created in Phase 3, with plan unit limits enforced from then on, and Phase 5 extends the same table. There is never a second units table.
 
+### Phase P build notes (2026-09-26)
+
+**Stack versions pinned** (newer than what CLAUDE.md's "latest stable" implied, checked against npm at build time — re-check before Phase 0a in case newer majors have since become compatible):
+- Next.js 16.3.6, React 19.3, Tailwind CSS 4.3, next-intl 4.14.
+- **TypeScript stays on `~5.9.3`, not 6.x**: `typescript-eslint` (an `eslint-config-next` dependency) only supports TypeScript `<6.1`.
+- **ESLint stays on `^9.39`, not 10.x**: `eslint-config-next` needs `eslint-plugin-react-hooks@^7`, which isn't out for ESLint 10 yet.
+- `eslint-config-next`'s flat-config entrypoint is imported as `"eslint-config-next/core-web-vitals"` (no `.js` — the package's `exports` map is extensionless).
+
+**Next.js 16.3 renamed `middleware.ts` to `proxy.ts`** (same API, same `config.matcher` export); `middleware.ts` still works but logs a deprecation warning at build time. The app's locale proxy lives at `src/proxy.ts`.
+
+**Routing:** `src/i18n/routing.ts` uses `localePrefix: "as-needed"` — Arabic (default) has no URL prefix (`/demo`), English does (`/en/demo`). `next.config.ts`'s `X-Robots-Tag` header rule needs two `source` entries for this reason (`/demo/:path*` and `/en/demo/:path*`).
+
+**IBM Plex Sans Arabic tabular numerals — resolved.** Downloaded the actual Google Fonts files and inspected them with fontTools: the Western-digit (`latn`) glyphs (the default per CLAUDE.md §7) all share one advance width at both shipped weights (400, 600) — genuinely tabular, no `font-feature-settings` needed. The Arabic-Indic (`arab`) digits are *not* tabular and the font exposes no OpenType feature to make them so. `src/lib/format/money.ts` already supports a `digitStyle: "arab"` option (tested, unused by any UI yet since no settings screen exists before Phase 5/9) — when Arabic-Indic digits ship as a user setting, this needs either a different font for that mode or accepting non-tabular alignment; flag it then.
+
+**Digit formatting:** `ar-EG-u-nu-latn` was confirmed in Node to group thousands correctly with Western digits; `src/lib/format/money.ts` and `percent.ts` build the display string manually (decimal.js for half-up rounding, `Intl.NumberFormat` only for digit grouping/style) rather than using `Intl.NumberFormat`'s `style: "currency"`, which inserts invisible bidi control characters around the currency symbol in Arabic locales.
+
+**RTL chevron direction:** a "back" chevron points toward the reading-direction *start* (left in LTR, right in RTL) — base icon `ChevronLeft` + `rtl:rotate-180`. A "forward/disclosure" chevron (a list row leading somewhere) points the opposite way — base icon `ChevronRight` + `rtl:rotate-180`. Easy to get backwards (an earlier draft of this phase had both swapped); verified against real screenshots before merging.
+
+**shadcn/ui:** this sandbox's network policy blocks `ui.shadcn.com`, so the `shadcn` CLI can't fetch components. `src/components/ui/` (button, card, badge, progress, tabs) is hand-written in shadcn's own style (cva + Radix primitives) instead. If a future session has `ui.shadcn.com` allowed, the CLI can still be used for *new* components — `components.json` is already configured for it.
+
+**Progress bar RTL fix:** shadcn's stock `<Progress>` fills via `transform: translateX(...)`, which is a *physical*-axis transform and doesn't flip with `dir`. `src/components/ui/progress.tsx` fills via the indicator's own `width` instead (no transform) — a block box's width naturally grows from its own inline-start edge, which is direction-aware without any manual flipping.
+
+**Test architecture:** Vitest component tests render `*Screen` components directly (not the Next.js `page.tsx` route files, which are async Server Components and can't run in jsdom); `src/test/render.tsx` wraps them in `NextIntlClientProvider`, and `src/test/mocks/navigation.tsx` stubs `@/i18n/navigation`'s `Link` as a plain `<a>` (next-intl's real `Link` needs the App Router context jsdom doesn't have). Playwright e2e tests hit a real `next build && next start` server instead, so they exercise real routing, headers and RTL layout. `vitest.setup.ts` calls `@testing-library/react`'s `cleanup()` in an explicit `afterEach` — `vitest.config.mts` doesn't set `test.globals`, so the library's own auto-cleanup can't detect the runner and DOM leaks across tests in the same file without this.
+
+**Playwright browser:** `@playwright/test`'s default headless-shell binary revision doesn't match what's pre-installed in this sandbox; `playwright.config.ts` sets `launchOptions.executablePath` to the pre-installed full Chromium build instead (`/opt/pw-browsers/chromium`). The `pnpm start -- -p 3000` argument-forwarding pattern silently breaks under pnpm 9 (the `--` itself reaches `next start` as a literal argument); `playwright.config.ts`'s `webServer` sets `PORT=3000` as an env var instead.
+
+**Fixture design:** Madinaty and Sheikh Zayed (owner-operated / arbitrage) reuse the revenue and cost figures from BUILD_PLAN.md §4.6 Examples A and B, but applied under a *different* operating model than those examples describe (no commission, since owner-operated/arbitrage units never have one) — this is why every Phase P unit shows the same 60% occupancy and 2,500.00 ADR; Phase 1's calculator will generate genuinely varied numbers. The two hero totals, the top-3-expenses list, the 1,500.00 portfolio overhead and the 20,000.00 owner payout are hand-picked, not in §4.6; `src/test/fixtures.test.ts` checks every fixture total sums exactly from its parts, and Phase 1 re-derives everything from the real engine.
+
+**Feedback button (added when Amir approved the phase plan):** a "رأيك؟" button on every `/demo` screen opens WhatsApp with the screen path prefilled, via `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (`src/components/demo/feedback-button.tsx`); hidden until that env var is set, same pattern as the pre-order button.
+
 ### Security and privacy
 - Owner access uses an owner-grant table and signed, expiring links.
 - CSV files are parsed in the browser, and the file is never stored.
@@ -117,11 +148,14 @@
 
 ## Open issues
 
-- **Questions for Amir:** see `docs/BUILD_PLAN.md` §6. The most urgent are the pre-order button destination (Phase P), the domain (Phase 0b), and prices and founding terms (before the pre-order campaign).
+- **Questions for Amir:** see `docs/BUILD_PLAN.md` §6. The most urgent are the pre-order button destination (`NEXT_PUBLIC_PREORDER_URL`, still unset) and the Vercel connection, both blocking Amir's phone review; the domain (Phase 0b) and prices/founding terms (before the pre-order campaign) come next.
 - **Technical checks:**
-  - Does Serwist work with the current Next.js bundler? (Phase 0a)
-  - Does IBM Plex Sans Arabic, as served, expose tabular numerals? (Phase P)
-  - Format Western digits in Arabic with `ar-EG-u-nu-latn`. (Phase P)
+  - Does Serwist work with the current Next.js bundler? (Phase 0a — not yet checked)
+  - ~~Does IBM Plex Sans Arabic, as served, expose tabular numerals?~~ **Resolved in Phase P:** yes for Western digits (the default); Arabic-Indic digits are not tabular — see "Phase P build notes" above.
+  - ~~Format Western digits in Arabic with `ar-EG-u-nu-latn`.~~ **Resolved in Phase P:** confirmed and implemented in `src/lib/format/`.
+- **Invited users and personal orgs (decide in Phase 5):** users who join through an invitation should not get an auto-created personal org. The Phase 0b sign-up trigger creates one for every new user, so Phase 5 must change that behaviour in a new migration (migrations are forward-only). Options to weigh then: (a) the trigger skips the personal org when a valid invitation exists for the email; (b) the personal org is created lazily, on the first sign-in of a user who belongs to no org. To keep that change small, Phase 0b should put org creation in its own database function.
+- **Phase P prototype audience:** the Phase P build is for Amir's review only. It is not shown to hosts, and no pre-order push happens, until Phase 1 lands: that's when the calculator is wired to the real engine and units show varied (non-identical) sample data. Until then the prototype stays a private Vercel preview.
+
 ## How to resume in a fresh session (including Claude Code on the web)
 
 1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.
