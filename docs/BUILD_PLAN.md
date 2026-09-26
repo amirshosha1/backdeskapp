@@ -1,32 +1,38 @@
-# BUILD_PLAN.md — {{APP_NAME}}
+# BUILD_PLAN.md — Safi (صافي)
 
-Arabic-first financial OS for STR hosts: feasibility calculator, setup guide, and a Pro accounting ERP.
-Read together with `CLAUDE.md` at the repo root. Section 0 is for Amir; Claude Code starts at Section 1.
+Arabic-first financial OS for STR hosts: feasibility calculator, setup guide, and an accounting ERP (Free for one unit, paid plans for more).
+Read together with `CLAUDE.md` at the repo root and `docs/PROGRESS.md`. Section 0 is for Amir; Claude Code starts at Section 1.
 
 ---
 
 ## 0. Before you start (for Amir — Claude Code may skip this section)
 
+### Workflow: cloud-first
+No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the dev database on a hosted Supabase project, and migrations and database tests run in GitHub Actions. You test on Vercel preview links on your phone. Details: `CLAUDE.md` §5.
+
 ### Accounts and tools
-- [ ] Node.js LTS, pnpm, Git and Claude Code installed and signed in
-- [ ] Private GitHub repo: `CLAUDE.md` at the root, this file at `docs/BUILD_PLAN.md`
-- [ ] Supabase project (EU region such as Frankfurt, the closest to Egypt) and the Supabase CLI
-- [ ] Vercel account connected to the repo
-- [ ] PostHog project (EU cloud) and a Resend account with your sending domain
-- [ ] Paymob merchant account — **start now**; business verification can take weeks
+- [x] Node.js LTS, pnpm, Git and Claude Code installed and signed in
+- [x] GitHub repo `amirshosha1/str-money-finder` (keep it private): `CLAUDE.md` at the root, this file at `docs/BUILD_PLAN.md`
+- [ ] Vercel account connected to the repo — needed for the Phase P preview
+- [ ] Supabase account with one free project slot — Claude Code creates the dev project (Frankfurt) in Phase 0b, only after your approval
+- [ ] Resend account with a verified sending domain — needed from Phase 0b (until the domain is verified, dev sign-in emails reach only your own Resend address)
+- [ ] PostHog project (EU cloud) — Phase 0b
+- [ ] Google Cloud OAuth client — whenever convenient; Google sign-in stays off by config until then
+- [ ] Paymob merchant account — start verification early; not needed until the pre-launch payments phase
 - [ ] Anthropic API key (needed from Phase 8)
+- [ ] Supabase prod project on a paid plan — only before launch
 
 ### Data to prepare
-- [ ] `data/seed/inventory.csv` — your 81-item list with columns: `code, name_ar, name_en, category, tier (economy|mid|premium), qty_per_unit, unit_cost_min, unit_cost_max, useful_life_months, supplier_name, notes`
-- [ ] `data/samples/airbnb_earnings.csv` — a real Airbnb earnings export with guest names deleted
+- [ ] `data/seed/inventory.csv` — your 81-item list with columns: `code, name_ar, name_en, category, tier (economy|mid|premium), qty_per_unit, unit_cost_min, unit_cost_max, useful_life_months, supplier_name, notes` (Phase 3)
+- [ ] `data/samples/airbnb_earnings.csv` — a real Airbnb earnings export with guest names deleted (Phase 6)
 - [ ] `data/seed/benchmarks.csv` — ADR, occupancy and setup-cost figures you trust per area, each with source and date
-- [ ] Pricing decision in EGP: monthly, annual, founding-member offer
+- [ ] Prices in EGP for Solo, Pro and Business (monthly and annual), the Setup Kit, and the founding-member terms — needed before the pre-order campaign starts (after Phase P)
 
 ### How to run the build
-1. Open the repo in Claude Code and send the **Kickoff prompt** (§5.0).
-2. For each phase, send the **Standard phase prompt** with the phase number. Approve the plan, let it build, review the diff, commit.
-3. Clear the context between phases (`/clear`); `CLAUDE.md` and `docs/PROGRESS.md` carry the memory.
-4. Do not skip the **Validation Gate** after Phase 4.
+1. For each phase, send the **Standard phase prompt** (§5.0) with the phase id, in this order: **P, 1, 0a, 0b, 2, 3 → Validation Gate → 5, 6, 7, 8, 4, 10 → LAUNCH → 9**.
+2. Approve the plan, let it build, review the diff, and test the Vercel preview on your phone.
+3. Clear the context between phases (`/clear`); `CLAUDE.md` and `docs/PROGRESS.md` carry the memory. A Claude Code on the web session can continue any phase the same way.
+4. Start selling founding-member pre-orders as soon as the Phase P prototype is live. Until Phase 5, track InstaPay pre-orders outside the app. Do not skip the **Validation Gate** before Phase 5.
 
 ---
 
@@ -36,20 +42,20 @@ Read together with `CLAUDE.md` at the repo root. Section 0 is for Amir; Claude C
 Most Egyptian STR hosts do not know their true net profit. They track payouts in WhatsApp and notebooks, forget irregular costs, ignore depreciation and miscalculate commissions, so they misprice, overspend on setup, or keep a losing unit (or exit a profitable one). Co-hosts and small management companies also spend hours every month building owner statements in Excel, which causes disputes with owners.
 
 ### Personas (in order of monetization priority)
-1. **Co-host / small management company (3–30 units)** — manages units for owners; needs commissions and owner statements. **Primary Pro buyer.**
-2. **Owner-operator (1–3 units)** — wants true profit and cost control. Mostly Free, some Pro.
+1. **Co-host / small management company (3–30 units)** — manages units for owners; needs commissions and owner statements. **Primary paid buyer.**
+2. **Owner-operator (1–3 units)** — wants true profit and cost control. Free (1-unit ledger) or Solo.
 3. **Aspiring investor** — deciding whether to buy, rent or furnish a unit for STR. Free calculator user and Setup Kit buyer.
-4. **Unit owner (managed)** — read-only statement viewer (Phase 9).
+4. **Unit owner (managed)** — reads finalized statements through signed links (Phase 7) and, after launch, the owner portal (Phase 9). Never an org member.
 
 ### Goals and success metrics
 | Metric | Target | Measured in |
 |---|---|---|
 | Calculator completion (started → results) | ≥ 60% | PostHog funnel |
 | Sign-up from calculator results | ≥ 15% | PostHog |
-| Paid founding-member pre-orders before the ERP is built | ≥ 20 | Admin page / Paymob |
-| Pro activation: ≥ 10 transactions in the first 14 days | ≥ 70% of new Pro orgs | DB query |
-| Median time to add one expense | ≤ 10 s | PostHog timing event |
-| Pro month-2 retention | ≥ 80% | Subscriptions table |
+| Paid founding-member pre-orders before the ERP is built | ≥ 20 | Amir's InstaPay records (manual) |
+| Paid activation: ≥ 10 transactions in the first 14 days | ≥ 70% of new paid orgs | DB query |
+| Add one expense | ≤ 4 taps (excluding amount digits); median ≤ 10 s | e2e test (taps); PostHog timing event (real users) |
+| Paid month-2 retention | ≥ 80% | Subscriptions table |
 
 ### Non-goals
 See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
@@ -58,27 +64,33 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 
 ## 2. Plans and gating
 
-**Principle: gate by scale and depth, never by hiding the answer.** A Free user gets a complete, correct result for one unit. Pro unlocks more units, real bookkeeping, automation and comparison.
+**Principle: gate by scale and depth, never by hiding the answer.** A Free user gets a complete, correct result for one unit, in the calculator and in the ledger. Paid plans unlock more units, payout import, owner statements, AI entry, alerts, exports and comparison.
 
-| Capability | Free | Pro | Setup Kit (one-time) |
+| Capability | Free | Paid (Solo / Pro / Business) | Setup Kit (one-time) |
 |---|---|---|---|
 | Feasibility and profit calculator | Unlimited anonymous runs, 1 saved scenario | Unlimited scenarios, side-by-side compare | — |
 | Sensitivity grid (occupancy × ADR) | 3 × 3 | 7 × 7 + export | — |
-| 12-month seasonal projection | Blurred teaser | ✅ | — |
-| Area benchmark comparison | Blurred teaser | ✅ | — |
+| 12-month seasonal projection (server-only) | Blurred placeholder teaser | ✅ | — |
+| Area benchmark comparison (server-only) | Blurred placeholder teaser | ✅ | — |
 | Setup guide (7 stages) | Overview of every stage | Detailed playbooks | Detailed playbooks |
 | Checklists with progress | Basic | With actual costs → CAPEX | ✅ |
 | 81-item inventory by tier + budget planner | Preview (first 10 items) | ✅ | ✅ |
-| Ledger: income, expenses, recurring, receipts | — | ✅ | — |
+| Units in the ledger | 1 | Solo 3 · Pro 10 · Business 30 | — |
+| Manual ledger: income, expenses, recurring rules, receipt photos, full history | ✅ (1 unit; receipt photos compressed in the browser and capped by `receipt_photos_max` in the plan entitlements) | ✅ | — |
+| Agreements ("unit settings" for owner-operated and arbitrage units) and commission calculation | ✅ (1 unit) | ✅ | — |
+| Monthly P&L, KPIs, break-even, payback from actuals | ✅ (1 unit) | ✅ + portfolio | — |
 | Payout CSV import | — | ✅ | — |
-| Agreements, commissions, owner statements | — | ✅ | — |
-| Monthly P&L, KPIs, break-even, payback | Calculator estimates only | Live, from actuals | — |
-| Smart entry (text, voice, receipt photo) | — | ✅ | — |
+| Owner statements (finalize, PDF, signed links) | — | ✅ | — |
+| Smart entry (text, voice, receipt reading) | — | ✅ | — |
 | Alerts | — | ✅ | — |
 | Exports (CSV, XLSX, PDF) | — | ✅ | — |
-| Team seats and owner portal | — | ✅ (Phase 9) | — |
+| Team seats and owner portal | — | ✅ (Phase 9, after launch) | — |
 
-**Plan structure.** All prices live in the `plans` table, never in code. Plan codes: `free`, `pro_solo` (up to N units), `pro_business` (base price + price per extra unit), `setup_kit` (one-time), `founding` (pre-order). Pro includes everything in the Setup Kit. Entitlements are stored as JSON on each plan and resolved by `getEntitlements(orgId)`.
+**Plan structure.**
+- Plan codes: `free` (1 unit), `solo` (up to 3 units), `pro` (up to 10), `business` (up to 30), `setup_kit` (one-time), `founding` (pre-order). The three paid tiers have identical features and differ only by `unit_limit`. Paid plans include everything in the Setup Kit.
+- Prices live in `plan_prices` (plan × currency × interval), never in code. No price rows exist until Amir sets prices; until then the prototype pricing page shows prices labelled SAMPLE.
+- Entitlements are stored as JSON on each plan, can be overridden per subscription (`entitlements_override`, e.g. founding members or complimentary access), and are resolved on the server by `getEntitlements(orgId)`.
+- Until the payments phase, paid access is granted manually: a subscription or purchase with `provider = 'manual'` (InstaPay), created by a server-only admin script (from Phase 5). Before Phase 5, Amir tracks InstaPay pre-orders outside the app.
 
 ---
 
@@ -88,88 +100,131 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 |---|---|
 | `profiles` | `user_id`, `full_name`, `locale`, `digit_style`, `default_currency` |
 | `orgs` | `name`, `type` (individual/company), `country`, `default_currency`, `timezone` |
-| `org_members` | `org_id`, `user_id`, `role` (owner, admin, member, accountant, unit_owner_viewer) |
-| `plans` | `code`, `name_ar`, `name_en`, `price_monthly`, `price_annual`, `currency`, `unit_limit`, `extra_unit_price`, `entitlements` jsonb, `active` |
-| `subscriptions` | `org_id`, `plan_id`, `status`, `period_start`, `period_end`, `provider`, `provider_ref`, `is_founding` |
-| `purchases` | one-time purchases (Setup Kit, founding pre-order): `amount`, `currency`, `status`, `provider_ref` |
-| `units` | `name`, `city`, `area`, `bedrooms`, `bathrooms`, `max_guests`, `status` (planning, setup, live, paused, archived), `operating_model`, `currency`, `go_live_date` |
+| `org_members` | `org_id`, `user_id`, `role` (owner, admin, member, accountant). Unit owners are never members — see `owner_grants`. |
+| `plans` | `code`, `name_ar`, `name_en`, `kind` (free, subscription, one_time), `unit_limit`, `entitlements` jsonb, `active`, `sort_order` |
+| `plan_prices` | `plan_id`, `currency`, `interval` (month, year, one_time), `amount`, `active` |
+| `subscriptions` | `org_id`, `plan_id`, `status`, `period_start`, `period_end`, `provider` (manual, paymob), `provider_ref`, `is_founding`, `entitlements_override` jsonb |
+| `purchases` | one-time purchases (Setup Kit, founding pre-order): `plan_id`, `amount`, `currency`, `status`, `provider` (manual, paymob), `provider_ref` |
+| `units` | `name`, `city`, `area`, `bedrooms`, `bathrooms`, `max_guests`, `status` (planning, setup, live, paused, archived), `operating_model`, `currency` (the unit currency), `go_live_date`. Created with minimal columns in Phase 3; Phase 5 extends the same table (never a second units table). |
+| `unit_month_settings` | `unit_id`, `month`, `blocked_nights` (entered by hand; there is no calendar) |
 | `parties` | owners, cleaners, suppliers, co-hosts: `type`, `name`, optional `phone` |
-| `agreements` | `unit_id`, `owner_party_id`, `commission_basis` (gross_revenue, net_payout, noi, fixed_monthly, hybrid), `commission_rate`, `fixed_fee`, `hybrid_mode` (sum, max), `include_cleaning_fees`, `expense_bearer_rules` jsonb, `effective_from`, `effective_to` |
-| `categories` | system defaults (`org_id` null) + org custom: `kind` (income, expense, capex), `code`, `name_ar`, `name_en`, `parent_id`, `cost_behavior` (fixed, per_night, per_stay, irregular, one_off) |
-| `transactions` | `unit_id` (nullable = portfolio level), `date`, `type` (income, expense, capex, owner_payout, commission, adjustment, transfer), `category_id`, `amount`, `currency`, `party_id`, `description`, `source` (manual, nl_entry, receipt_ai, csv_import, recurring), `receipt_path`, `stay_id`, `confirmed`, `ai_confidence`, `created_by` |
-| `stays` | **financial summary only**: `unit_id`, `external_ref_hash`, `channel`, `check_in`, `check_out`, `nights`, `accommodation_revenue`, `cleaning_fee`, `other_fees`, `platform_fee`, `taxes_collected`, `payout_amount`, `payout_date`, `currency`, `import_batch_id`. No guest data. |
-| `import_batches` | `source`, sanitized file path, `mapping` jsonb, row counts, `status` |
-| `recurring_rules` | `unit_id`, `category_id`, `amount`, `frequency`, `day_of_month`, `next_run_on` |
+| `agreements` | one effective agreement per unit at any time: `unit_id`, `owner_party_id` (managed units only), `commission_basis` (none, gross_revenue, net_payout, noi, fixed_monthly, hybrid), `commission_rate`, `fixed_fee`, `hybrid_mode` (sum, max), `hybrid_basis` (gross_revenue, net_payout, noi), `include_cleaning_fees`, `expense_bearer_rules` jsonb, `statement_basis` (cash — default, accrual), `tax_rate` (null = no tax), `tax_base` (pre_tax_profit — default, gross_revenue, net_payout), `effective_from`, `effective_to`. Owner-operated and rental-arbitrage units use basis `none`, and the UI calls their record **"unit settings"**, never "agreement". |
+| `categories` | system defaults (`org_id` null) + org custom: `kind` (income, expense, capex), `code`, `name_ar`, `name_en`, `parent_id`, `cost_behavior` (fixed, per_night, per_stay, irregular, one_off). Utilities default to `fixed`; an org can switch the cost behavior of any category (stored as an org-level override). |
+| `transactions` | `unit_id` (null = portfolio-level manager overhead), `date` (posting date used by every report), `occurred_on` (original date), `type` (income, expense, capex, owner_payout, commission, adjustment, transfer), `category_id`, `amount_original`, `currency_original`, `fx_rate`, `amount_unit` (in the unit currency; org default currency when `unit_id` is null), `party_id`, `description`, `source` (manual, nl_entry, receipt_ai, csv_import, recurring, statement), `receipt_path`, `stay_id`, `statement_id`, `confirmed`, `ai_confidence`, `created_by`. `commission` rows exist only as snapshots created when a statement is finalized (`source = statement`). `owner_payout` rows record real money sent to an owner and drive the balance due. |
+| `stays` | **financial summary only**: `unit_id`, `external_ref_hash` (per-org HMAC), `channel`, `check_in`, `check_out`, `nights`, `accommodation_revenue`, `cleaning_fee`, `other_fees`, `platform_fee`, `taxes_collected` (stored, excluded from gross revenue), `payout_amount`, `payout_date`, `currency`, `fx_rate` (to the unit currency), `import_batch_id`. No guest data. |
+| `stay_month_allocations` | engine-computed split of each stay by month, in the unit currency: `stay_id`, `unit_id`, `month`, `nights`, `accommodation_revenue`, `cleaning_fee`, `other_fees`, `platform_fee`, `engine_version`. Recomputed whenever the stay changes. |
+| `import_batches` | `source`, `mapping` jsonb, row counts, `status`. The uploaded file is never stored. |
+| `recurring_rules` | `unit_id`, `category_id`, `amount`, `currency`, `frequency`, `day_of_month`, `next_run_on` |
 | `capex_assets` | `unit_id`, `name`, `category`, `cost`, `purchase_date`, `useful_life_months`, `salvage_value` |
-| `scenarios` | calculator runs: `user_id` or anonymous token, `inputs` jsonb, `results` jsonb snapshot, `engine_version` |
-| `statements` | `unit_id`, `owner_party_id`, `period`, `number`, `totals` jsonb, `pdf_path`, `status` (draft, finalized, sent), `finalized_at` |
+| `scenarios` | saved calculator runs, **after sign-up only**: `org_id`, `created_by`, `inputs` jsonb, `results` jsonb snapshot, `engine_version`. Anonymous drafts stay in the browser. |
+| `statements` | `unit_id`, `owner_party_id`, `period`, `number` (sequential per org), `basis` (cash, accrual), `opening_balance` (the previous statement's closing balance; entered by hand on an owner's first statement), `totals` jsonb, `pdf_path`, `status` (draft, finalized, sent), `finalized_at` |
+| `statement_links` | signed, expiring share links: `statement_id`, `token_hash` (the raw token is never stored), `expires_at`, `revoked_at`, `created_by` |
+| `owner_grants` | owner access: `owner_party_id`, `email`, `user_id` (set after the owner signs in), `created_by`, `revoked_at`. Grants read access to **finalized** statements of units whose agreement names that owner, and nothing else. |
 | `period_locks` | `org_id`, `unit_id`, `month` |
 | `alerts` | `unit_id`, `type`, `severity`, `payload` jsonb, `read_at` |
 | `benchmarks` | `area_code`, `city`, `bedrooms`, `metric`, `p25`, `p50`, `p75`, `sample_size`, `source` (curated, aggregated), `as_of` |
 | `calculator_presets` | default assumptions per area, each with `source` and a `is_sample` flag |
 | `inventory_templates` | imported from `data/seed/inventory.csv` |
 | `unit_checklist_progress` | `unit_id`, `item_id`, `done_at`, `actual_cost` |
-| `audit_log` | `actor`, `table`, `row_id`, `action`, `before`, `after`, `at` |
+| `audit_log` | `org_id`, `actor`, `table_name`, `row_id`, `action`, `before`, `after`, `at`, `redacted_at` |
+
+**`audit_log` design (built in Phase 0b):**
+- Written only by `SECURITY DEFINER` triggers on financial tables. No client role can insert, update or delete rows.
+- Readable by the org's `owner` and `admin` roles.
+- Personal-data columns are listed in one registry (e.g. `profiles.full_name`, `parties.name`, `parties.phone`, `owner_grants.email`).
+- On account or party deletion, a service-role-only function removes those keys from `before` and `after` and sets `redacted_at`. That is the only permitted modification.
 
 ---
 
 ## 4. Finance engine specification (`src/lib/finance/`)
 
-All functions are pure, typed, and operate on one unit for one period (month) unless stated otherwise.
+All functions are pure, typed, work in the unit currency, and operate on one unit for one period (month) unless stated otherwise. Rounding is half-up; every split gives the leftover cent(s) to the last line so the parts sum exactly to the whole.
 
 ### 4.1 Core definitions
 ```
-nights_available   = days_in_period − blocked_nights        (count from go_live_date if it falls mid-period)
+nights_available   = days_in_period − blocked_nights        (unit_month_settings; count from go_live_date if it falls mid-period)
 booked_nights      = Σ stay nights falling inside the period (prorated, see 4.4)
-occupancy          = booked_nights / nights_available        (null when nights_available = 0)
+occupancy          = booked_nights / nights_available        (null when nights_available = 0; see availability conflict below)
 accommodation_rev  = Σ accommodation revenue, prorated by night
 ADR                = accommodation_rev / booked_nights       (null when booked_nights = 0)
 RevPAR             = accommodation_rev / nights_available
-gross_revenue      = accommodation_rev + cleaning_fees + other_income
+gross_revenue      = accommodation_rev + cleaning_fees + other_income      (excludes taxes_collected)
 platform_fees      = Σ actual fees (imported)  |  gross_revenue × fee_rate (manual / calculator)
+                     allocated to accommodation, cleaning and other income in proportion to each component
 net_payout         = gross_revenue − platform_fees
-opex               = fixed + per_night + per_stay + irregular   (excludes CAPEX and owner payouts)
+opex               = fixed + per_night + per_stay + irregular   (excludes CAPEX, owner payouts and commission)
 NOI                = net_payout − opex
 commission         = f(agreement)                                 (see 4.2)
 depreciation       = Σ (cost − salvage) / useful_life_months for assets active in the period
-net_profit         = NOI − commission − depreciation − tax (only if the user configured a tax rate)
+pre_tax_profit     = NOI − commission − depreciation
+tax_base_amount    = per agreement.tax_base: pre_tax_profit (default) | gross_revenue | net_payout
+tax                = agreement.tax_rate × max(tax_base_amount, 0)  (0 when tax_rate is null; zero tax on a loss)
+net_profit         = pre_tax_profit − tax
 ```
 
-### 4.2 Commission bases (`managed_for_owner` only)
+**Availability conflict.** If `booked_nights > nights_available` (e.g. blocked nights entered over real stays), the engine never clamps silently: it returns the unclamped occupancy together with a typed `availability_conflict` warning. The UI shows a data warning and caps the **displayed** occupancy at 100%.
+
+**Tax.** Rate and base are user-configurable per agreement; no rate is ever preset or presented as advice.
+
+**Currency.** The engine only accepts amounts in the unit currency (`amount_unit`). Transactions store the original amount, original currency and an explicit `fx_rate`; `amount_unit = round_half_up(amount_original × fx_rate, 2)`, and `fx_rate = 1` when the currencies match. Any input in another currency is rejected with a typed error.
+
+**Cost types.** Every opex category has a cost behavior. Defaults: cleaning and consumables `per_stay`; utilities, internet, compound fees and rent `fixed`; repairs `irregular`. Orgs can switch any category's behavior.
+
+### 4.2 Commission bases (`managed_for_owner` only; other models use `none`)
 | Basis | Formula |
 |---|---|
-| `gross_revenue` | c × gross_revenue (exclude cleaning fees if `include_cleaning_fees = false`) |
-| `net_payout` | c × net_payout (same cleaning-fee flag) |
+| `none` | 0 |
+| `gross_revenue` | c × base, where base = gross_revenue minus cleaning fees if `include_cleaning_fees = false` |
+| `net_payout` | c × base, where base = net_payout minus (cleaning fees − platform fees allocated to cleaning) if `include_cleaning_fees = false` |
 | `noi` | c × max(NOI, 0) — no commission on a loss; NOI uses all unit opex regardless of bearer |
 | `fixed_monthly` | F |
-| `hybrid` | mode `sum`: F + c × basis; mode `max`: max(F, c × basis) (minimum guarantee) |
+| `hybrid` | percentage part on `hybrid_basis`. Mode `sum`: F + c × base; mode `max`: max(F, c × base) (minimum guarantee) |
+
+**Statement basis** (per agreement, default `cash`):
+- `cash` — revenue, platform fees and payouts by payout date; expenses by payment date. The statement's commission is computed on these cash-basis figures.
+- `accrual` — by night, as in 4.4.
 
 **Expense bearer rules** (per category): `owner`, `manager`, or `split(p)`.
-- **Owner view:** `owner_net = net_payout − owner_borne_opex − commission`; `balance_due = owner_net − owner_payouts_already_paid`.
+- **Owner view (statement):** `owner_net = net_payout − owner_borne_opex − commission`; `balance_due = opening_balance + owner_net − owner_payouts_in_period`, where `opening_balance` is the closing balance of the previous finalized statement, or a manually entered amount on an owner's first statement.
 - **Manager view:** `manager_profit = commission − manager_borne_opex`.
+- **Portfolio-level costs** (`unit_id` null) are manager overhead, never charged to owners unless explicitly allocated to units.
+- **Org profit (home hero number):** Σ `net_profit` of owner-operated and rental-arbitrage units + Σ `manager_profit` of managed units − portfolio-level overhead (shown as its own line). One total per currency.
 - **Rental arbitrage:** rent is a fixed opex line; no commission; the org keeps the full NOI.
 - **Owner-operated:** the org is the owner; no commission.
 
 ### 4.3 Break-even (from the unit P&L perspective)
 ```
-avg_LOS                 = booked_nights / stays                (calculator: user input)
-gross_per_night         = (accommodation_rev + cleaning_fees) / booked_nights
-var_per_night           = per_stay_costs / avg_LOS + per_night_costs
-contribution_per_night:
-  basis gross_revenue   → gross_per_night × (1 − fee_rate − c) − var_per_night
-  basis net_payout      → gross_per_night × (1 − fee_rate) × (1 − c) − var_per_night
-  basis noi/fixed/none  → gross_per_night × (1 − fee_rate) − var_per_night
-break_even_nights       = (fixed_monthly + fixed_commission + depreciation_if_included) / contribution_per_night
-break_even_occupancy    = break_even_nights / nights_available
+avg_LOS                   = booked_nights / stays                (calculator: user input)
+accom_per_night           = ADR
+clean_per_night           = cleaning_fee_per_stay / avg_LOS
+gross_per_night           = accom_per_night + clean_per_night
+var_per_night             = per_stay_costs / avg_LOS + per_night_costs
+contribution_per_night    = gross_per_night × (1 − fee_rate) − var_per_night          (before commission)
+commissionable_per_night:
+  basis gross_revenue     → accom_per_night + (clean_per_night if include_cleaning_fees)
+  basis net_payout        → (accom_per_night + (clean_per_night if include_cleaning_fees)) × (1 − fee_rate)
+NOI(n)                    = contribution_per_night × n − fixed_costs
+profit(n)                 = NOI(n) − commission(n) − depreciation_if_included
+commission(n):
+  none                    → 0
+  gross_revenue/net_payout→ c × commissionable_per_night × n
+  noi                     → c × max(NOI(n), 0)
+  fixed_monthly           → F
+  hybrid sum              → F + c × base(n)
+  hybrid max              → max(F, c × base(n))
 ```
-- Adjust the commission term when cleaning fees are excluded from the commission base.
+- **Break-even nights** is the smallest n in [0, nights_available] where profit(n) = 0 (pre-tax; tax is zero at break-even).
+- **Piecewise solver.** profit(n) is continuous and piecewise linear, with kinks where NOI(n) = 0 or where c × base(n) = F. Solve each linear segment for its root, keep only roots that lie inside their own segment and inside [0, nights_available], and return the smallest. If none exists, return a typed `unreachable` result. Never return a negative or infinite number.
+- For the `noi` basis this reduces to `break_even_nights = (fixed_costs + depreciation / (1 − c)) / contribution_per_night` (depreciation = 0 when excluded).
+- `break_even_occupancy = break_even_nights / nights_available`.
+- `break_even_ADR(target_occupancy)` uses the same solver with n fixed and ADR as the variable (profit is piecewise linear in ADR too).
 - `irregular` costs (repairs) are excluded by default; this is a user setting.
-- If `contribution_per_night ≤ 0` or break-even exceeds available nights, return a typed `unreachable` result. Never return a negative or infinite number.
-- Also provide `break_even_ADR(target_occupancy)` by solving the same equation for the nightly rate.
 
 ### 4.4 Revenue recognition
-- **Accrual by night** (default for KPIs and P&L): stays crossing a month boundary are prorated by nights; cleaning fees are recognized on the check-in date; refunds and adjustments on their own date.
-- **Cash view** (cash flow): everything by payout or payment date.
+- **Accrual by night** (default for KPIs and P&L): stays crossing a month boundary are prorated by nights; cleaning fees are recognized on the check-in date; platform fees follow the component they were allocated to (the accommodation share is prorated by night, the cleaning share is recognized on check-in); refunds and adjustments on their own date.
+- **Cash view** (cash flow, and owner statements by default): everything by payout or payment date.
+- **Locked months:** anything dated inside a locked month is posted (`date`) to the first open period after it; `occurred_on` keeps the original date.
+- The engine computes per-month stay allocations; they are stored in `stay_month_allocations` so reports only aggregate.
 - Both views must reconcile over a full closed stay.
 
 ### 4.5 Investment metrics
@@ -178,40 +233,72 @@ total_cash_invested = CAPEX + deposits + pre-opening costs
 payback_months      = total_cash_invested / avg_monthly_net_cashflow   (null if cash flow ≤ 0)
 cash_on_cash        = annual_net_cashflow / total_cash_invested
 ```
-Projections: 12-month model with monthly occupancy and ADR multipliers (seasonality), user-editable.
+Projections: 12-month model with monthly occupancy and ADR multipliers (seasonality), user-editable. Server-only.
 
 ### 4.6 Worked examples — implement all of these as unit tests
-**Example A — managed unit.** Commission 20% on net payout (cleaning fees included); platform fee 15.5% on gross; 30-day month; 0 blocked nights.
+**Common assumptions** unless an example says otherwise: 30-day month, 0 blocked nights, currency EGP, platform fee 15.5% of gross. Cost types: cleaning (350 per stay) and consumables (150 per stay) are `per_stay`; utilities (2,500), internet (600), compound fees (1,000) and rent are `fixed`; repairs (800) are `irregular`. All stays and payouts fall inside the month, so cash and accrual agree.
+
+**Example A — managed unit.** Commission 20% on net payout (cleaning fees included). The owner bears all costs.
 - 6 stays, 18 nights, accommodation revenue 45,000; cleaning fees 6 × 400 = 2,400
 - Opex: cleaning 6 × 350 = 2,100; consumables 6 × 150 = 900; utilities 2,500; internet 600; compound fees 1,000; repairs 800 → **7,900.00**
-- Expected: occupancy **0.60**, ADR **2,500.00**, RevPAR **1,500.00**, gross **47,400.00**, platform fees **7,347.00**, payout **40,053.00**, NOI **32,153.00**, commission **8,010.60**, owner net before depreciation **24,142.40**
+- Expected: occupancy **0.60**, ADR **2,500.00**, RevPAR **1,500.00**, gross **47,400.00**, platform fees **7,347.00** (allocated: accommodation **6,975.00**, cleaning **372.00**), payout **40,053.00**, NOI **32,153.00**, commission **8,010.60**, owner net before depreciation **24,142.40**
 
-**Example B — rental arbitrage.** Same stays and opex, rent 35,000/month, no commission.
+**Example A2 — cleaning fees excluded from the commission base.** Same as A with `include_cleaning_fees = false`.
+- Base = 45,000 − 6,975 = **38,025.00** → commission **7,605.00**; owner net before depreciation **24,548.00**
+
+**Example B — rental arbitrage** (basis `none`). Same stays and opex, plus rent 35,000 per month (`fixed`).
 - Expected NOI: 40,053 − 7,900 − 35,000 = **−2,847.00**
-- Break-even (repairs excluded): fixed = 35,000 + 2,500 + 600 + 1,000 = 39,100; gross_per_night = 2,633.33; var_per_night = 500 / 3 = 166.67; contribution = 2,633.33 × 0.845 − 166.67 = **2,058.50**; break-even nights ≈ **18.99**; break-even occupancy ≈ **63.3%**
+- Break-even (repairs excluded, no depreciation): fixed = 35,000 + 2,500 + 600 + 1,000 = 39,100; gross_per_night = 2,633.33; var_per_night = 500 / 3 = 166.67; contribution = 2,633.33 × 0.845 − 166.67 = **2,058.50**; break-even nights ≈ **18.99**; break-even occupancy ≈ **63.3%**
 
-**Example C — hybrid minimum guarantee.** max(3,000, 10% × gross). With Example A gross 47,400 → **4,740.00**. With gross 20,000 → **3,000.00**.
+**Example C — hybrid minimum guarantee.** Mode `max`, `hybrid_basis = gross_revenue`: max(3,000, 10% × gross). With Example A gross 47,400 → **4,740.00**. With gross 20,000 → **3,000.00**.
 
 **Example D — NOI basis with a loss.** NOI = −1,200 → commission **0.00**.
 
-**Example E — proration.** Check-in 30 Jan, check-out 3 Feb, 4 nights, accommodation 10,000 → January **2 nights / 5,000**, February **2 nights / 5,000**.
+**Example E — proration and statement basis.** Check-in 30 Jan, check-out 3 Feb, 4 nights, accommodation 10,000, no cleaning fee; platform fee 1,550.00; payout 8,450.00 dated 31 Jan.
+- Accrual: January **2 nights / 5,000**, February **2 nights / 5,000**; platform fee **775.00** per month; net payout **4,225.00** per month.
+- Cash: January **8,450.00**, February **0.00**. Both views total 8,450.00.
+
+**Example E2 — proration remainder.** Check-in 31 Jan, check-out 3 Feb, 3 nights, accommodation 1,000.00 → nightly 333.33, 333.33, 333.34 → January **333.33**, February **666.67**.
 
 **Example F — rounding.** Split 100.00 into 3 lines → 33.33, 33.33, **33.34**; lines sum exactly to the total.
 
+**Example G — NOI-basis break-even with depreciation.** Managed unit, commission 25% of NOI; ADR 2,500; cleaning fee 400 per stay; average stay 3 nights; per-stay costs 500; fixed costs 4,100 (utilities, internet, compound fees); depreciation 3,000 included; repairs excluded.
+- Contribution **2,058.50**; required NOI = 3,000 / (1 − 0.25) = **4,000.00**
+- Break-even nights = (4,100 + 4,000) / 2,058.50 ≈ **3.93** (the uncorrected formula would give ≈ 3.45); break-even occupancy ≈ **13.1%**
+
+**Example H — hybrid break-even, solved piecewise.** Commission max(3,000, 10% × gross revenue including cleaning); ADR 2,500; cleaning fee 400 per stay; average stay 3 nights; per-stay costs 500; fixed costs 30,000; no depreciation.
+- Minimum-fee segment: n = (30,000 + 3,000) / 2,058.50 ≈ 16.03, but there 10% × gross ≈ 4,221.5 > 3,000, so this root lies outside its segment and is rejected.
+- Percentage segment: contribution after commission = 2,058.50 − 263.33 = 1,795.17; n = 30,000 / 1,795.17 ≈ 16.71, where 10% × gross ≈ 4,400.7 ≥ 3,000, so it is valid.
+- Expected: break-even nights ≈ **16.71**; break-even occupancy ≈ **55.7%**
+
+**Example I — FX.** An EGP unit.
+- An expense of USD 100.00 at an explicit rate of 48.7550 → `amount_unit` **4,875.50**
+- SAR 1.00 at 12.3450 → **12.35** (half-up; half-even would give 12.34)
+- A USD amount without an FX rate → typed error
+
+**Example J — availability conflict.** 30-day month, 10 blocked nights (20 available), 25 booked nights → occupancy **1.25** with an `availability_conflict` warning; the UI displays **100%** plus the data warning.
+
+**Example K — tax** (test values only, not real rates). `tax_rate = 0.10`, `tax_base = pre_tax_profit`: pre-tax profit 5,000.00 → tax **500.00**, net profit **4,500.00**; pre-tax profit −1,000.00 → tax **0.00**, net profit **−1,000.00**.
+
 ### 4.7 Invariants (property-based tests with fast-check)
-- `0 ≤ occupancy ≤ 1`; commission ≥ 0.
-- Statement lines always sum exactly to the statement total.
-- Proration conserves totals across months.
+- `occupancy ≥ 0`, and `occupancy > 1` only ever comes with an `availability_conflict` warning; displayed occupancy ≤ 100%. Commission ≥ 0; tax ≥ 0.
+- Statement lines always sum exactly to the statement total; the parts of every split sum exactly to the whole.
+- Proration conserves totals across months; platform-fee allocation conserves the total fee.
+- Cash and accrual views reconcile over a full closed stay.
 - Results are independent of transaction order.
-- Mixed currencies inside one calculation are rejected with a typed error.
+- Break-even: when a result is returned, profit at that point is 0 (± 0.01) and negative for every n below it.
+- Inputs in a currency other than the unit currency are rejected with a typed error.
 
 ---
 
 ## 5. Build phases and prompts
 
-### 5.0 Prompts to paste into Claude Code
+### 5.0 Execution order and prompts
 
-**Kickoff prompt (send once, first):**
+**Order:** P → 1 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 → 10 → 🚀 LAUNCH → 9.
+Phase numbers are kept stable and the sections below follow execution order. Phase 1 runs right after P because the engine needs no database or auth. Phase 4 (payments and legal) runs just before launch. Phase 9 is post-launch growth.
+
+**Kickoff prompt (sent once on 2026-09-26; kept for reference):**
 ```
 Read CLAUDE.md and docs/BUILD_PLAN.md in full. Do not write any code yet.
 Reply with:
@@ -221,7 +308,7 @@ Reply with:
 Then wait for my answers.
 ```
 
-**Standard phase prompt (send once per phase, replace {N}):**
+**Standard phase prompt (send once per phase, replace {N} with P, 1, 0a, 0b, …):**
 ```
 Execute Phase {N} from docs/BUILD_PLAN.md.
 1. Plan first: list the files, migrations, RLS policies and tests you will create or change. Wait for my approval.
@@ -238,54 +325,100 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 
 ---
 
-### Phase 0 — Foundation
+### Phase P — Clickable prototype (no database, no login)
+**Goal:** a prototype real hosts can tap through on their phones, used to sell founding-member pre-orders.
+
 **Scope**
-- Scaffold Next.js + TypeScript strict, Tailwind, shadcn/ui, ESLint, Prettier, and the pnpm scripts in `CLAUDE.md` §4.
-- next-intl with `ar` default (`dir="rtl"`) and `en`; locale switcher; IBM Plex Sans Arabic; design tokens for light and dark themes.
-- App shell: bottom navigation (Home, Calculator, Guide, Units, More) with empty states.
-- PWA: manifest with Arabic name, placeholder icons, Serwist service worker, offline fallback page.
-- Supabase: local dev via CLI, server and browser clients, auth (email magic link + Google), session-refresh middleware.
-- Migration 001: `profiles`, `orgs`, `org_members`, `plans`, `subscriptions`, `audit_log` with RLS; seed plan codes with prices `NULL`.
-- Trigger: on sign-up, create a profile and a personal org.
-- PostHog provider (consent-aware), global error boundary, `.env.example`, GitHub Actions CI (lint, typecheck, unit tests), `docs/PROGRESS.md`.
+- Scaffold only what the prototype needs and later phases keep: Next.js + TypeScript strict, Tailwind, shadcn/ui, next-intl (`ar` default with `dir="rtl"`; every string in `messages/`), IBM Plex Sans Arabic, design tokens in one file, bottom navigation (Home, Calculator, Guide, Units, More), ESLint and Vitest with the `lint`, `typecheck` and `test` scripts, `vercel.json` with functions in `fra1`.
+- Screens with sample data:
+  1. Calculator: a **read-only** walkthrough of one sample scenario (no inputs) and its results, until Phase 1 wires it to the engine
+  2. Setup guide: stage list and one stage page
+  3. Monthly profit home — owner view and co-host view (switchable)
+  4. Add expense (≤ 4 taps)
+  5. Owner statement
+  6. Pricing page: Solo, Pro, Business, Setup Kit and the founding-member offer, with SAMPLE prices and a pre-order call to action whose destination Amir supplies
+- Screens are built from real, reusable presentational components in `src/components/` that take data as props. Prototype pages live under `/demo` and pass them fixtures from `src/demo/fixtures/`; later phases pass the same components real data. `/demo` stays as a public sample-data demo.
+- Fixture numbers come from the worked examples in §4.6 and involve no formulas.
+- Every `/demo` screen shows a clear "بيانات تجريبية" banner; prices are also labelled SAMPLE. `/demo` is `noindex` (robots meta tag and `X-Robots-Tag` header) until launch.
+- Deployed on a Vercel preview.
 
 **Acceptance**
-- [ ] Arabic loads by default with correct RTL; switching to English leaves no untranslated strings.
-- [ ] Installable as a PWA on Android Chrome; offline page appears when disconnected.
-- [ ] Sign-up creates a profile and personal org; a user cannot read another org's rows (RLS test).
+- [ ] Every screen above is reachable from the bottom navigation and renders correctly in Arabic RTL at 360 px.
+- [ ] Add expense completes in ≤ 4 taps, not counting the amount digits.
+- [ ] Every `/demo` screen shows the "بيانات تجريبية" banner; prices are labelled SAMPLE; there are no hardcoded UI strings.
+- [ ] `/demo` responses carry `noindex`.
+- [ ] Amir opens the Vercel preview on a phone and taps through every screen.
+- [ ] IBM Plex Sans Arabic, as served, shows tabular numerals in money columns (or a fallback is chosen and recorded).
+- [ ] `pnpm lint && pnpm typecheck && pnpm test` pass (at least one render smoke test per screen).
+
+### Phase 1 — Finance engine (no database, no auth)
+**Scope**
+- Implement §4 as pure modules: `money.ts` (decimal, half-up, split with leftover cents), `fx.ts`, `period.ts` (nights available, proration, per-month stay allocations, posting period for locked months, availability-conflict warning), `fees.ts` (platform-fee allocation), `kpis.ts`, `commission.ts`, `tax.ts`, `statement.ts` (cash and accrual bases, opening balance, owner payouts), `breakeven.ts` (piecewise solver, `break_even_ADR`), `investment.ts`, `projection.ts` (12-month seasonal; server-only), `sensitivity.ts`, `org-profit.ts` (owner and co-host views).
+- Zod schemas for every input and output; export an `ENGINE_VERSION` constant stored with each scenario and each stay allocation.
+- **At the end of the phase, wire the `/demo` calculator to the real engine:** inputs become editable and results are computed in the browser by the engine. The projection and benchmark teasers stay placeholders (server-only), and the "بيانات تجريبية" banner stays.
+- CI arrives in Phase 0a; until then the end-of-phase checks run locally.
+
+**Acceptance**
+- [ ] All worked examples in §4.6 (A–K) pass to 2 decimal places.
+- [ ] All invariants in §4.7 pass as property-based tests.
+- [ ] Edge cases covered: zero available nights, zero stays, booked nights > available nights, contribution ≤ 0, unreachable break-even, mixed currency, missing FX rate, mid-month go-live, a stay crossing into a locked month, tax on a loss.
+- [ ] Line and branch coverage ≥ 95% for `src/lib/finance/`.
+- [ ] `projection.ts` cannot be imported from client code (the build fails if it is).
+- [ ] The `/demo` calculator, fed the Example A and B inputs, shows the engine's results (component or e2e test).
+
+### Phase 0a — Foundation: app shell (no database)
+**Scope**
+- Prettier and the remaining pnpm scripts in `CLAUDE.md` §4 that do not need a database (ESLint, Vitest and the core scripts exist since Phase P).
+- Complete English messages; locale switcher; a test that `ar.json` and `en.json` have identical keys.
+- Light and dark themes from the design tokens; empty states for every tab.
+- PWA: manifest with the Arabic name "صافي", placeholder icons, Serwist service worker, offline fallback page. Check that Serwist works with the current Next.js bundler; if it needs webpack, build production with webpack.
+- Global error boundary, `.env.example`.
+- GitHub Actions CI: lint, typecheck, unit tests.
+
+**Acceptance**
+- [ ] Arabic loads by default with correct RTL; switching to English leaves no untranslated strings (key-parity test).
+- [ ] Installable as a PWA on Android Chrome from the Vercel preview; the offline page appears when disconnected.
 - [ ] CI is green.
 
-### Phase 1 — Finance engine (no UI)
+### Phase 0b — Foundation: Supabase, auth and database tests in CI
 **Scope**
-- Implement §4 as pure modules: `money.ts`, `period.ts` (nights available, proration), `kpis.ts`, `commission.ts`, `statement.ts`, `breakeven.ts`, `investment.ts`, `projection.ts` (12-month seasonal), `sensitivity.ts`.
-- Zod schemas for every input and output; export an `ENGINE_VERSION` constant stored with each scenario.
+- After Amir approves: create the dev Supabase project in Frankfurt (free plan) through the Supabase connector. Touch no other project.
+- Server and browser Supabase clients; session refresh and next-intl routing combined in one middleware.
+- Auth: 6-digit email code (the email also carries a sign-in link) and Google, off by config until the OAuth client exists. Resend as SMTP for dev Auth. Wildcard redirect URLs for Vercel previews (`https://*-<vercel-scope>.vercel.app/**`).
+- Migration 001: `profiles`, `orgs`, `org_members` (owner, admin, member, accountant), `plans` (seeded: free 1 unit, solo 3, pro 10, business 30, setup_kit, founding), `plan_prices` (no rows until prices are set), `subscriptions` (with `entitlements_override`), `audit_log` (append-only, with the redaction function in §3) — all with RLS.
+- Trigger: on sign-up, create a profile and a personal org (`individual`, EGP, `Africa/Cairo`) with the user as `owner`.
+- Entitlements service `getEntitlements(orgId)` (server-only) and a `useEntitlements` hook that reads flags only; an org with no subscription is Free.
+- PostHog provider: nothing is captured until the user opts in; it does nothing when the key is missing.
+- GitHub Actions: apply migrations to dev, then run `pnpm test:db`. Tests create their own users through the admin API and delete them afterwards.
+- The Vercel Preview environment points at dev.
 
 **Acceptance**
-- [ ] All worked examples in §4.6 pass to 2 decimal places.
-- [ ] All invariants in §4.7 pass as property-based tests.
-- [ ] Edge cases covered: zero available nights, zero stays, contribution ≤ 0, mixed currency, mid-month go-live.
-- [ ] Line and branch coverage ≥ 95% for `src/lib/finance/`.
+- [ ] On a Vercel preview, signing up with a 6-digit email code creates a profile, a personal org and an owner membership.
+- [ ] RLS tests: a user cannot read or write another org's rows; no client role can update or delete `audit_log`; only the redaction function can redact it.
+- [ ] `getEntitlements` returns Free for a new org and the paid limits for a `manual` subscription.
+- [ ] CI is green, including the database job.
 
 ### Phase 2 — Free feasibility and profit calculator
 **Scope**
-- `/calculator`: 5-step wizard that works without login and autosaves a local draft.
+- `/calculator`: 5-step wizard reusing the calculator components and engine wiring from Phases P and 1. It runs entirely in the browser, works without login and autosaves the draft in the browser.
   1. **Unit:** city/area, bedrooms, bathrooms, max guests.
   2. **Model:** owner-operated / rental arbitrage (rent, deposit) / managed (commission basis and rate).
   3. **Revenue:** ADR, occupancy or nights per month, average length of stay, cleaning fee charged, platform fee rate.
-  4. **Costs:** fixed monthly, per-stay (cleaning, consumables, laundry), per-night (utilities), setup CAPEX (quick total or itemized) and useful life.
+  4. **Costs:** fixed monthly (utilities default here), per-stay (cleaning, consumables, laundry), per-night, setup CAPEX (quick total or itemized) and useful life.
   5. **Results.**
 - Results: monthly and annual net profit, margin, break-even occupancy and ADR, payback months, cash-on-cash, 3 × 3 sensitivity grid, and a plain-language verdict generated by rules, not AI (e.g. "Profitable above 63% occupancy").
-- Pro teasers: 12-month projection and area benchmark as blurred **placeholder** visuals with an "Unlock with Pro" call to action.
+- Paid teasers: 12-month projection and area benchmark as blurred **placeholder** visuals with an "Unlock with Pro" call to action. The real projection and benchmarks are computed only on the server, for paid orgs.
 - Defaults from `calculator_presets`, editable, each labelled SAMPLE until a source is supplied.
-- Saving a scenario requires sign-up (the conversion moment); Free keeps 1 saved scenario.
+- Curated benchmarks: import `data/seed/benchmarks.csv` (each figure with source and date) into `benchmarks`, so the paid comparison has data at launch. Aggregated benchmarks come after launch (Phase 9).
+- Saving a scenario requires sign-up (the conversion moment); the browser draft is then saved to the user's org. Free keeps 1 saved scenario.
 - **Share card:** a generated image (OG image route) of the headline results with branding, designed for host WhatsApp and Facebook groups. Sensitive inputs hidden by default.
 - Analytics events: `calculator_started`, `step_completed`, `results_viewed`, `teaser_clicked`, `scenario_saved`, `share_clicked`.
 
 **Acceptance**
 - [ ] Full flow on a 360 px screen in Arabic takes under 3 minutes with defaults.
 - [ ] Results match the finance-engine outputs for the Example A and B inputs (e2e test).
-- [ ] Network inspection shows no Pro data in teaser payloads.
-- [ ] Anonymous user who signs up keeps the draft scenario.
+- [ ] Network inspection and a bundle check show no paid data and no projection or benchmark code in the Free client.
+- [ ] An anonymous user who signs up keeps the draft scenario, now saved to the org.
 
 ### Phase 3 — Setup guide, checklists and Setup Kit
 **Scope**
@@ -298,65 +431,60 @@ RTL and translation issues, missing tests, performance. List issues by severity,
   6. Launch and first reviews
   7. Optimization
 - Frontmatter: `stage`, `order`, `tier` (free/pro), `est_cost_range`, `est_duration`. Claude Code writes skeleton drafts marked `DRAFT — Amir to review` and never states legal requirements as fact.
-- Per-unit checklist progress; optional actual cost on each item creates a CAPEX asset (Pro).
+- Create the `units` table with the minimal columns checklists need, with RLS and the plan's unit limit enforced on the server. This is the same table Phase 5 extends; there is never a second units table.
+- Per-unit checklist progress; optional actual cost on each item creates a CAPEX asset (paid).
 - Import `data/seed/inventory.csv` into `inventory_templates`; budget planner totals by tier and bedroom count; Free preview shows the first 10 items.
-- Setup Kit entitlement flag (payment wiring comes in Phase 4).
+- Setup Kit entitlement flag. Before launch the Setup Kit is sold by InstaPay and granted with a `manual` purchase; payment wiring comes in Phase 4.
 
 **Acceptance**
 - [ ] Guide pages are readable offline once visited.
-- [ ] Pro sections are gated on the server.
+- [ ] Paid sections are gated on the server.
 - [ ] Inventory import validates the CSV and reports row-level errors; budget totals match a hand-calculated fixture.
 
-### Phase 4 — Monetization and pre-orders
+### ⛔ VALIDATION GATE (before Phase 5)
+- Hosts see the Phase P prototype (plus whatever of Phases 1–3 is live) and pay a founding-member pre-order by **manual InstaPay transfer**. Amir tracks the payments outside the app until Phase 5. No code and no payment integration are needed for this.
+- Stop after Phase 3. **Do not start Phase 5** until Amir sends this exact line: `Gate passed: {number} paid pre-orders.` The target is ≥ 20. If the target is not met, the next work is distribution (content, outreach, host groups), not code. Claude Code must ask for this line before planning Phase 5.
+
+### Phase 5 — ERP core (Free for 1 unit, paid for more)
 **Scope**
-- `/pricing` page rendered from the `plans` table (AR/EN), monthly/annual toggle, founding-member offer.
-- `PaymentProvider` interface (`createCheckout`, `handleWebhook`, `getStatus`, `cancel`) with a Paymob implementation: HMAC verification, idempotent webhook processing, sandbox mode.
-- One-time purchases (Setup Kit, founding pre-order) and subscriptions, with a manual-renewal fallback (invoice + reminder email) if recurring card billing is unavailable on the account.
-- Entitlements service and `useEntitlements` hook; the teaser component reads flags only.
-- Founding pre-order: pay now for N months of Pro at launch; confirmation email via Resend.
-- `/admin` (role-gated): pre-order count, revenue, funnel snapshot from PostHog.
-
-**Acceptance**
-- [ ] A sandbox payment grants the entitlement within 10 s of the webhook.
-- [ ] A replayed or forged webhook is rejected and logged.
-- [ ] Changing a price in the database updates `/pricing` without a deploy.
-
-### ⛔ VALIDATION GATE
-Stop after Phase 4. **Do not start Phase 5** until Amir sends this exact line: `Gate passed: {number} paid pre-orders.` The target is ≥ 20. If the target is not met, the next work is distribution (content, outreach, host groups), not code. Claude Code must ask for this line before planning Phase 5.
-
-### Phase 5 — ERP core (Pro)
-**Scope**
-- Migrations: `units`, `parties`, `agreements`, `categories` (seeded Egyptian STR chart of accounts in AR/EN), `transactions`, `recurring_rules`, `capex_assets`, `period_locks`, `stays`.
-- Units CRUD with operating model; agreement editor with a live preview of the commission on a sample month.
-- **10-second expense entry:** amount keypad first, then category chips (most recent first), unit, date defaulting to today; optional receipt photo to a private Storage bucket served by signed URLs.
+- Migrations: extend `units` (created in Phase 3), add `unit_month_settings`, `parties`, `agreements`, `categories` (seeded Egyptian STR chart of accounts in AR/EN; utilities `fixed`), `transactions`, `recurring_rules`, `capex_assets`, `period_locks`, `stays`, `stay_month_allocations`.
+- Units CRUD with operating model; one effective agreement per unit; agreement editor (commission basis including the hybrid basis, statement basis, tax rate and base, expense bearers) with a live preview of the commission on a sample month. For owner-operated and rental-arbitrage units the same editor is labelled "unit settings" and shows only what applies (tax, statement basis).
+- Blocked nights per unit per month, entered by hand.
+- **Add expense in ≤ 4 taps:** amount keypad first, then category chips (most recent first), unit (preselected when there is one unit, otherwise the last used), date defaulting to today, save. Optional receipt photo to a private Storage bucket served by signed URLs; on Free, photos are compressed in the browser before upload and capped by `receipt_photos_max` in the plan entitlements. PostHog `expense_added` event with `duration_ms`.
+- FX: a transaction in a currency other than the unit's requires an explicit rate; the unit-currency amount is shown before saving.
+- Portfolio-level costs (no unit) are recorded as manager overhead.
 - Recurring rules (rent, internet, compound fees) materialized daily by pg_cron.
-- Period locks enforced at database level; `audit_log` on every insert, update and delete of financial tables.
-- Unit limit per plan enforced on the server.
+- Period locks enforced at database level; anything dated in a locked month posts to the next open period; `audit_log` on every insert, update and delete of financial tables.
+- Unit limits enforced on the server: Free 1, Solo 3, Pro 10, Business 30.
+- A role matrix for owner, admin, member and accountant, presented in the phase plan for approval, then tested.
+- Founding members: a server-only admin script grants paid access (a `manual` subscription with `is_founding`).
 
 **Acceptance**
-- [ ] Median add-expense time ≤ 10 s in a Playwright timing test.
+- [ ] Add expense takes ≤ 4 taps excluding the amount digits (a Playwright test counts the taps).
 - [ ] A recurring rule creates exactly one transaction per period (idempotent).
-- [ ] Edits in a locked period are blocked by the database (trigger or RLS), not only the UI.
+- [ ] Edits in a locked period are blocked by the database (trigger or RLS), not only the UI; a new entry dated in a locked month lands in the next open period.
 - [ ] Role-matrix tests for owner, admin, member and accountant.
+- [ ] A Free org cannot create a second unit or exceed its receipt-photo limit.
 
 ### Phase 6 — Payout import
 **Scope**
-- Upload CSV → detect preset (Airbnb earnings export first; Booking.com later) → column-mapping UI saved per org → preview with row-level validation → commit.
+- Parse the CSV in the browser (Web Worker) → detect preset (Airbnb earnings export first; Booking.com later) → column-mapping UI saved per org → preview with row-level validation → upload sanitized rows only → commit. The file itself is never uploaded or stored.
+- Strip guest names and contact details in the browser before upload.
 - Map rows to `stays` and transactions: reservation, payout, resolution/adjustment, cancellation fee, refund.
-- Strip PII at parse time (guest name and contact details). Persist only a sanitized copy of the file.
-- Deduplicate by SHA-256 hash of confirmation code + row type + date + amount.
-- Prorate by night across months per §4.4.
+- Deduplicate by HMAC-SHA256 of confirmation code + row type + date + amount, computed on the server with a per-org key derived from a server secret; raw confirmation codes are never persisted.
+- FX: when the payout currency differs from the unit currency, take the rate from the payout row or ask for it explicitly.
+- The engine computes `stay_month_allocations` (§4.4); rows dated in a locked month post to the next open period.
 
 **Acceptance**
-- [ ] The sample file in `data/samples/` imports with zero PII persisted (a test asserts this).
+- [ ] Importing the sample file in `data/samples/` sends no PII in any request and persists none (tests assert both).
 - [ ] Re-importing the same file creates zero duplicates.
 - [ ] The imported month's P&L equals a hand-built fixture.
 
 ### Phase 7 — Reports and owner statements
 **Scope**
-- Home dashboard: this month's net profit as the hero number, change vs last month, occupancy / ADR / RevPAR, a break-even progress bar ("break-even reached on day 19"), top 3 expense categories.
+- Home dashboard: this month's **org profit** as the hero number (owner view for owner-operated and rental-arbitrage units; co-host view for managed units: Σ commission − manager-borne costs, with portfolio overhead as its own line), change vs last month, occupancy / ADR / RevPAR (occupancy display capped at 100% with a data warning on an availability conflict), a break-even progress bar ("break-even reached on day 19"), top 3 expense categories. One total per currency.
 - P&L per unit and per portfolio: accrual ⇄ cash toggle; month, quarter, year; drill-down by category.
-- Owner statements: draft → review → finalize (locks the period) → PDF in AR or EN → share link. Render HTML and print with headless Chromium to guarantee correct Arabic shaping and bidi; avoid PDF libraries with weak Arabic support. Sequential statement numbering per org.
+- Owner statements: basis from the agreement (cash by default); opening balance (carried forward; entered by hand on an owner's first statement), revenue, fees, owner-borne expenses, commission, owner payouts and balance due; draft → review → finalize (locks the period and snapshots the commission transaction) → PDF in AR or EN → signed, expiring share link (`statement_links`). Render HTML and print with headless Chromium to guarantee correct Arabic shaping and bidi; avoid PDF libraries with weak Arabic support. Sequential statement numbering per org.
 - Commission payable summary for managers across all owners.
 - Exports: CSV and XLSX for transactions and P&L.
 
@@ -364,6 +492,8 @@ Stop after Phase 4. **Do not start Phase 5** until Amir sends this exact line: `
 - [ ] Arabic text in PDFs shapes correctly (visual snapshot test).
 - [ ] Statement totals equal finance-engine output; lines sum exactly.
 - [ ] A finalized statement cannot change; corrections appear as adjustments in the next open period.
+- [ ] The home hero number equals `org-profit` output for owner-operated, managed and mixed portfolio fixtures.
+- [ ] Revoked or expired statement links return nothing.
 
 ### Phase 8 — Smart entry and alerts
 **Scope**
@@ -380,35 +510,59 @@ Stop after Phase 4. **Do not start Phase 5** until Amir sends this exact line: `
 - [ ] Nothing AI-generated is saved as confirmed without a user action.
 - [ ] When the quota is exceeded, the UI falls back gracefully to the manual form.
 
-### Phase 9 — Growth and moat
-- Team seats (member, accountant) with invitations.
-- Owner portal: magic-link, read-only access to finalized statements for that owner's units.
-- WhatsApp entry: a signed webhook endpoint consumed by Amir's n8n instance and the WhatsApp Business API; same parser as Phase 8; phone numbers linked to users.
-- Benchmarks: curated `benchmarks` table first; later, anonymized aggregates from opted-in orgs (minimum 5 units per cell, no org identifiable).
-- Multi-currency (SAR, AED) and GCC locale presets.
-- Referral program: one month of Pro per paid referral.
+### Phase 4 — Payments and legal (pre-launch; runs after Phase 8)
+**Scope**
+- `/pricing` rendered from `plans` and `plan_prices` (AR/EN), monthly/annual toggle, founding-member offer (the Phase P page, now on live data).
+- `PaymentProvider` interface (`createCheckout`, `handleWebhook`, `getStatus`, `cancel`) with a Paymob implementation: HMAC verification, idempotent webhook processing, sandbox mode.
+- One-time purchases (Setup Kit) and subscriptions for Solo, Pro and Business, with a manual-renewal fallback (invoice + reminder email) if recurring card billing is unavailable on the account.
+- Move manually granted (InstaPay) founding members onto normal subscriptions without losing their terms.
+- Confirmation emails via Resend.
+- `/admin` (role-gated): orders, revenue, funnel snapshot from PostHog.
+- Drafts for legal review: terms of service, privacy policy (written with Egypt's Personal Data Protection Law, Law 151 of 2020, in mind) and refund policy. **Drafts only, for legal review** — never presented as legal advice.
+
+**Acceptance**
+- [ ] A sandbox payment grants the entitlement within 10 s of the webhook.
+- [ ] A replayed or forged webhook is rejected and logged.
+- [ ] Changing a price in the database updates `/pricing` without a deploy.
+- [ ] Legal drafts exist, clearly marked DRAFT — for legal review.
 
 ### Phase 10 — Hardening and launch
+- Create the prod Supabase project (paid plan) with Amir's approval; prod keys only in Vercel and GitHub secrets.
 - Security: RLS test for every table × role, Storage policies, rate limiting on auth, AI and webhooks, secrets audit.
-- Privacy: privacy policy and terms drafted with Egypt's Personal Data Protection Law (Law 151 of 2020) in mind — **drafts only, for legal review**; user data export and account deletion.
+- Privacy: user data export and account deletion, including `audit_log` redaction. The Phase 4 legal drafts are reviewed by a lawyer before launch.
 - Reliability: verified daily backups, error monitoring, uptime check.
 - Quality: Lighthouse mobile ≥ 90, WCAG AA contrast.
 - Onboarding emails (day 0, 2, 7) and in-app empty-state guidance.
-- Launch checklist in `docs/LAUNCH.md`.
+- Launch checklist in `docs/LAUNCH.md`, including removing `noindex` from `/demo`.
+
+### 🚀 LAUNCH
+Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms. Everything after this point is post-launch.
+
+### Phase 9 — Growth and moat (post-launch)
+- Team seats (member, accountant) with invitations.
+- Owner portal: sign-in with a 6-digit email code; access only through `owner_grants` (read-only, finalized statements of that owner's units). Owners never become org members. Until then, owners use signed statement links (Phase 7).
+- WhatsApp entry: a signed webhook endpoint consumed by Amir's n8n instance and the WhatsApp Business API; same parser as Phase 8; phone numbers linked to users.
+- Benchmarks: anonymized aggregates from opted-in orgs (minimum 5 units per cell, no org identifiable), next to the curated benchmarks from Phase 2.
+- GCC: SAR and AED presets and locale presets (per-transaction FX already exists from Phase 5).
+- Referral program: one month of a paid plan per paid referral.
 
 ---
 
 ## 6. Open questions for Amir
 
-| # | Question | Blocks |
-|---|---|---|
-| 1 | App name and domain | Phase 0 |
-| 2 | Launch areas for presets (e.g. Madinaty, Rehab, New Cairo, Sheikh Zayed, Sahel, Gouna) and the source for each default | Phase 2 |
-| 3 | Is `inventory.csv` ready in the specified columns? | Phase 3 |
-| 4 | Paymob account status; is recurring card billing enabled? Final EGP prices and founding-member terms | Phase 4 |
-| 5 | Real Airbnb earnings CSV sample (guest names removed) | Phase 6 |
-| 6 | Speech-to-text provider | Phase 8 |
-| 7 | WhatsApp Business API number | Phase 9 |
+| # | Question | Blocks | Default if unanswered |
+|---|---|---|---|
+| 1 | Domain for Safi (Resend sending domain, production URLs) | Phase 0b | Dev sign-in emails reach only Amir's own address |
+| 2 | Where the prototype's pre-order button goes (e.g. a WhatsApp number or a form) | Phase P | Placeholder link, clearly marked |
+| 3 | Prices for Solo, Pro and Business (monthly, annual), the Setup Kit, and founding-member terms | Pre-order campaign (after Phase P) | SAMPLE prices in the prototype |
+| 4 | Launch areas for presets (e.g. Madinaty, Rehab, New Cairo, Sheikh Zayed, Sahel, Gouna) and the source for each default | Phase 2 | — |
+| 5 | Is `inventory.csv` ready in the specified columns? | Phase 3 | — |
+| 6 | Paymob account status; is recurring card billing enabled? | Phase 4 | Manual-renewal fallback |
+| 7 | Real Airbnb earnings CSV sample (guest names removed) | Phase 6 | — |
+| 8 | Speech-to-text provider | Phase 8 | — |
+| 9 | WhatsApp Business API number | Phase 9 (post-launch) | — |
+
+Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 
 ---
 
