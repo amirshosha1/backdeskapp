@@ -1,0 +1,45 @@
+/**
+ * Design tokens — the single file CLAUDE.md §7 requires for colors, radii,
+ * spacing and type. Until Safi has a brand, the palette is calm and neutral:
+ * deep teal primary, warm neutral surfaces. Only the light theme is built in
+ * Phase P; dark mode is added in Phase 0a.
+ *
+ * These are Tailwind v4 theme variables (`@theme`), so every name below is
+ * also a utility class: `bg-primary`, `text-loss`, `rounded-md`, `font-sans`.
+ */
+
+@theme {
+  /* Brand */
+  --color-primary: #0f5c56;
+  --color-primary-foreground: #f3faf9;
+  --color-primary-hover: #0c4a45;
+
+  /* Surfaces */
+  --color-background: #faf8f5;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1ede7;
+  --color-border: #e4ddd3;
+
+  /* Text */
+  --color-foreground: #211c17;
+  --color-foreground-muted: #6b6258;
+  --color-foreground-subtle: #948a7d;
+
+  /* Financial semantics */
+  --color-profit: #0f7a4a;
+  --color-profit-foreground: #eaf7ef;
+  --color-loss: #b23b3b;
+  --color-loss-foreground: #fbecec;
+  --color-warning: #a8681a;
+  --color-warning-foreground: #fdf1e3;
+  --color-sample: #8a5a12;
+  --color-sample-foreground: #fdf3e1;
+  --color-locked: #6b6258;
+  --color-locked-foreground: #f1ede7;
+
+  /* Radii (beyond Tailwind's default scale) */
+  --radius-card: 1rem;
+
+  /* Type */
+  --font-sans: var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
