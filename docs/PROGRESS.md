@@ -122,6 +122,8 @@
   - Does Serwist work with the current Next.js bundler? (Phase 0a)
   - Does IBM Plex Sans Arabic, as served, expose tabular numerals? (Phase P)
   - Format Western digits in Arabic with `ar-EG-u-nu-latn`. (Phase P)
+- **Invited users and personal orgs (decide in Phase 5):** users who join through an invitation should not get an auto-created personal org. The Phase 0b sign-up trigger creates one for every new user, so Phase 5 must change that behaviour in a new migration (migrations are forward-only). Options to weigh then: (a) the trigger skips the personal org when a valid invitation exists for the email; (b) the personal org is created lazily, on the first sign-in of a user who belongs to no org. To keep that change small, Phase 0b should put org creation in its own database function.
+
 ## How to resume in a fresh session (including Claude Code on the web)
 
 1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.
