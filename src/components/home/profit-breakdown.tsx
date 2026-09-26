@@ -1,0 +1,28 @@
+import { useLocale, useTranslations } from "next-intl";
+import { Money } from "@/components/common/money";
+import type { AppLocale } from "@/i18n/routing";
+import type { Localized } from "@/demo/fixtures/types";
+
+export interface ProfitBreakdownProps {
+  lines: { label: Localized; amount: string }[];
+}
+
+export function ProfitBreakdown({ lines }: ProfitBreakdownProps) {
+  const t = useTranslations("home");
+  const locale = useLocale() as AppLocale;
+
+  return (
+    <div className="rounded-card border border-border bg-surface p-4">
+      <h2 className="text-sm font-semibold">{t("coHostBreakdownTitle")}</h2>
+      <ul className="mt-2 flex flex-col gap-2">
+        {lines.map((line) => (
+          <li key={line.label.en} className="flex items-center justify-between text-sm">
+            <span>{line.label[locale]}</span>
+            <Money amount={line.amount} colorBySign signDisplay="always" />
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-foreground-subtle">{t("portfolioOverheadNote")}</p>
+    </div>
+  );
+}

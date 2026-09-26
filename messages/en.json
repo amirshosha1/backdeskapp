@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "siteName": "Safi",
+    "description": "The financial operating system for short-term-rental hosts"
+  },
+  "common": {
+    "sampleDataBanner": "Sample data",
+    "sampleBadge": "SAMPLE",
+    "dataWarningOccupancy": "Booked nights exceed available nights — check the blocked nights",
+    "unlockWithPro": "Unlock with any paid plan",
+    "lockedTeaserBody": "Available on any paid plan",
+    "feedbackCta": "Feedback?",
+    "feedbackPrefill": "My feedback on the {path} screen in the Safi prototype:",
+    "bottomNavLabel": "Main navigation",
+    "notStoredNotice": "This is sample data only — nothing is saved",
+    "back": "Back"
+  },
+  "nav": {
+    "home": "Home",
+    "calculator": "Calculator",
+    "guide": "Guide",
+    "units": "Units",
+    "more": "More"
+  },
+  "home": {
+    "heroQuestion": "How much did I really make this month?",
+    "ownerView": "Owner view",
+    "coHostView": "Co-host view",
+    "kpiOccupancy": "Occupancy",
+    "kpiAdr": "ADR",
+    "kpiRevpar": "RevPAR",
+    "topExpensesTitle": "Top 3 expense categories",
+    "breakEvenTitle": "Break-even progress",
+    "breakEvenProgress": "{booked} of ~{target} nights",
+    "breakEvenNotReached": "Break-even not yet reached this month",
+    "breakEvenReached": "Break-even reached this month",
+    "addExpenseCta": "Add expense",
+    "unitsInThisView": "Units in this view",
+    "coHostBreakdownTitle": "Manager profit breakdown",
+    "portfolioOverheadNote": "Portfolio-level overhead is never charged to owners"
+  },
+  "units": {
+    "title": "Units",
+    "operatingModel": {
+      "owner_operated": "Owner-operated",
+      "rental_arbitrage": "Rental arbitrage",
+      "managed_for_owner": "Managed for owner"
+    },
+    "occupancyLabel": "Occupancy",
+    "adrLabel": "ADR",
+    "netProfitLabel": "Net profit",
+    "managerProfitLabel": "Manager profit",
+    "ownerLabel": "Owner",
+    "viewStatementCta": "View statement",
+    "noStatementNote": "A statement exists for this unit, but is not wired up in this prototype"
+  },
+  "calculator": {
+    "title": "Feasibility and profit calculator",
+    "stepLabel": "Step {step} of {total}",
+    "resultsTitle": "Results",
+    "grossRevenueLabel": "Gross revenue",
+    "platformFeesLabel": "Platform fees",
+    "netPayoutLabel": "Net payout",
+    "opexLabel": "Operating expenses",
+    "rentLabel": "Rent",
+    "noiLabel": "Monthly NOI",
+    "contributionPerNightLabel": "Contribution per night",
+    "breakEvenNightsLabel": "Break-even nights",
+    "breakEvenOccupancyLabel": "Break-even occupancy",
+    "depreciationExcludedNote": "Depreciation is not included in this example",
+    "verdictNotProfitable": "Not profitable at {occupancy} occupancy — break-even is {breakEven}",
+    "verdictProfitable": "Profitable at {occupancy} occupancy — above the {breakEven} break-even",
+    "projectionTeaserTitle": "12-month seasonal projection",
+    "benchmarkTeaserTitle": "Area benchmark comparison",
+    "sampleAssumption": "Sample assumption"
+  },
+  "guide": {
+    "title": "Setup guide",
+    "stageLabel": "Stage {order}",
+    "overviewTitle": "Overview",
+    "checklistTitle": "Checklist",
+    "detailedPlaybookTitle": "Detailed playbook",
+    "detailedPlaybookLockedBody": "Detailed steps and supplier lists are available on any paid plan",
+    "draftNotice": "DRAFT — Amir to review"
+  },
+  "expense": {
+    "title": "Add expense",
+    "amountLabel": "Amount",
+    "categoryLabel": "Category",
+    "unitLabel": "Unit",
+    "dateLabel": "Date",
+    "todayLabel": "Today",
+    "saveCta": "Save",
+    "cancelCta": "Cancel",
+    "confirmationTitle": "Saved (sample only)",
+    "confirmationBody": "In the full version, this expense would actually be saved for this unit"
+  },
+  "statement": {
+    "title": "Owner statement",
+    "periodLabel": "Period",
+    "numberLabel": "Statement no.",
+    "statusFinalized": "Finalized",
+    "basisCash": "Cash basis",
+    "openingBalanceLabel": "Opening balance",
+    "grossRevenueLabel": "Gross revenue",
+    "platformFeesLabel": "Platform fees",
+    "netPayoutLabel": "Net payout",
+    "ownerExpensesLabel": "Owner-borne expenses",
+    "commissionLabel": "Commission",
+    "ownerNetLabel": "Owner net",
+    "ownerPayoutsLabel": "Owner payouts",
+    "balanceDueLabel": "Balance due",
+    "pdfLockedCta": "Download PDF — available in the full version",
+    "shareLinkLockedCta": "Signed share link — available in the full version"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "mostPopular": "Most popular",
+    "unitsUpTo": "Up to {count} units",
+    "unitsOne": "1 unit",
+    "currentPlanFree": "Free",
+    "preorderCta": "Reserve your spot",
+    "preorderPlaceholderNote": "The pre-order link is not set up yet",
+    "setupKitCta": "Setup Kit details"
+  }
+}

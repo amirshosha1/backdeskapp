@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "siteName": "صافي",
+    "description": "نظام صافي المالي لمضيفي الإيجار قصير المدى"
+  },
+  "common": {
+    "sampleDataBanner": "بيانات تجريبية",
+    "sampleBadge": "عيّنة",
+    "dataWarningOccupancy": "عدد الليالي المحجوزة أكبر من الليالي المتاحة — تحقق من الليالي المحظورة",
+    "unlockWithPro": "افتح مع أي باقة مدفوعة",
+    "lockedTeaserBody": "متاح مع أي باقة مدفوعة",
+    "feedbackCta": "رأيك؟",
+    "feedbackPrefill": "ملاحظتي على شاشة {path} في نسخة صافي التجريبية:",
+    "bottomNavLabel": "التنقل الرئيسي",
+    "notStoredNotice": "هذه بيانات تجريبية فقط، ولا يتم حفظ أي شيء",
+    "back": "رجوع"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "calculator": "الحاسبة",
+    "guide": "الدليل",
+    "units": "الوحدات",
+    "more": "المزيد"
+  },
+  "home": {
+    "heroQuestion": "كم ربحت فعلاً هذا الشهر؟",
+    "ownerView": "عرض المالك",
+    "coHostView": "عرض المدير المشارك",
+    "kpiOccupancy": "الإشغال",
+    "kpiAdr": "متوسط سعر الليلة",
+    "kpiRevpar": "الإيراد لكل ليلة متاحة",
+    "topExpensesTitle": "أكبر 3 بنود مصروفات",
+    "breakEvenTitle": "التقدم نحو التعادل",
+    "breakEvenProgress": "{booked} من نحو {target} ليلة",
+    "breakEvenNotReached": "لم يصل بعد إلى نقطة التعادل هذا الشهر",
+    "breakEvenReached": "وصل إلى نقطة التعادل هذا الشهر",
+    "addExpenseCta": "إضافة مصروف",
+    "unitsInThisView": "الوحدات في هذا العرض",
+    "coHostBreakdownTitle": "تفاصيل ربح المدير",
+    "portfolioOverheadNote": "التكاليف الإدارية العامة لا تُحمَّل على الملاك"
+  },
+  "units": {
+    "title": "الوحدات",
+    "operatingModel": {
+      "owner_operated": "تشغيل مباشر",
+      "rental_arbitrage": "إيجار من الباطن",
+      "managed_for_owner": "إدارة نيابة عن مالك"
+    },
+    "occupancyLabel": "الإشغال",
+    "adrLabel": "متوسط سعر الليلة",
+    "netProfitLabel": "صافي الربح",
+    "managerProfitLabel": "ربح المدير",
+    "ownerLabel": "المالك",
+    "viewStatementCta": "عرض كشف الحساب",
+    "noStatementNote": "كشف الحساب متاح لهذه الوحدة، لكنه غير مُفعّل في هذه النسخة التجريبية"
+  },
+  "calculator": {
+    "title": "حاسبة الجدوى والربح",
+    "stepLabel": "خطوة {step} من {total}",
+    "resultsTitle": "النتائج",
+    "grossRevenueLabel": "إجمالي الإيرادات",
+    "platformFeesLabel": "رسوم المنصة",
+    "netPayoutLabel": "صافي التحويل",
+    "opexLabel": "المصروفات التشغيلية",
+    "rentLabel": "الإيجار",
+    "noiLabel": "صافي الدخل التشغيلي الشهري",
+    "contributionPerNightLabel": "هامش المساهمة لكل ليلة",
+    "breakEvenNightsLabel": "ليالي التعادل",
+    "breakEvenOccupancyLabel": "نسبة إشغال التعادل",
+    "depreciationExcludedNote": "الإهلاك غير مُدرج في هذا المثال",
+    "verdictNotProfitable": "غير مربحة عند إشغال {occupancy} — التعادل عند {breakEven}",
+    "verdictProfitable": "مربحة عند إشغال {occupancy} — أعلى من التعادل عند {breakEven}",
+    "projectionTeaserTitle": "توقعات 12 شهرًا موسمية",
+    "benchmarkTeaserTitle": "مقارنة بمعايير المنطقة",
+    "sampleAssumption": "افتراض تقديري"
+  },
+  "guide": {
+    "title": "دليل الإعداد",
+    "stageLabel": "المرحلة {order}",
+    "overviewTitle": "نظرة عامة",
+    "checklistTitle": "قائمة المهام",
+    "detailedPlaybookTitle": "الدليل التفصيلي",
+    "detailedPlaybookLockedBody": "الخطوات التفصيلية وقوائم الموردين متاحة مع أي باقة مدفوعة",
+    "draftNotice": "مسودة — قيد مراجعة أمير"
+  },
+  "expense": {
+    "title": "إضافة مصروف",
+    "amountLabel": "المبلغ",
+    "categoryLabel": "الفئة",
+    "unitLabel": "الوحدة",
+    "dateLabel": "التاريخ",
+    "todayLabel": "اليوم",
+    "saveCta": "حفظ",
+    "cancelCta": "إلغاء",
+    "confirmationTitle": "تم الحفظ (تجريبيًا)",
+    "confirmationBody": "في النسخة الكاملة، سيُحفظ هذا المصروف فعليًا لهذه الوحدة"
+  },
+  "statement": {
+    "title": "كشف حساب المالك",
+    "periodLabel": "الفترة",
+    "numberLabel": "رقم الكشف",
+    "statusFinalized": "معتمد نهائيًا",
+    "basisCash": "أساس نقدي",
+    "openingBalanceLabel": "الرصيد الافتتاحي",
+    "grossRevenueLabel": "إجمالي الإيرادات",
+    "platformFeesLabel": "رسوم المنصة",
+    "netPayoutLabel": "صافي التحويل",
+    "ownerExpensesLabel": "مصروفات يتحملها المالك",
+    "commissionLabel": "العمولة",
+    "ownerNetLabel": "صافي مستحقات المالك",
+    "ownerPayoutsLabel": "المبالغ المحوّلة للمالك",
+    "balanceDueLabel": "الرصيد المستحق",
+    "pdfLockedCta": "تنزيل PDF — متاح في النسخة الكاملة",
+    "shareLinkLockedCta": "رابط مشاركة موقّع — متاح في النسخة الكاملة"
+  },
+  "pricing": {
+    "title": "الأسعار والباقات",
+    "perMonth": "شهريًا",
+    "perYear": "سنويًا",
+    "mostPopular": "الأكثر اختيارًا",
+    "unitsUpTo": "حتى {count} وحدة",
+    "unitsOne": "وحدة واحدة",
+    "currentPlanFree": "مجانًا",
+    "preorderCta": "احجز مكانك الآن",
+    "preorderPlaceholderNote": "رابط الحجز غير مُفعّل بعد",
+    "setupKitCta": "تفاصيل حقيبة التأسيس"
+  }
+}
