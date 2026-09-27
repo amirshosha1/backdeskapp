@@ -1,21 +1,24 @@
 # PROGRESS — Safi (صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-09-26 (Phase P built).
+> Last updated: 2026-09-27 (Phase P.1 built).
 
 ## Current status
 
-- **Phase P (clickable prototype) is built** on branch `claude/phase-p-clickable-prototype-wxl8za`: scaffold, design tokens, i18n, all 9 screens, fixtures, and the lint/typecheck/unit/e2e test suites all pass. See "Phase P build notes" below for what a fresh session needs to know before touching this code.
-- **Next step:** Phase **1** (finance engine). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`.
-- **Before Amir can review on a phone:** Amir connects the GitHub repo to Vercel (still not done) and, once the preview is live, sets `NEXT_PUBLIC_PREORDER_URL` and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` as Vercel env vars. Per the Phase P decision below, the prototype is for Amir's review only until Phase 1 lands — no pre-order push yet.
+- **Phase P (clickable prototype)** was merged into `main` (amirshosha1/str-money-finder#1). Amir reviewed it on his phone: it felt broken (silent taps) and the design was weak, which led to Phase P.1.
+- **Phase P.1 (prototype fixes and redesign) is built** on branch `claude/phase-p-clickable-prototype-wxl8za` and opened as a pull request: tap audit (no silent taps, enforced by an e2e crawler), design direction A2 on every screen, an expense-details screen, the Arabic/English switch, the Arabic copy pass, and bidi/404/safe-area fixes. Lint, typecheck, 88 unit/component tests and 55 e2e tests pass. See "Phase P.1 decisions" and "Phase P.1 build notes" below.
+- **Next step:** Amir reviews the P.1 preview on his phone and merges; then Phase **1** (finance engine + live `/demo` calculator). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`.
+- **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link stays hidden until then). The prototype is for Amir's review only until Phase 1 lands — no pre-order push yet.
 
 ## Phase checklist (in execution order)
 
 | Phase | Status |
 |---|---|
 | Kickoff: review, decisions, docs | ✅ Done (2026-09-26) |
-| P — Clickable prototype | ✅ Built (2026-09-26); awaiting Amir's review on a Vercel preview |
+| P — Clickable prototype | ✅ Merged (2026-09-26) |
+| P.1 — Prototype fixes and redesign | ✅ Built (2026-09-27); PR awaiting Amir's review |
 | 1 — Finance engine (+ wire the `/demo` calculator to it) | ⏭ Next |
+| P.2 — Interactive demo, data in the browser only | Not started |
 | 0a — App shell, i18n, PWA, CI | Not started |
 | 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project |
 | 2 — Free calculator | Not started |
@@ -36,7 +39,7 @@
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
 - Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
 - Supabase: no Safi project exists yet. The dev project (Frankfurt, free plan, Amir's last free slot) is created in Phase 0b only after approval. **Amir's other Supabase projects are off-limits.**
-- Not set up yet: Vercel ↔ repo connection, Resend sending domain, PostHog, Google OAuth client, Paymob, Anthropic key, prod Supabase project.
+- Vercel is connected to the repo (Amir reviewed the Phase P preview on his phone). Not set up yet: Resend sending domain, PostHog, Google OAuth client, Paymob, Anthropic key, prod Supabase project.
 - Phase P was built from a Claude Code on the web session (cloud container, Node 22.22, pnpm 10.33 available there — `package.json` still pins `packageManager: pnpm@9.15.0` to match Amir's machine; both installed the same lockfile cleanly). `pnpm dev`, `build`, `lint`, `typecheck`, `test` and `test:e2e` all exist now.
 
 ## Decisions (2026-09-26)
@@ -52,7 +55,7 @@
 - Brand: a calm, neutral default palette, with all tokens in one file. Analytics: PostHog captures nothing until the user opts in and does nothing without a key.
 
 ### Sequencing, payments and validation
-- Order: **P → 1 → 0a → 0b → 2 → 3 → Gate → 5 → 6 → 7 → 8 → 4 → 10 → LAUNCH → 9**. Phase numbers stay stable.
+- Order: **P → 1 → 0a → 0b → 2 → 3 → Gate → 5 → 6 → 7 → 8 → 4 → 10 → LAUNCH → 9**. Phase numbers stay stable. *(Superseded on 2026-09-27: P.1 and P.2 were added, see "Phase P.1 decisions".)*
 - **Phase P** is a clickable prototype: all key screens with sample data, Arabic RTL, mobile-first, no database, no login, deployed on a Vercel preview, built from real reusable components.
   - Pages live under `/demo`, with fixtures taken from the worked examples.
   - Every demo screen shows a "بيانات تجريبية" banner, and `/demo` is `noindex` until launch.
@@ -109,6 +112,29 @@
 - **Worked examples A–K** are in BUILD_PLAN §4.6 (A2, E2 and G–K were added at kickoff).
 - **Units table:** a minimal `units` table is created in Phase 3, with plan unit limits enforced from then on, and Phase 5 extends the same table. There is never a second units table.
 
+### Phase P.1 decisions (2026-09-27)
+
+- **New order:** **P → P.1 → 1 → P.2 → 0a → 0b → 2 → 3 → Gate → 5 → 6 → 7 → 8 → 4 → 10 → LAUNCH → 9.** Recorded in `CLAUDE.md` §8 and `docs/BUILD_PLAN.md` §0 and §5.0.
+- **Phase P.2** makes the demo interactive with data kept in the browser only: add a unit, add expenses, and see Home update live through the engine. No account, nothing sent to a server. Its scope is in `docs/BUILD_PLAN.md`.
+- **Design direction A2** was chosen from three Home directions and pushed toward Amir's reference screenshots: royal-blue gradient (no teal), frosted-glass tiles on the hero and nav only (solid fallback), soft grey cards without outlines, radii 24–32 px, 8 pt grid, one icon stroke weight, tabular numbers, banner text just "بيانات تجريبية". The owner statement keeps the ledger style from direction B. Recorded in `CLAUDE.md` §7.
+- **Home, approved with three tweaks:** (1) the units are a swipeable glass carousel, one card per unit (name, operating model, profit), and the separate "وحداتك" list is gone; (2) section links are brand blue, and the floating nav never hides the last content; (3) the statement pill depends on the view: owner → "تقرير الشهر" (toast until P.2, then each unit's monthly report); co-host → "كشف حساب", opening the Downtown statement.
+- **No silent taps:** every tappable element works or explains itself with a toast; no disabled placeholder buttons; Save on add-expense says what is missing. Enforced by `e2e/taps.spec.ts`. Recorded in `CLAUDE.md` §7.
+- **Language switch moved from Phase 0a to P.1.** The locale comes from the URL only (no `Accept-Language` detection, no cookie); switching keeps the current screen.
+- **Copy register:** simple MSA with Egyptian terms (confirmed by Amir). "شقة المدينتي" → "شقة مدينتي". In English, the utilities category is "Utilities" (the Arabic stays "الكهرباء والمياه").
+- **Month-over-month change chip** on Home: a SAMPLE value (+8.4% owner, +5.2% co-host), requested for the design review and not in §4.6. From Phase 1 it comes from real data or is hidden.
+
+### Phase P.1 build notes (2026-09-27)
+
+- **Route groups:** `/demo` pages live in `src/app/[locale]/demo/(tabs)/` (screens under the floating nav; the layout pads the bottom by `BOTTOM_NAV_CLEARANCE`) and `(task)/` (full-screen tasks without the nav: add expense). URLs are unchanged. Unknown paths hit `src/app/[locale]/[...rest]/page.tsx`, which calls `notFound()` so the localized `src/app/[locale]/not-found.tsx` renders with a 404 status.
+- **Constants shared by server layouts must not live in `"use client"` modules** (they arrive on the server as client references, not values). `BOTTOM_NAV_CLEARANCE` is in `src/components/layout/constants.ts` for this reason.
+- **Statically rendered pages must read "today" on the client.** Add expense reads the Cairo date through `useSyncExternalStore` (server snapshot `null`); a server-side date would freeze at build time.
+- **Bidi:** `<Money>` and `<Percent>` put the signed number in `<bdi dir="ltr">`, with the currency label in its own span (after the number in Arabic, before it in English). Strings interpolated into sentences use `formatMoney(..., { isolate: true })` / `formatPercent(..., { isolate: true })`, which wrap the number in LRI…PDI (U+2066…U+2069). `formatMoneyParts` feeds the hero figure's dimmed decimals. English money now reads "EGP -2,847.00" (sign attached to the number).
+- **Toasts and sheets:** `src/components/common/toast.tsx` (`ToastProvider` in the demo layout, `useToast`, `ToastButton`; an `aria-live` status region) and `sheet.tsx` (a Radix Dialog bottom sheet). `@radix-ui/react-dialog` was added; `@radix-ui/react-tabs` and `@radix-ui/react-progress` were removed with the old `card`, `progress` and `tabs` components.
+- **Glass:** `.glass` and `.nav-pill` in `src/styles/globals.css` use `backdrop-filter`, with a solid-colour fallback under `@supports not (backdrop-filter: blur(1px))`. The meter on Home fills by `width`, not a transform, so it follows the reading direction.
+- **No formulas in components:** expense shares, the "everything else" bubble, and the break-even display values (target nights, nights short, progress) are pre-computed in the fixtures and checked by `src/test/fixtures.test.ts`. Bubble diameters are layout only (√share, with a minimum size so small labels fit).
+- **Tests added:** e2e `taps.spec.ts` (crawler), `locale.spec.ts` (switch keeps the screen, English browser lands on Arabic, localized 404s), and in `navigation.spec.ts`: nav clearance on every tab screen, the minus sign measured left of the digits in RTL, carousel/details/statement-pill flows. Add expense's e2e now checks validation messages and the unit sheet. The shared screen list is in `e2e/screens.ts` (spec files must not import each other).
+- **Screenshots** of every screen (Arabic and English, 360 px) were produced with a throwaway Playwright script against `pnpm build && pnpm start` and sent to Amir; they are not committed.
+
 ### Phase P build notes (2026-09-26)
 
 **Stack versions pinned** (newer than what CLAUDE.md's "latest stable" implied, checked against npm at build time — re-check before Phase 0a in case newer majors have since become compatible):
@@ -127,9 +153,9 @@
 
 **RTL chevron direction:** a "back" chevron points toward the reading-direction *start* (left in LTR, right in RTL) — base icon `ChevronLeft` + `rtl:rotate-180`. A "forward/disclosure" chevron (a list row leading somewhere) points the opposite way — base icon `ChevronRight` + `rtl:rotate-180`. Easy to get backwards (an earlier draft of this phase had both swapped); verified against real screenshots before merging.
 
-**shadcn/ui:** this sandbox's network policy blocks `ui.shadcn.com`, so the `shadcn` CLI can't fetch components. `src/components/ui/` (button, card, badge, progress, tabs) is hand-written in shadcn's own style (cva + Radix primitives) instead. If a future session has `ui.shadcn.com` allowed, the CLI can still be used for *new* components — `components.json` is already configured for it.
+**shadcn/ui:** this sandbox's network policy blocks `ui.shadcn.com`, so the `shadcn` CLI can't fetch components. `src/components/ui/` is hand-written in shadcn's own style (cva + Radix primitives) instead; since P.1 it holds only `button` and `badge`. If a future session has `ui.shadcn.com` allowed, the CLI can still be used for *new* components — `components.json` is already configured for it.
 
-**Progress bar RTL fix:** shadcn's stock `<Progress>` fills via `transform: translateX(...)`, which is a *physical*-axis transform and doesn't flip with `dir`. `src/components/ui/progress.tsx` fills via the indicator's own `width` instead (no transform) — a block box's width naturally grows from its own inline-start edge, which is direction-aware without any manual flipping.
+**Progress bar RTL fix:** shadcn's stock `<Progress>` fills via `transform: translateX(...)`, which is a *physical*-axis transform and doesn't flip with `dir`. Fill by `width` instead (no transform) — a block box's width grows from its inline-start edge, so it follows the reading direction. (`ui/progress.tsx` was removed in P.1; the Home break-even meter uses the same technique.)
 
 **Test architecture:** Vitest component tests render `*Screen` components directly (not the Next.js `page.tsx` route files, which are async Server Components and can't run in jsdom); `src/test/render.tsx` wraps them in `NextIntlClientProvider`, and `src/test/mocks/navigation.tsx` stubs `@/i18n/navigation`'s `Link` as a plain `<a>` (next-intl's real `Link` needs the App Router context jsdom doesn't have). Playwright e2e tests hit a real `next build && next start` server instead, so they exercise real routing, headers and RTL layout. `vitest.setup.ts` calls `@testing-library/react`'s `cleanup()` in an explicit `afterEach` — `vitest.config.mts` doesn't set `test.globals`, so the library's own auto-cleanup can't detect the runner and DOM leaks across tests in the same file without this.
 
@@ -154,6 +180,10 @@
   - ~~Does IBM Plex Sans Arabic, as served, expose tabular numerals?~~ **Resolved in Phase P:** yes for Western digits (the default); Arabic-Indic digits are not tabular — see "Phase P build notes" above.
   - ~~Format Western digits in Arabic with `ar-EG-u-nu-latn`.~~ **Resolved in Phase P:** confirmed and implemented in `src/lib/format/`.
 - **Invited users and personal orgs (decide in Phase 5):** users who join through an invitation should not get an auto-created personal org. The Phase 0b sign-up trigger creates one for every new user, so Phase 5 must change that behaviour in a new migration (migrations are forward-only). Options to weigh then: (a) the trigger skips the personal org when a valid invitation exists for the email; (b) the personal org is created lazily, on the first sign-in of a user who belongs to no org. To keep that change small, Phase 0b should put org creation in its own database function.
+- **P.2 browser data at sign-up (decide in the P.2 plan):** when a visitor who built units and expenses in the browser later signs up (Phase 0b onward), is that data migrated into their new org or discarded? Migrating needs a server-side import path with the usual Zod validation and `audit_log` entries; discarding is simpler but loses the visitor's work.
+- **P.2 income (decide in the P.2 plan):** P.2 as defined covers adding units and expenses. Whether the visitor can also record income (the "إضافة دخل" pill, a toast today) is open; without it, Home can only move down.
+- **Identical sample KPIs:** every unit, and both Home views, show 60% occupancy, 2,500 ADR and 1,500 RevPAR (see "Fixture design" below). Closed in Phase 1 when the engine produces varied sample data.
+- **`DataWarning`** (`src/components/common/data-warning.tsx`) is unused: no fixture has booked nights above available nights. Phase 1 wires it to the engine's `availability_conflict` warning.
 - **Phase P prototype audience:** the Phase P build is for Amir's review only. It is not shown to hosts, and no pre-order push happens, until Phase 1 lands: that's when the calculator is wired to the real engine and units show varied (non-identical) sample data. Until then the prototype stays a private Vercel preview.
 
 ## How to resume in a fresh session (including Claude Code on the web)
