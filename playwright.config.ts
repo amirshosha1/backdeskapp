@@ -1,10 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Phase P e2e coverage (BUILD_PLAN.md §5, Phase P acceptance): navigation
- * reachability, the "بيانات تجريبية" banner, the 360 px layout with no
- * horizontal scroll, the `/demo` noindex header, and the add-expense tap
- * count. Runs against Chromium only — the pre-installed browser in this
+ * Phase P / P.1 e2e coverage (BUILD_PLAN.md §5): navigation reachability,
+ * the "بيانات تجريبية" banner, the 360 px layout with no horizontal scroll
+ * and no content hidden under the nav, the `/demo` noindex header, the
+ * add-expense tap count, the language switch and 404s, and the
+ * no-silent-taps crawler. Runs against Chromium only — the pre-installed browser in this
  * environment, and the one that matches the mid-range Android target.
  */
 export default defineConfig({

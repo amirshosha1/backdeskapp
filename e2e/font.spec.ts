@@ -1,17 +1,20 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * BUILD_PLAN.md Phase P acceptance: IBM Plex Sans Arabic, as served, shows
- * tabular numerals in money columns. The font's Western digits (the
- * default digit style, CLAUDE.md §7) all share one advance width in both
- * shipped weights — verified offline against the actual Google Fonts
- * files during planning — so this only needs to confirm the font is the
- * one actually applied to a money column, not remeasure the glyphs.
+ * Phase P acceptance: IBM Plex Sans Arabic, as served, shows tabular
+ * numerals in money columns. The font's Western digits (the default digit
+ * style, CLAUDE.md §7) share one advance width, so this only confirms the
+ * font is the one applied to a money figure and that tabular numerals are
+ * requested.
  */
-test("a money figure on the home screen uses IBM Plex Sans Arabic", async ({ page }) => {
+test("the home figure uses IBM Plex Sans Arabic with tabular numerals", async ({ page }) => {
   await page.goto("/demo");
   const money = page.locator(".tabular-nums-money").first();
   await expect(money).toBeVisible();
-  const fontFamily = await money.evaluate((el) => getComputedStyle(el).fontFamily);
-  expect(fontFamily).toContain("IBM Plex Sans Arabic");
+  const style = await money.evaluate((el) => {
+    const computed = getComputedStyle(el);
+    return { fontFamily: computed.fontFamily, numeric: computed.fontVariantNumeric };
+  });
+  expect(style.fontFamily).toContain("IBM Plex Sans Arabic");
+  expect(style.numeric).toContain("tabular-nums");
 });
