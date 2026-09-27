@@ -19,4 +19,11 @@ describe("<Money />", () => {
     const { container } = renderWithIntl(<Money amount="8010.60" colorBySign />, { locale: "en" });
     expect(container.querySelector(".text-profit")).not.toBeNull();
   });
+
+  it("keeps the minus sign left of the digits in RTL by isolating the number", () => {
+    const { container } = renderWithIntl(<Money amount="-7347.00" />, { locale: "ar" });
+    const number = container.querySelector("bdi");
+    expect(number).toHaveAttribute("dir", "ltr");
+    expect(number).toHaveTextContent(/^-7,347\.00$/);
+  });
 });

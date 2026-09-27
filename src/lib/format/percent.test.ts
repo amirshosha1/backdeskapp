@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { capDisplayRatio, formatPercent } from "./percent";
+import { LRI, PDI } from "./money";
 
 describe("capDisplayRatio", () => {
   it("passes a ratio at or below 1 through unchanged", () => {
@@ -21,5 +22,15 @@ describe("formatPercent", () => {
 
   it("respects a custom decimal count", () => {
     expect(formatPercent(0.633, { locale: "en", decimals: 0 })).toBe("63%");
+  });
+
+  it("shows a sign on changes only when asked, never on zero", () => {
+    expect(formatPercent(0.084, { locale: "ar", signDisplay: "always" })).toBe("+8.4%");
+    expect(formatPercent(-0.052, { locale: "en" })).toBe("-5.2%");
+    expect(formatPercent(0, { locale: "en", signDisplay: "always" })).toBe("0.0%");
+  });
+
+  it("wraps the result in LTR isolate marks when asked", () => {
+    expect(formatPercent(0.689, { locale: "ar", isolate: true })).toBe(`${LRI}68.9%${PDI}`);
   });
 });
