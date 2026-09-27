@@ -7,14 +7,13 @@ import type { UnitFixture } from "./types";
  * than the managed model those examples were written for. Downtown Cairo
  * keeps Example A exactly as written (managed, 20% commission on net
  * payout). Rehab reuses the same base revenue under Example C's hybrid
- * commission. This is a Phase P simplification — every unit looking alike
- * is a known gap, closed in Phase 1 when the calculator generates varied
- * scenarios (see docs/PROGRESS.md).
+ * commission. Every unit looking alike is a known Phase P gap, closed in
+ * Phase 1 when the engine generates varied sample data (docs/PROGRESS.md).
  */
 export const UNITS: UnitFixture[] = [
   {
     id: "madinaty",
-    name: { ar: "شقة المدينتي", en: "Madinaty apartment" },
+    name: { ar: "شقة مدينتي", en: "Madinaty apartment" },
     area: { ar: "مدينتي، القاهرة الجديدة", en: "Madinaty, New Cairo" },
     operatingModel: "owner_operated",
     currency: "EGP",

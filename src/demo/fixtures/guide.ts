@@ -1,7 +1,7 @@
 import type { Localized } from "./types";
 
 /**
- * Setup guide fixtures. Content is prototype copy for Amir's review — it
+ * Setup guide fixtures. Content is prototype copy, still to be reviewed — it
  * states no legal requirements as fact and carries no prices, matching
  * Phase 3's "DRAFT — Amir to review" rule (BUILD_PLAN.md §5, Phase 3) even
  * though Phase P ships no real content pipeline yet.
@@ -21,28 +21,28 @@ export const GUIDE_STAGES: GuideStage[] = [
     order: 1,
     title: { ar: "الجدوى والموقع", en: "Feasibility and location" },
     overview: {
-      ar: "قبل أي التزام: احسب العائد المتوقع وقارن بين مناطق مختلفة.",
-      en: "Before any commitment: estimate the expected return and compare areas.",
+      ar: "قبل أي التزام، احسب العائد المتوقع وقارن بين أكثر من منطقة.",
+      en: "Before you commit, estimate the expected return and compare more than one area.",
     },
     tier: "free",
   },
   {
     id: "2",
     order: 2,
-    title: { ar: "القانوني وموافقة الكمبوند", en: "Legal and compound approval" },
+    title: { ar: "العقد وموافقة الكمبوند", en: "Lease and compound approval" },
     overview: {
-      ar: "تأكد من وجود بند صريح للإيجار قصير المدى في العقد، وراجع لوائح الكمبوند.",
-      en: "Make sure the lease has an explicit short-term-rental clause, and check the compound rules.",
+      ar: "تأكد أن عقد الإيجار يسمح صراحةً بالتأجير قصير المدة، وراجع قواعد الكمبوند.",
+      en: "Make sure the lease explicitly allows short-term rental, and check the compound rules.",
     },
     tier: "free",
   },
   {
     id: "3",
     order: 3,
-    title: { ar: "الميزانية والفرش", en: "Budget and furnishing" },
+    title: { ar: "الميزانية والتجهيز", en: "Budget and furnishing" },
     overview: {
-      ar: "خطّط لميزانية التأسيس قبل الشراء، بندًا ببند.",
-      en: "Plan the setup budget before buying anything, item by item.",
+      ar: "خطّط لميزانية التجهيز بندًا بندًا قبل أن تشتري أي شيء.",
+      en: "Plan the setup budget item by item before you buy anything.",
     },
     tier: "free",
   },
@@ -51,18 +51,18 @@ export const GUIDE_STAGES: GuideStage[] = [
     order: 4,
     title: { ar: "التصوير والإعلان", en: "Photography and listing" },
     overview: {
-      ar: "صور احترافية ووصف دقيق يرفعان معدل الحجز.",
-      en: "Professional photos and an accurate description raise the booking rate.",
+      ar: "صور احترافية ووصف دقيق يرفعان نسبة الحجز.",
+      en: "Professional photos and an accurate description raise bookings.",
     },
     tier: "free",
   },
   {
     id: "5",
     order: 5,
-    title: { ar: "التشغيل", en: "Operations" },
+    title: { ar: "التشغيل اليومي", en: "Day-to-day operations" },
     overview: {
-      ar: "التنظيف والمستلزمات والصيانة — نظام يومي يمنع المفاجآت.",
-      en: "Cleaning, consumables and maintenance — a daily system that prevents surprises.",
+      ar: "التنظيف والمستلزمات والصيانة: نظام ثابت يمنع المفاجآت.",
+      en: "Cleaning, supplies and maintenance: a steady routine that prevents surprises.",
     },
     tier: "free",
   },
@@ -71,8 +71,8 @@ export const GUIDE_STAGES: GuideStage[] = [
     order: 6,
     title: { ar: "الإطلاق وأول التقييمات", en: "Launch and first reviews" },
     overview: {
-      ar: "أول ضيوفك يشكّلون سمعتك — عاملهم على هذا الأساس.",
-      en: "Your first guests shape your reputation — treat them that way.",
+      ar: "أول ضيوفك يصنعون سمعة الوحدة، فاهتم بتجربتهم.",
+      en: "Your first guests build the unit's reputation, so look after them.",
     },
     tier: "free",
   },
@@ -89,12 +89,12 @@ export const GUIDE_STAGES: GuideStage[] = [
 ];
 
 export const STAGE_3_CHECKLIST: Localized[] = [
-  { ar: "تحديد الميزانية الإجمالية للتأسيس", en: "Set the total setup budget" },
-  { ar: "قائمة الأثاث الأساسي (غرف النوم والصالة)", en: "Core furniture list (bedrooms and living room)" },
+  { ar: "حدّد الميزانية الإجمالية للتجهيز", en: "Set the total setup budget" },
+  { ar: "الأثاث الأساسي (غرف النوم والصالة)", en: "Core furniture (bedrooms and living room)" },
   { ar: "الأجهزة الكهربائية (تكييف، ثلاجة، غسالة)", en: "Appliances (A/C, fridge, washer)" },
-  { ar: "المطبخ والأدوات المنزلية", en: "Kitchen and household items" },
-  { ar: "المفروشات (ملاءات، مناشف، ستائر)", en: "Linens (sheets, towels, curtains)" },
-  { ar: "أجهزة السلامة (طفاية حريق، كاشف دخان)", en: "Safety equipment (fire extinguisher, smoke detector)" },
+  { ar: "أدوات المطبخ والمنزل", en: "Kitchen and household items" },
+  { ar: "المفروشات (ملاءات ومناشف وستائر)", en: "Linens (sheets, towels, curtains)" },
+  { ar: "أدوات السلامة (طفاية حريق وكاشف دخان)", en: "Safety equipment (fire extinguisher, smoke detector)" },
   { ar: "قفل ذكي أو صندوق مفاتيح", en: "Smart lock or key box" },
-  { ar: "مقارنة الأسعار مع مورّدين مختلفين قبل الشراء", en: "Compare prices across suppliers before buying" },
+  { ar: "قارن الأسعار بين أكثر من مورّد قبل الشراء", en: "Compare prices across suppliers before buying" },
 ];

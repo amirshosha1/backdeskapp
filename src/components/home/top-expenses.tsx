@@ -1,27 +1,33 @@
 import { useLocale, useTranslations } from "next-intl";
+import { ListRow } from "@/components/common/list-row";
 import { Money } from "@/components/common/money";
+import { ExpenseGlyph } from "@/components/common/icons";
+import { SectionHeader } from "@/components/common/section-header";
+import { formatPercent } from "@/lib/format/percent";
 import type { AppLocale } from "@/i18n/routing";
-import type { Localized } from "@/demo/fixtures/types";
+import type { ExpenseShare } from "@/demo/fixtures/types";
 
-export interface TopExpensesProps {
-  items: { category: Localized; amount: string }[];
-}
-
-export function TopExpenses({ items }: TopExpensesProps) {
+/** Home's compact version of the expense breakdown; "التفاصيل" opens the full one. */
+export function TopExpenses({ items }: { items: ExpenseShare[] }) {
   const t = useTranslations("home");
   const locale = useLocale() as AppLocale;
 
   return (
-    <div className="rounded-card border border-border bg-surface p-4">
-      <h2 className="text-sm font-semibold">{t("topExpensesTitle")}</h2>
-      <ul className="mt-2 flex flex-col gap-2">
+    <section>
+      <SectionHeader title={t("topExpensesTitle")} action={{ label: t("details"), href: "/demo/expenses" }} />
+      <div className="mt-1">
         {items.map((item) => (
-          <li key={item.category.en} className="flex items-center justify-between text-sm">
-            <span>{item.category[locale]}</span>
-            <Money amount={item.amount} />
-          </li>
+          <ListRow
+            key={item.id}
+            icon={<ExpenseGlyph icon={item.icon} />}
+            title={item.name[locale]}
+            subtitle={t("shareOfMonth", {
+              share: formatPercent(item.share, { locale, decimals: 0, isolate: true }),
+            })}
+            trailing={<Money amount={item.amount} className="text-[0.9375rem] font-semibold" />}
+          />
         ))}
-      </ul>
-    </div>
+      </div>
+    </section>
   );
 }

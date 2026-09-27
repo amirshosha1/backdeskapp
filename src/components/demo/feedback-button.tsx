@@ -1,15 +1,15 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 /**
- * Opens WhatsApp with the current screen name prefilled. Hidden until
- * `NEXT_PUBLIC_FEEDBACK_WHATSAPP` is set — added at Amir's request when
- * approving the Phase P plan.
+ * "رأيك؟" — opens WhatsApp with the current screen prefilled. It sits in
+ * the sample-data banner of every `/demo` screen, so it never covers
+ * content. Hidden until `NEXT_PUBLIC_FEEDBACK_WHATSAPP` is set.
  */
-export function FeedbackButton() {
+export function FeedbackLink({ onHero }: { onHero?: boolean }) {
   const t = useTranslations("common");
   const pathname = usePathname();
   const number = process.env.NEXT_PUBLIC_FEEDBACK_WHATSAPP;
@@ -24,9 +24,12 @@ export function FeedbackButton() {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-[5.5rem] end-4 z-20 flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-md"
+      data-testid="feedback-link"
+      className={cn(
+        "tap ms-2 rounded-full px-2 py-0.5 font-semibold underline-offset-2",
+        onHero ? "bg-white/15 text-white" : "bg-brand-soft text-brand",
+      )}
     >
-      <MessageCircle className="h-4 w-4" aria-hidden="true" />
       {t("feedbackCta")}
     </a>
   );

@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 
 export interface LockedTeaserProps {
   title: string;
@@ -19,17 +18,22 @@ export function LockedTeaser({ title, body, children }: LockedTeaserProps) {
   const t = useTranslations("common");
 
   return (
-    <div className="relative overflow-hidden rounded-card border border-border">
-      <div aria-hidden="true" className="pointer-events-none select-none opacity-70 blur-sm">
+    <div className="relative overflow-hidden rounded-card bg-fill">
+      <div aria-hidden="true" className="pointer-events-none select-none opacity-60 blur-[6px]">
         {children}
       </div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface/60 p-4 text-center">
-        <Lock className="h-5 w-5 text-locked" aria-hidden="true" />
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-page text-brand shadow-sm">
+          <Lock className="h-5 w-5" aria-hidden="true" />
+        </span>
         <p className="text-sm font-semibold">{title}</p>
-        <p className="text-xs text-foreground-muted">{body}</p>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/demo/pricing">{t("unlockWithPro")}</Link>
-        </Button>
+        <p className="text-xs text-muted">{body}</p>
+        <Link
+          href="/demo/pricing"
+          className="tap mt-1 rounded-full bg-ink px-4 py-2 text-sm font-medium text-white"
+        >
+          {t("unlockWithPro")}
+        </Link>
       </div>
     </div>
   );

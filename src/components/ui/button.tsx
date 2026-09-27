@@ -4,24 +4,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50",
+  "tap inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover",
-        outline: "border border-border bg-surface hover:bg-surface-muted",
-        ghost: "hover:bg-surface-muted",
-        link: "text-primary underline-offset-4 hover:underline",
+        /** The one primary action on a screen. */
+        primary: "bg-ink text-white",
+        /** Brand-blue action on the light page. */
+        brand: "bg-brand text-white",
+        /** Soft grey pill — secondary actions on the light page. */
+        soft: "bg-fill text-ink",
+        /** White pill on the royal hero. */
+        light: "bg-white text-navy-900",
+        /** Frosted pill on the royal hero. */
+        glass: "glass text-white",
+        link: "text-brand underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-11 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-14 rounded-md px-6 text-base",
+        default: "h-12 px-5 text-sm",
+        sm: "h-9 px-4 text-sm",
+        lg: "h-14 px-6 text-base",
         icon: "h-11 w-11",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "primary",
       size: "default",
     },
   },
@@ -34,10 +41,15 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, type, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...(asChild ? {} : { type: type ?? "button" })}
+        {...props}
+      />
     );
   },
 );

@@ -1,51 +1,69 @@
-import { useLocale, useTranslations } from "next-intl";
 import { Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Money } from "@/components/common/money";
 import { SampleBadge } from "@/components/common/sample-badge";
-import { cn } from "@/lib/utils";
+import { ToastButton } from "@/components/common/toast";
+import { PreorderAction } from "./preorder-button";
 import type { AppLocale } from "@/i18n/routing";
 import type { PlanFixture } from "@/demo/fixtures/pricing";
+import { cn } from "@/lib/utils";
 
 export function PlanCard({ plan }: { plan: PlanFixture }) {
   const t = useTranslations("pricing");
+  const tToast = useTranslations("toast");
   const locale = useLocale() as AppLocale;
 
   return (
-    <Card className={cn(plan.highlighted && "border-primary")}>
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle>{plan.name[locale]}</CardTitle>
-        {plan.highlighted && <Badge>{t("mostPopular")}</Badge>}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <p className="text-sm text-foreground-muted">
-          {plan.unitLimit === 1 ? t("unitsOne") : t("unitsUpTo", { count: plan.unitLimit })}
-        </p>
+    <article
+      className={cn(
+        "rounded-card p-5",
+        plan.highlighted ? "bg-page shadow-[0_1px_2px_rgb(10_18_36/0.04),0_16px_36px_-18px_rgb(29_78_216/0.35)] ring-2 ring-brand" : "bg-fill",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{plan.name[locale]}</h2>
+        {plan.highlighted && <Badge variant="brand">{t("mostPopular")}</Badge>}
+      </div>
+      <p className="mt-0.5 text-sm text-muted">
+        {plan.unitLimit === 1 ? t("unitsOne") : t("unitsUpTo", { count: plan.unitLimit })}
+      </p>
 
-        <div className="flex items-baseline gap-2">
-          {plan.priceMonthly ? (
-            <>
-              <span className="text-2xl font-bold">
-                <Money amount={plan.priceMonthly} />
-              </span>
-              <span className="text-sm text-foreground-muted">{t("perMonth")}</span>
-              <SampleBadge />
-            </>
-          ) : (
-            <span className="text-2xl font-bold">{t("currentPlanFree")}</span>
-          )}
-        </div>
+      <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        {plan.priceMonthly ? (
+          <>
+            <Money amount={plan.priceMonthly} decimals={0} className="text-3xl font-semibold" />
+            <span className="text-sm text-muted">{t("perMonth")}</span>
+            <SampleBadge />
+          </>
+        ) : (
+          <span className="text-3xl font-semibold">{t("free")}</span>
+        )}
+      </div>
 
-        <ul className="flex flex-col gap-1.5 text-sm">
-          {plan.features.map((feature) => (
-            <li key={feature.en} className="flex items-start gap-2">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-              <span>{feature[locale]}</span>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+      <ul className="mt-4 flex flex-col gap-2 text-sm">
+        {plan.features.map((feature) => (
+          <li key={feature.en} className="flex items-start gap-2">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+            <span>{feature[locale]}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-5">
+        {plan.priceMonthly ? (
+          <PreorderAction className={plan.highlighted ? "bg-brand text-white" : "bg-ink text-white"}>
+            {t("choosePlan", { plan: plan.name[locale] })}
+          </PreorderAction>
+        ) : (
+          <ToastButton
+            message={tToast("signupSoon")}
+            className="flex h-12 w-full items-center justify-center rounded-full bg-page text-sm font-semibold"
+          >
+            {t("startFree")}
+          </ToastButton>
+        )}
+      </div>
+    </article>
   );
 }

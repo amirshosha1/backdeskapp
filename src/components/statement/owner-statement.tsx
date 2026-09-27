@@ -1,82 +1,123 @@
-import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Download, Link2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Money } from "@/components/common/money";
+import { ToastButton } from "@/components/common/toast";
+import { formatPercent } from "@/lib/format/percent";
 import type { AppLocale } from "@/i18n/routing";
 import type { STATEMENT } from "@/demo/fixtures/statement";
+import { cn } from "@/lib/utils";
 
+/**
+ * The owner statement keeps direction B's ledger look (Amir's condition in
+ * Phase P.1): ink on paper, dotted leaders, dashed rules between lines and a
+ * double rule above each total — the page an owner is meant to trust.
+ */
 export function OwnerStatement({ statement }: { statement: typeof STATEMENT }) {
   const t = useTranslations("statement");
+  const tToast = useTranslations("toast");
   const locale = useLocale() as AppLocale;
 
   return (
-    <div className="flex flex-col">
+    <div>
       <PageHeader title={t("title")} backHref="/demo/units" />
-      <div className="flex flex-col gap-4 p-4 pb-24">
-        <div>
-          <p className="font-semibold">{statement.unitName[locale]}</p>
-          <p className="text-sm text-foreground-muted">{statement.ownerName[locale]}</p>
-        </div>
+      <div className="px-4 pt-3">
+        <article className="rounded-card bg-paper px-5 pt-5 pb-3 shadow-[0_1px_2px_rgb(10_18_36/0.04),0_16px_32px_-20px_rgb(10_18_36/0.25)]">
+          <header className="border-b-2 border-ink pb-4">
+            <h2 className="text-xl font-bold">{statement.unitName[locale]}</h2>
+            <p className="mt-0.5 text-sm text-ink-2">
+              {statement.ownerName[locale]} · {statement.period[locale]}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Badge variant="profit">{t("statusFinalized")}</Badge>
+              <Badge variant="onFill">{t("basisCash")}</Badge>
+              <Badge variant="onFill">
+                <bdi>{t("number", { number: statement.number })}</bdi>
+              </Badge>
+            </div>
+          </header>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="profit">{t("statusFinalized")}</Badge>
-          <Badge variant="outline">{t("basisCash")}</Badge>
-          <Badge variant="outline">
-            {t("numberLabel")} {statement.number}
-          </Badge>
-          <Badge variant="outline">{statement.period[locale]}</Badge>
-        </div>
+          <dl className="text-sm">
+            <Line label={t("openingBalanceLabel")} amount={statement.openingBalance} />
+            <Line label={t("grossRevenueLabel")} amount={statement.grossRevenue} />
+            <Line label={t("platformFeesLabel")} amount={statement.platformFees} />
+            <Line label={t("netPayoutLabel")} amount={statement.netPayout} total />
+            <Line label={t("ownerExpensesLabel")} amount={statement.ownerExpensesTotal}>
+              <ul className="mt-2 flex flex-col gap-1.5 ps-3 text-xs text-muted">
+                {statement.ownerExpenses.map((line) => (
+                  <li key={line.category.en} className="flex items-baseline gap-2">
+                    <span>{line.category[locale]}</span>
+                    <span className="flex-1 border-b border-dotted border-rule" aria-hidden="true" />
+                    <Money amount={line.amount} hideCurrency />
+                  </li>
+                ))}
+              </ul>
+            </Line>
+            <Line
+              label={t("commissionLabel", {
+                rate: formatPercent(statement.commissionRate, { locale, decimals: 0, isolate: true }),
+              })}
+              amount={statement.commission}
+            />
+            <Line label={t("ownerNetLabel")} amount={statement.ownerNet} total />
+            <Line label={t("ownerPayoutsLabel")} amount={statement.ownerPayouts} />
+            <Line label={t("balanceDueLabel")} amount={statement.balanceDue} total grand />
+          </dl>
+        </article>
 
-        <dl className="flex flex-col gap-2 rounded-card border border-border bg-surface p-4 text-sm">
-          <Row label={t("openingBalanceLabel")} amount={statement.openingBalance} />
-          <Row label={t("grossRevenueLabel")} amount={statement.grossRevenue} />
-          <Row label={t("platformFeesLabel")} amount={statement.platformFees} colorBySign />
-          <Row label={t("netPayoutLabel")} amount={statement.netPayout} emphasize />
-          <Row
-            label={t("ownerExpensesLabel")}
-            amount={statement.ownerExpensesTotal}
-            colorBySign
-          />
-          <Row label={t("commissionLabel")} amount={statement.commission} colorBySign />
-          <Row label={t("ownerNetLabel")} amount={statement.ownerNet} emphasize />
-          <Row label={t("ownerPayoutsLabel")} amount={statement.ownerPayouts} colorBySign />
-          <Row label={t("balanceDueLabel")} amount={statement.balanceDue} emphasize />
-        </dl>
-
-        <div className="flex flex-col gap-2">
-          <Button variant="outline" size="lg" disabled>
+        <div className="mt-4 flex gap-2">
+          <ToastButton
+            message={tToast("downloadPdf")}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-fill text-sm font-medium"
+          >
             <Download className="h-4 w-4" aria-hidden="true" />
-            {t("pdfLockedCta")}
-          </Button>
-          <Button variant="outline" size="lg" disabled>
+            {t("downloadPdf")}
+          </ToastButton>
+          <ToastButton
+            message={tToast("shareLink")}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-fill text-sm font-medium"
+          >
             <Link2 className="h-4 w-4" aria-hidden="true" />
-            {t("shareLinkLockedCta")}
-          </Button>
+            {t("shareLink")}
+          </ToastButton>
         </div>
       </div>
     </div>
   );
 }
 
-function Row({
+function Line({
   label,
   amount,
-  colorBySign,
-  emphasize,
+  total,
+  grand,
+  children,
 }: {
   label: string;
   amount: string;
-  colorBySign?: boolean;
-  emphasize?: boolean;
+  total?: boolean;
+  grand?: boolean;
+  children?: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <dt className={emphasize ? "font-semibold" : "text-foreground-muted"}>{label}</dt>
-      <dd className={emphasize ? "font-semibold" : "font-medium"}>
-        <Money amount={amount} colorBySign={colorBySign} />
-      </dd>
+    <div
+      className={cn(
+        "py-3",
+        total
+          ? "border-t border-ink shadow-[inset_0_3px_0_-2px_var(--color-paper),inset_0_4px_0_-2px_var(--color-ink)]"
+          : "border-t border-dashed border-rule-strong",
+      )}
+    >
+      <div className="flex items-baseline gap-2">
+        <dt className={cn(total ? "font-semibold text-ink" : "text-ink-2", grand && "text-base")}>{label}</dt>
+        <span className="flex-1 border-b border-dotted border-rule" aria-hidden="true" />
+        <dd className={cn("font-semibold", grand && "text-lg")}>
+          <Money amount={amount} />
+        </dd>
+      </div>
+      {children}
     </div>
   );
 }

@@ -9,27 +9,27 @@ export interface CategoryChipsProps {
   categories: ExpenseCategory[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  label: string;
 }
 
-/** Most-recent-first, as the real ledger will order them (BUILD_PLAN.md Phase 5). */
-export function CategoryChips({ categories, selectedId, onSelect }: CategoryChipsProps) {
+/** Most-recent-first category chips, a single-choice radio group. */
+export function CategoryChips({ categories, selectedId, onSelect, label }: CategoryChipsProps) {
   const locale = useLocale() as AppLocale;
 
   return (
-    <div className="flex flex-wrap gap-2" role="group">
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
       {categories.map((category) => {
         const isSelected = category.id === selectedId;
         return (
           <button
             key={category.id}
             type="button"
-            aria-pressed={isSelected}
+            role="radio"
+            aria-checked={isSelected}
             onClick={() => onSelect(category.id)}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm font-medium",
-              isSelected
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-surface text-foreground",
+              "tap h-11 rounded-full px-4 text-sm font-medium",
+              isSelected ? "bg-ink text-white" : "bg-fill text-ink",
             )}
           >
             {category.name[locale]}

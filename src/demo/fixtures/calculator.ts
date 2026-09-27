@@ -68,12 +68,12 @@ export const CALCULATOR_STEPS: WalkthroughStep[] = [
       {
         kind: "text",
         label: { ar: "النموذج", en: "Model" },
-        value: { ar: "إيجار من الباطن", en: "Rental arbitrage" },
+        value: { ar: "إعادة تأجير", en: "Rental arbitrage" },
       },
       { kind: "money", label: { ar: "الإيجار الشهري", en: "Monthly rent" }, amount: "35000.00" },
       {
         kind: "money",
-        label: { ar: "التأمين", en: "Deposit" },
+        label: { ar: "مبلغ التأمين", en: "Deposit" },
         amount: "70000.00",
         isSample: true,
       },
@@ -83,8 +83,8 @@ export const CALCULATOR_STEPS: WalkthroughStep[] = [
     id: "revenue",
     title: { ar: "الإيرادات", en: "Revenue" },
     rows: [
-      { kind: "money", label: { ar: "متوسط سعر الليلة (ADR)", en: "ADR" }, amount: "2500.00" },
-      { kind: "percent", label: { ar: "الإشغال", en: "Occupancy" }, ratio: 0.6 },
+      { kind: "money", label: { ar: "متوسط سعر الليلة", en: "Average nightly rate (ADR)" }, amount: "2500.00" },
+      { kind: "percent", label: { ar: "نسبة الإشغال", en: "Occupancy" }, ratio: 0.6 },
       {
         kind: "text",
         label: { ar: "متوسط مدة الإقامة", en: "Average length of stay" },
@@ -92,21 +92,21 @@ export const CALCULATOR_STEPS: WalkthroughStep[] = [
       },
       {
         kind: "money",
-        label: { ar: "رسوم التنظيف للضيف", en: "Cleaning fee charged" },
+        label: { ar: "رسوم التنظيف على الضيف", en: "Cleaning fee charged" },
         amount: "400.00",
       },
-      { kind: "percent", label: { ar: "نسبة رسوم المنصة", en: "Platform fee rate" }, ratio: 0.155 },
+      { kind: "percent", label: { ar: "عمولة المنصة", en: "Platform fee rate" }, ratio: 0.155 },
     ],
   },
   {
     id: "costs",
     title: { ar: "التكاليف", en: "Costs" },
     rows: [
-      { kind: "money", label: { ar: "المرافق (ثابت)", en: "Utilities (fixed)" }, amount: "2500.00" },
+      { kind: "money", label: { ar: "الكهرباء والمياه (ثابت)", en: "Utilities (fixed)" }, amount: "2500.00" },
       { kind: "money", label: { ar: "الإنترنت (ثابت)", en: "Internet (fixed)" }, amount: "600.00" },
       {
         kind: "money",
-        label: { ar: "رسوم الكمبوند (ثابت)", en: "Compound fees (fixed)" },
+        label: { ar: "مصاريف الكمبوند (ثابت)", en: "Compound fees (fixed)" },
         amount: "1000.00",
       },
       {
@@ -116,17 +116,17 @@ export const CALCULATOR_STEPS: WalkthroughStep[] = [
       },
       {
         kind: "money",
-        label: { ar: "المستلزمات (لكل حجز)", en: "Consumables (per stay)" },
+        label: { ar: "مستلزمات الضيوف (لكل حجز)", en: "Guest supplies (per stay)" },
         amount: "150.00",
       },
       {
         kind: "money",
-        label: { ar: "الصيانة (غير منتظم، مستبعد من التعادل)", en: "Repairs (irregular, excluded from break-even)" },
+        label: { ar: "الصيانة (غير منتظمة، خارج حساب التعادل)", en: "Repairs (irregular, left out of break-even)" },
         amount: "800.00",
       },
       {
         kind: "money",
-        label: { ar: "استثمار التأسيس (تقديري)", en: "Setup CAPEX (quick total)" },
+        label: { ar: "تكلفة التجهيز (إجمالي تقريبي)", en: "Setup cost (quick total)" },
         amount: "250000.00",
         isSample: true,
       },
@@ -141,6 +141,8 @@ export const CALCULATOR_STEPS: WalkthroughStep[] = [
 ];
 
 export const CALCULATOR_RESULTS = {
+  occupancy: 0.6,
+  adr: "2500.00",
   grossRevenue: "47400.00",
   platformFees: "-7347.00",
   netPayout: "40053.00",

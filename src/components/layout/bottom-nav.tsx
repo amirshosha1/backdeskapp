@@ -1,22 +1,22 @@
 "use client";
 
-import { Calculator, Home, ListChecks, MoreHorizontal, ScrollText } from "lucide-react";
+import { BookOpen, Building2, Calculator, House, LayoutGrid } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { href: "/demo", labelKey: "home", Icon: Home },
+  { href: "/demo", labelKey: "home", Icon: House },
   { href: "/demo/calculator", labelKey: "calculator", Icon: Calculator },
-  { href: "/demo/guide", labelKey: "guide", Icon: ScrollText },
-  { href: "/demo/units", labelKey: "units", Icon: ListChecks },
-  { href: "/demo/more", labelKey: "more", Icon: MoreHorizontal },
+  { href: "/demo/guide", labelKey: "guide", Icon: BookOpen },
+  { href: "/demo/units", labelKey: "units", Icon: Building2 },
+  { href: "/demo/more", labelKey: "more", Icon: LayoutGrid },
 ] as const;
 
 /**
- * Thumb-reachable bottom navigation (CLAUDE.md §7): Home, Calculator, Guide,
- * Units, More. Active state matches on the full path so `/demo/guide/3`
- * still highlights the Guide tab.
+ * Floating dark navigation pill (CLAUDE.md §7: thumb-reachable bottom
+ * navigation). The active tab is a filled white circle. Home's sub-screen
+ * (expense details) keeps Home active; other tabs match on their prefix.
  */
 export function BottomNav() {
   const t = useTranslations("nav");
@@ -26,21 +26,31 @@ export function BottomNav() {
   return (
     <nav
       aria-label={tCommon("bottomNavLabel")}
-      className="fixed inset-x-0 bottom-0 z-20 flex h-[4.5rem] border-t border-border bg-surface"
+      className="nav-pill fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30 flex h-[4.5rem] items-center justify-between rounded-full px-2"
     >
       {TABS.map(({ href, labelKey, Icon }) => {
-        const isActive = href === "/demo" ? pathname === "/demo" : pathname.startsWith(href);
+        const isActive =
+          href === "/demo"
+            ? pathname === "/demo" || pathname.startsWith("/demo/expenses")
+            : pathname.startsWith(href);
         return (
           <Link
             key={href}
             href={href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center gap-1 text-xs font-medium",
-              isActive ? "text-primary" : "text-foreground-muted",
+              "tap flex flex-1 flex-col items-center gap-0.5 text-[0.6875rem]",
+              isActive ? "font-semibold text-white" : "text-[#8c95ab]",
             )}
           >
-            <Icon className="h-5 w-5" aria-hidden="true" />
+            <span
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full",
+                isActive && "bg-white text-navy-900",
+              )}
+            >
+              <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+            </span>
             {t(labelKey)}
           </Link>
         );
