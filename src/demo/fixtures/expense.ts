@@ -12,12 +12,17 @@ export interface ExpenseCategory {
   name: Localized;
 }
 
+// Every category used in EXPENSE_BREAKDOWN below, plus "other" for anything
+// that doesn't fit one of the named categories (BUILD_PLAN.md Phase P.1.1).
 export const RECENT_CATEGORIES: ExpenseCategory[] = [
   { id: "cleaning", name: { ar: "التنظيف", en: "Cleaning" } },
   { id: "repairs", name: { ar: "الصيانة", en: "Repairs" } },
   { id: "utilities", name: { ar: "الكهرباء والمياه", en: "Utilities" } },
   { id: "consumables", name: { ar: "مستلزمات الضيوف", en: "Guest supplies" } },
   { id: "internet", name: { ar: "الإنترنت", en: "Internet" } },
+  { id: "rent", name: { ar: "الإيجار", en: "Rent" } },
+  { id: "compound", name: { ar: "مصاريف الكمبوند", en: "Compound fees" } },
+  { id: "other", name: { ar: "أخرى", en: "Other" } },
 ];
 
 export const EXPENSE_UNITS = UNITS;

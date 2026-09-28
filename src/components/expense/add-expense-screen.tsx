@@ -7,12 +7,15 @@ import { Link } from "@/i18n/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Sheet } from "@/components/common/sheet";
 import { UnitGlyph } from "@/components/common/icons";
+import { parseAmount } from "@/lib/format/amount";
 import { AmountKeypad } from "./amount-keypad";
 import { CategoryChips } from "./category-chips";
 import type { AppLocale } from "@/i18n/routing";
 import type { ExpenseCategory } from "@/demo/fixtures/expense";
 import type { UnitFixture } from "@/demo/fixtures/types";
 import { cn } from "@/lib/utils";
+
+type FormError = "amount_empty" | "amount_invalid" | "amount_non_positive" | "category" | null;
 
 export interface AddExpenseScreenProps {
   categories: ExpenseCategory[];
@@ -45,7 +48,7 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
   const [unitId, setUnitId] = useState(defaultUnitId);
   const [unitSheetOpen, setUnitSheetOpen] = useState(false);
   const [pickedDate, setPickedDate] = useState<string | null>(null);
-  const [error, setError] = useState<"amount" | "category" | null>(null);
+  const [error, setError] = useState<FormError>(null);
   const [saved, setSaved] = useState(false);
 
   // "Today" is read on the client: this page is statically rendered, so a
@@ -63,7 +66,8 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
   }
 
   function save() {
-    if (!(Number(amount) > 0)) return setError("amount");
+    const parsed = parseAmount(amount);
+    if (!parsed.ok) return setError(`amount_${parsed.error}`);
     if (!categoryId) return setError("category");
     setError(null);
     setSaved(true);
@@ -114,9 +118,9 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
           value={amount}
           onChange={(next) => {
             setAmount(next);
-            if (error === "amount") setError(null);
+            if (error?.startsWith("amount_")) setError(null);
           }}
-          invalid={error === "amount"}
+          invalid={error?.startsWith("amount_") ?? false}
           describedBy={error ? errorId : undefined}
         />
 
@@ -137,6 +141,7 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
           <button
             type="button"
             onClick={() => setUnitSheetOpen(true)}
+            aria-label={`${t("unitLabel")}: ${unit.name[locale]}`}
             className="tap flex h-14 items-center gap-3 rounded-tile bg-fill px-4 text-start"
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-page text-ink-2">
@@ -170,7 +175,15 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
 
         <div className="mt-auto pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <p id={errorId} role="alert" className="mb-2 min-h-5 text-center text-sm font-medium text-loss">
-            {error === "amount" ? t("errorAmount") : error === "category" ? t("errorCategory") : ""}
+            {error === "amount_empty"
+              ? t("errorAmountEmpty")
+              : error === "amount_invalid"
+                ? t("errorAmountInvalid")
+                : error === "amount_non_positive"
+                  ? t("errorAmountNonPositive")
+                  : error === "category"
+                    ? t("errorCategory")
+                    : ""}
           </p>
           <button
             type="button"

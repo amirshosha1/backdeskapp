@@ -35,7 +35,7 @@ test("Save explains what is missing instead of doing nothing", async ({ page }) 
   await expect(save).toBeEnabled();
 
   await save.click();
-  await expect(alert).toHaveText("أدخل المبلغ أولًا");
+  await expect(alert).toHaveText("أدخل المبلغ");
 
   await page.locator('input[inputmode="decimal"]').fill("100");
   await save.click();
@@ -44,6 +44,16 @@ test("Save explains what is missing instead of doing nothing", async ({ page }) 
   await page.getByRole("radio", { name: "الصيانة" }).click();
   await save.click();
   await expect(page.getByRole("heading", { name: "تم حفظ المصروف (تجريبيًا)" })).toBeVisible();
+});
+
+test("an invalid amount shows a distinct message, never the empty-amount one", async ({ page }) => {
+  await page.goto("/demo/expenses/new");
+  const save = page.getByRole("button", { name: "حفظ المصروف" });
+  const alert = page.getByRole("main").getByRole("alert");
+
+  await page.locator('input[inputmode="decimal"]').fill("12.5.5");
+  await save.click();
+  await expect(alert).toHaveText("المبلغ غير صحيح، اكتب أرقامًا فقط");
 });
 
 test("the unit can be changed from a bottom sheet, and the date shows today", async ({ page }) => {
