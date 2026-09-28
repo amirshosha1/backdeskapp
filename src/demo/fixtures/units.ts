@@ -44,6 +44,8 @@ export const UNITS: UnitFixture[] = [
     revpar: "1500.00",
     managerProfit: "8010.60",
     owner: { ar: "أحمد يوسف", en: "Ahmed Youssef" },
+    // §4.6 Example A: 20% commission on net payout.
+    commissionBasis: { ar: "20% من صافي المحوّل", en: "20% of net payout" },
     hasStatement: true,
   },
   {
@@ -64,6 +66,8 @@ export const UNITS: UnitFixture[] = [
     // two dots make the nun unambiguous. Sample data, so no real name is
     // affected by the respelling.
     owner: { ar: "مني عزيز", en: "Mona Aziz" },
+    // §4.6 Example C: hybrid minimum guarantee, mode `max`, basis gross_revenue.
+    commissionBasis: { ar: "10% من الإيرادات، بحد أدنى 3,000", en: "10% of revenue, minimum 3,000" },
     hasStatement: false,
   },
 ];
