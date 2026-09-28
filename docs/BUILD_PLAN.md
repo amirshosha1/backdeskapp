@@ -220,7 +220,8 @@ commission(n):
 - For the `noi` basis this reduces to `break_even_nights = (fixed_costs + depreciation / (1 − c)) / contribution_per_night` (depreciation = 0 when excluded).
 - `break_even_occupancy = break_even_nights / nights_available`.
 - `break_even_ADR(target_occupancy)` uses the same solver with n fixed and ADR as the variable (profit is piecewise linear in ADR too).
-- `irregular` costs (repairs) are excluded by default; this is a user setting.
+- **`irregular` costs (e.g. repairs) and any monthly maintenance/irregular allowance are included in `fixed_costs` by default** — a host who never budgets for the odd repair or replacement is not actually at break-even. A per-scenario toggle excludes them (decided 2026-09-28, after `docs/PROGRESS.md`'s Phase P.1 review found the excluded-by-default figure understated how many nights a unit needs: at 19 booked nights — one below the excluded-default figure of ~19 — Example B's unit still loses 788.50). The UI shows the included-by-default figure as the primary break-even result, with the excluded variant as a secondary line (Example B2).
+- **Whole-night display.** Because a night is not divisible, a host needs the *ceiling* of `break_even_nights`, not the nearest whole night, to actually reach break-even (Example B: 19.38 rounds up to 20, not 19 — at 19 nights the unit still runs a loss). Any UI showing "nights needed" rounds up.
 
 ### 4.4 Revenue recognition
 - **Accrual by night** (default for KPIs and P&L): stays crossing a month boundary are prorated by nights; cleaning fees are recognized on the check-in date; platform fees follow the component they were allocated to (the accommodation share is prorated by night, the cleaning share is recognized on check-in); refunds and adjustments on their own date.
@@ -250,7 +251,8 @@ Projections: 12-month model with monthly occupancy and ADR multipliers (seasonal
 
 **Example B — rental arbitrage** (basis `none`). Same stays and opex, plus rent 35,000 per month (`fixed`).
 - Expected NOI: 40,053 − 7,900 − 35,000 = **−2,847.00**
-- Break-even (repairs excluded, no depreciation): fixed = 35,000 + 2,500 + 600 + 1,000 = 39,100; gross_per_night = 2,633.33; var_per_night = 500 / 3 = 166.67; contribution = 2,633.33 × 0.845 − 166.67 = **2,058.50**; break-even nights ≈ **18.99**; break-even occupancy ≈ **63.3%**
+- Break-even (maintenance/irregular costs included by default, no depreciation): fixed = 35,000 + 2,500 + 600 + 1,000 + 800 = **39,900**; gross_per_night = 2,633.33; var_per_night = 500 / 3 = 166.67; contribution = 2,633.33 × 0.845 − 166.67 = **2,058.50**; break-even nights ≈ **19.38**; break-even occupancy ≈ **64.6%** (rounded up to 20 whole nights = 66.7%, since a fractional night doesn't clear the line — at 19 nights the unit still runs a loss of **−788.50**).
+- **Example B2 — maintenance/irregular costs excluded** (the per-scenario toggle, shown as the secondary figure): fixed = 35,000 + 2,500 + 600 + 1,000 = **39,100** (repairs excluded); same contribution 2,058.50; break-even nights ≈ **18.99**; break-even occupancy ≈ **63.3%**.
 
 **Example C — hybrid minimum guarantee.** Mode `max`, `hybrid_basis = gross_revenue`: max(3,000, 10% × gross). With Example A gross 47,400 → **4,740.00**. With gross 20,000 → **3,000.00**.
 
