@@ -390,13 +390,13 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 **Goal:** hosts try the product with their own numbers before any account exists.
 
 **Scope**
-- In `/demo`, a visitor can add a unit and add expenses, and Home updates live through the Phase 1 engine. The data lives in the browser only: no account, nothing sent to a server.
+- In `/demo`, a visitor can add a unit, add expenses and record income, and Home updates live through the Phase 1 engine. The data lives in the browser only: no account, nothing sent to a server.
 - "تقرير الشهر" (owner view) opens each unit's monthly report instead of a toast.
 - The "بيانات تجريبية" banner, `noindex` and the no-silent-taps rule stay. The fixture data remains the starting point, with a way to reset to it.
-- To settle in the P.2 plan: whether the visitor also records income (the "إضافة دخل" pill), and what happens to the browser data at sign-up (migrate into the new org or discard; see `docs/PROGRESS.md`).
+- At sign-up (Phase 0b onward), the visitor's browser data migrates into their new org by default — the same policy as the anonymous calculator draft (`docs/PROGRESS.md`, kickoff decisions) — through a server-side import path with the usual Zod validation and `audit_log` entries.
 
 **Acceptance**
-- [ ] Adding a unit or an expense updates Home immediately, with every figure computed by `src/lib/finance/` (component or e2e test).
+- [ ] Adding a unit, an expense or income updates Home immediately, with every figure computed by `src/lib/finance/` (component or e2e test).
 - [ ] No network request carries demo data (e2e check on requests).
 - [ ] Reloading the page keeps the visitor's data; resetting restores the fixtures.
 - [ ] The e2e tap crawler still passes on every `/demo` screen.
