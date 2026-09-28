@@ -5,6 +5,11 @@ import type { Localized } from "./types";
  * states no legal requirements as fact and carries no prices, matching
  * Phase 3's "DRAFT — Amir to review" rule (BUILD_PLAN.md §5, Phase 3) even
  * though Phase P ships no real content pipeline yet.
+ *
+ * `draft` stands in for Phase 3's MDX frontmatter (`content/{ar,en}/guide/`,
+ * `stage`, `order`, `tier`, ...): the draft status lives here and in
+ * docs/PROGRESS.md, not as a "نص مبدئي" label in the UI (Phase P.1.1 —
+ * Amir found the UI label noisy; the content still needs his review).
  */
 
 export interface GuideStage {
@@ -13,6 +18,7 @@ export interface GuideStage {
   title: Localized;
   overview: Localized;
   tier: "free" | "pro";
+  draft: boolean;
 }
 
 export const GUIDE_STAGES: GuideStage[] = [
@@ -25,6 +31,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Before you commit, estimate the expected return and compare more than one area.",
     },
     tier: "free",
+    draft: true,
   },
   {
     id: "2",
@@ -35,6 +42,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Make sure the lease explicitly allows short-term rental, and check the compound rules.",
     },
     tier: "free",
+    draft: true,
   },
   {
     id: "3",
@@ -45,6 +53,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Plan the setup budget item by item before you buy anything.",
     },
     tier: "free",
+    draft: true,
   },
   {
     id: "4",
@@ -55,6 +64,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Professional photos and an accurate description raise bookings.",
     },
     tier: "free",
+    draft: true,
   },
   {
     id: "5",
@@ -65,6 +75,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Cleaning, supplies and maintenance: a steady routine that prevents surprises.",
     },
     tier: "free",
+    draft: true,
   },
   {
     id: "6",
@@ -75,6 +86,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Your first guests build the unit's reputation, so look after them.",
     },
     tier: "free",
+    draft: true,
   },
   {
     id: "7",
@@ -85,6 +97,7 @@ export const GUIDE_STAGES: GuideStage[] = [
       en: "Review prices and costs every month, not every season.",
     },
     tier: "free",
+    draft: true,
   },
 ];
 

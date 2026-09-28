@@ -1,5 +1,4 @@
 import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { LockedTeaser } from "@/components/common/locked-teaser";
 import { Checklist } from "./checklist";
@@ -21,8 +20,7 @@ export function StageDetailScreen({ stage, checklist }: StageDetailScreenProps) 
       <PageHeader title={t("stageLabel", { order: stage.order })} backHref="/demo/guide" />
       <div className="flex flex-col gap-8 px-4 pt-4">
         <section className="rounded-card bg-fill p-5">
-          <Badge variant="onFill">{t("draftNotice")}</Badge>
-          <h2 className="mt-3 text-2xl font-semibold">{stage.title[locale]}</h2>
+          <h2 className="text-2xl font-semibold">{stage.title[locale]}</h2>
           <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-2">{stage.overview[locale]}</p>
         </section>
 
