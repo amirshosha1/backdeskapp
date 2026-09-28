@@ -22,7 +22,20 @@ export default async function DemoLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-dvh bg-page">{children}</div>
+      {/* Desktop: the mobile-first shell stays ~480px wide, centred, with a
+          neutral background outside it (BUILD_PLAN.md Phase P.1.1). Below
+          480px (the mobile-first baseline) this has no visible effect.
+          `translateZ(0)` gives the shell its own containing block, so the
+          floating bottom nav's `fixed` positioning tracks the shell's
+          width instead of the full viewport. */}
+      <div className="flex min-h-dvh justify-center bg-fill-strong">
+        <div
+          data-testid="app-shell"
+          className="relative min-h-dvh w-full max-w-[30rem] bg-page [transform:translateZ(0)]"
+        >
+          {children}
+        </div>
+      </div>
     </ToastProvider>
   );
 }
