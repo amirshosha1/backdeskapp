@@ -33,4 +33,11 @@ describe("<PricingScreen />", () => {
     renderWithIntl(<PricingScreen plans={PLANS} setupKit={SETUP_KIT} foundingOffer={FOUNDING_OFFER} />);
     expect(screen.queryByText(/ثابت/)).toBeNull();
   });
+
+  it("every paid tier's feature list opens with 'everything in the previous plan', Free's doesn't", () => {
+    renderWithIntl(<PricingScreen plans={PLANS} setupKit={SETUP_KIT} foundingOffer={FOUNDING_OFFER} />);
+    const paidPlans = PLANS.filter((p) => p.priceMonthly);
+    expect(paidPlans.length).toBe(3);
+    expect(screen.getAllByText("كل ما في الباقة السابقة، بالإضافة إلى:")).toHaveLength(paidPlans.length);
+  });
 });
