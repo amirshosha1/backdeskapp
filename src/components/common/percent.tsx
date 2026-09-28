@@ -8,24 +8,24 @@ export interface PercentProps {
   decimals?: number;
   /** Caps the displayed value at 100% (BUILD_PLAN.md §4.1). Default: true. */
   capAt100?: boolean;
+  signDisplay?: "auto" | "always";
   className?: string;
 }
 
 /**
- * Renders a ratio as a percentage. Occupancy is never clamped silently in
- * the engine, but the *displayed* value is capped at 100% here; pair this
- * with `<DataWarning />` when `isOverCapacity` is true so the cap is never
- * silent in the UI either.
+ * A ratio shown as a percentage, inside an LTR isolate so "%" and any sign
+ * stay on the right side in Arabic. Occupancy is never clamped silently in
+ * the engine; only the *displayed* value is capped here, and callers pair
+ * an over-capacity value with `<DataWarning />`.
  */
-export function Percent({ ratio, decimals, capAt100 = true, className }: PercentProps) {
+export function Percent({ ratio, decimals, capAt100 = true, signDisplay, className }: PercentProps) {
   const locale = useLocale() as AppLocale;
-  const { display } = capDisplayRatio(ratio);
-  const value = capAt100 ? display : ratio;
+  const value = capAt100 ? capDisplayRatio(ratio).display : ratio;
 
   return (
-    <span className={cn("tabular-nums-money", className)}>
-      {formatPercent(value, { locale, decimals })}
-    </span>
+    <bdi dir="ltr" className={cn("tabular-nums-money", className)}>
+      {formatPercent(value, { locale, decimals, signDisplay })}
+    </bdi>
   );
 }
 

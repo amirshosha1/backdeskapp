@@ -1,61 +1,112 @@
-import { Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { UnitCard } from "@/components/units/unit-card";
-import { HeroProfit } from "./hero-profit";
-import { KpiGrid } from "./kpi-grid";
-import { TopExpenses } from "./top-expenses";
+"use client";
+
+import { useState } from "react";
+import { ArrowUpRight, Landmark } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { HeroFigure } from "@/components/common/hero-figure";
+import { ListRow } from "@/components/common/list-row";
+import { Money } from "@/components/common/money";
+import { Percent } from "@/components/common/percent";
+import { SectionHeader } from "@/components/common/section-header";
+import { LogoMark, RoyalHero } from "@/components/layout/royal-hero";
 import { BreakEvenProgress } from "./break-even-progress";
-import { ProfitBreakdown } from "./profit-breakdown";
+import { QuickActions } from "./quick-actions";
+import { TopExpenses } from "./top-expenses";
+import { UnitCarousel } from "./unit-carousel";
+import { ViewSwitch, type HomeView } from "./view-switch";
+import type { AppLocale } from "@/i18n/routing";
 import type { HOME_COHOST_VIEW, HOME_OWNER_VIEW } from "@/demo/fixtures/home";
+import type { Localized } from "@/demo/fixtures/types";
 
 export interface HomeScreenProps {
+  period: Localized;
   ownerView: typeof HOME_OWNER_VIEW;
   coHostView: typeof HOME_COHOST_VIEW;
 }
 
-export function HomeScreen({ ownerView, coHostView }: HomeScreenProps) {
+/**
+ * Home (direction A2): the royal hero answers "كم ربحت فعلاً هذا الشهر؟",
+ * the units swipe as glass cards at its bottom, quick actions sit under it,
+ * then the one insight that explains the number. The owner/co-host switch
+ * is a prototype affordance; the product shows one view per org mix.
+ */
+export function HomeScreen({ period, ownerView, coHostView }: HomeScreenProps) {
   const t = useTranslations("home");
+  const tCommon = useTranslations("common");
+  const locale = useLocale() as AppLocale;
+  const [view, setView] = useState<HomeView>("owner");
+  const data = view === "owner" ? ownerView : coHostView;
 
   return (
-    <div className="flex flex-col gap-4 p-4 pb-24">
-      <Tabs defaultValue="owner">
-        <TabsList className="w-full">
-          <TabsTrigger value="owner">{t("ownerView")}</TabsTrigger>
-          <TabsTrigger value="cohost">{t("coHostView")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="owner" className="flex flex-col gap-4">
-          <HeroProfit question={t("heroQuestion")} amount={ownerView.heroTotal} />
-          <KpiGrid occupancy={ownerView.occupancy} adr={ownerView.adr} revpar={ownerView.revpar} />
-          <BreakEvenProgress
-            bookedNights={ownerView.breakEven.bookedNights}
-            breakEvenNights={ownerView.breakEven.breakEvenNights}
-            reached={ownerView.breakEven.reached}
+    <div>
+      <RoyalHero
+        leading={<LogoMark label={tCommon("brandName")} mark={tCommon("brandMark")} />}
+        center={
+          <ViewSwitch
+            value={view}
+            onChange={setView}
+            label={t("viewSwitchLabel")}
+            options={[
+              { value: "owner", label: t("viewOwner") },
+              { value: "cohost", label: t("viewCoHost") },
+            ]}
           />
-          <TopExpenses items={ownerView.topExpenses} />
-          <div className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold">{t("unitsInThisView")}</h2>
-            {ownerView.units.map((unit) => (
-              <UnitCard key={unit.id} unit={unit} />
-            ))}
-          </div>
-        </TabsContent>
+        }
+      >
+        <p className="mt-8 text-center text-xs text-white/55">{period[locale]}</p>
+        <h1 className="mt-1 text-center text-[0.9375rem] font-normal text-white/80">{t("heroQuestion")}</h1>
+        <HeroFigure amount={data.heroTotal} className="mt-3" />
+        <div className="mt-4 flex justify-center">
+          <span className="glass inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[0.8125rem]">
+            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            <Percent ratio={data.change.ratio} signDisplay="always" className="font-semibold" />
+            {t("changeVsLastMonth")}
+          </span>
+        </div>
 
-        <TabsContent value="cohost" className="flex flex-col gap-4">
-          <HeroProfit question={t("heroQuestion")} amount={coHostView.heroTotal} />
-          <ProfitBreakdown lines={coHostView.lines} />
-        </TabsContent>
-      </Tabs>
+        <dl className="mt-6 grid grid-cols-3 gap-2">
+          {[
+            { label: t("kpiOccupancy"), value: <Percent ratio={data.occupancy} decimals={0} /> },
+            { label: t("kpiAdr"), value: <Money amount={data.adr} decimals={0} hideCurrency /> },
+            { label: t("kpiRevpar"), value: <Money amount={data.revpar} decimals={0} hideCurrency /> },
+          ].map((tile) => (
+            <div key={tile.label} className="glass flex flex-col justify-between rounded-tile px-3 py-3.5">
+              <dt className="line-clamp-2 text-[0.6875rem] leading-snug text-white/70">{tile.label}</dt>
+              <dd className="mt-1.5 text-xl font-semibold">{tile.value}</dd>
+            </div>
+          ))}
+        </dl>
 
-      <Button asChild size="lg" className="mt-2">
-        <Link href="/demo/expenses/new">
-          <Plus className="h-5 w-5" aria-hidden="true" />
-          {t("addExpenseCta")}
-        </Link>
-      </Button>
+        <UnitCarousel units={data.units} label={t("unitsCarouselLabel")} />
+      </RoyalHero>
+
+      <div className="flex flex-col gap-8 px-4 pt-6">
+        <QuickActions view={view} />
+
+        {view === "owner" ? (
+          <>
+            <BreakEvenProgress
+              unitName={ownerView.breakEven.unitName}
+              bookedNights={ownerView.breakEven.bookedNights}
+              targetNights={ownerView.breakEven.targetNights}
+              nightsShort={ownerView.breakEven.nightsShort}
+              progress={ownerView.breakEven.progress}
+              reached={ownerView.breakEven.reached}
+            />
+            <TopExpenses items={ownerView.topExpenses} />
+          </>
+        ) : (
+          <section>
+            <SectionHeader title={t("overheadTitle")} />
+            <ListRow
+              icon={<Landmark className="h-5 w-5" aria-hidden="true" />}
+              title={t("overheadLabel")}
+              subtitle={t("overheadNote")}
+              trailing={<Money amount={coHostView.overhead} className="text-[0.9375rem] font-semibold" colorBySign />}
+            />
+          </section>
+        )}
+      </div>
     </div>
   );
 }

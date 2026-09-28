@@ -1,44 +1,34 @@
 import { expect, test } from "@playwright/test";
+import { ALL_SCREENS } from "./screens";
 
 /**
- * BUILD_PLAN.md Phase P acceptance: `/demo` responses carry noindex, via
- * both the response header (next.config.ts) and the page's robots meta
- * (demo/layout.tsx), in both locales.
+ * Phase P acceptance: `/demo` responses carry noindex, via both the
+ * response header (next.config.ts) and the page's robots meta
+ * (demo/layout.tsx), in both locales; every screen shows the sample-data
+ * banner, and every price is labelled as a sample.
  */
 test.describe("/demo stays out of search results", () => {
-  for (const path of ["/demo", "/en/demo", "/demo/calculator", "/en/demo/pricing"]) {
-    test(`${path} sends X-Robots-Tag: noindex`, async ({ page }) => {
+  for (const path of ["/demo", "/en/demo", "/demo/expenses", "/en/demo/pricing"]) {
+    test(`${path} sends X-Robots-Tag and a robots meta tag with noindex`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.headers()["x-robots-tag"]).toBe("noindex, nofollow");
-    });
-
-    test(`${path} has a noindex robots meta tag`, async ({ page }) => {
-      await page.goto(path);
       const content = await page.locator('meta[name="robots"]').getAttribute("content");
       expect(content).toContain("noindex");
     });
   }
+});
 
-  test("the sample-data banner appears on every screen", async ({ page }) => {
-    const paths = [
-      "/demo",
-      "/demo/calculator",
-      "/demo/guide",
-      "/demo/guide/3",
-      "/demo/units",
-      "/demo/units/downtown-cairo/statement",
-      "/demo/expenses/new",
-      "/demo/pricing",
-      "/demo/more",
-    ];
-    for (const path of paths) {
+test.describe("sample data is always labelled", () => {
+  test('the "بيانات تجريبية" banner appears on every screen', async ({ page }) => {
+    for (const path of ALL_SCREENS) {
       await page.goto(path);
-      await expect(page.getByText("بيانات تجريبية")).toBeVisible();
+      await expect(page.getByTestId("demo-banner"), path).toHaveText("بيانات تجريبية");
     }
   });
 
-  test("prices on the pricing page are labelled SAMPLE", async ({ page }) => {
+  test("prices on the pricing page are labelled as samples", async ({ page }) => {
     await page.goto("/demo/pricing");
-    await expect(page.getByText("عيّنة").first()).toBeVisible();
+    await expect(page.getByText("تجريبي", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("كل الأسعار تجريبية وستتحدد قبل الإطلاق.")).toBeVisible();
   });
 });

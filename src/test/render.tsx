@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import arMessages from "../../messages/ar.json";
 import enMessages from "../../messages/en.json";
 import type { AppLocale } from "@/i18n/routing";
+import { ToastProvider } from "@/components/common/toast";
 
 const MESSAGES: Record<AppLocale, typeof arMessages> = {
   ar: arMessages,
@@ -18,7 +19,9 @@ function Providers({ locale, children }: { locale: AppLocale; children: ReactNod
       timeZone="Africa/Cairo"
       now={new Date("2026-09-26T12:00:00+02:00")}
     >
-      <div dir={locale === "ar" ? "rtl" : "ltr"}>{children}</div>
+      <ToastProvider>
+        <div dir={locale === "ar" ? "rtl" : "ltr"}>{children}</div>
+      </ToastProvider>
     </NextIntlClientProvider>
   );
 }

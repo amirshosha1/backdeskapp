@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatMoney, formatNumber } from "./money";
+import { currencyLabel, formatMoney, formatMoneyParts, formatNumber, LRI, PDI } from "./money";
 
 describe("formatMoney", () => {
   it("formats a positive amount in Arabic with a trailing currency label", () => {
@@ -10,15 +10,25 @@ describe("formatMoney", () => {
     expect(formatMoney("24142.40", { locale: "en" })).toBe("EGP 24,142.40");
   });
 
-  it("prefixes negative amounts with a minus sign", () => {
+  it("keeps the minus sign attached to the number, not the currency label", () => {
     expect(formatMoney("-2847.00", { locale: "ar" })).toBe("-2,847.00 ج.م.");
-    expect(formatMoney("-2847.00", { locale: "en" })).toBe("-EGP 2,847.00");
+    expect(formatMoney("-2847.00", { locale: "en" })).toBe("EGP -2,847.00");
   });
 
   it("shows a leading plus for positive amounts when signDisplay is always", () => {
     expect(formatMoney("8010.60", { locale: "en", signDisplay: "always" })).toBe(
-      "+EGP 8,010.60",
+      "EGP +8,010.60",
     );
+  });
+
+  it("wraps the signed number in LTR isolate marks when asked, for use inside Arabic sentences", () => {
+    expect(formatMoney("-1500.00", { locale: "ar", isolate: true })).toBe(
+      `${LRI}-1,500.00${PDI} ج.م.`,
+    );
+  });
+
+  it("respects a custom decimal count", () => {
+    expect(formatMoney("29306.50", { locale: "en", decimals: 0 })).toBe("EGP 29,307");
   });
 
   it("never adds a plus sign to zero, even with signDisplay always", () => {
@@ -51,6 +61,35 @@ describe("formatMoney", () => {
     // 0.1 + 0.2 famously isn't 0.3 as a float; formatMoney takes the exact
     // decimal string instead of forcing the caller through float math.
     expect(formatMoney("0.30", { locale: "en" })).toBe("EGP 0.30");
+  });
+});
+
+describe("formatMoneyParts", () => {
+  it("splits an amount into sign, integer, fraction and currency (for dimmed decimals)", () => {
+    expect(formatMoneyParts("-7347.005", { locale: "ar" })).toEqual({
+      sign: "-",
+      integer: "7,347",
+      fraction: ".01",
+      currency: "ج.م.",
+      isNegative: true,
+    });
+  });
+
+  it("treats an amount that rounds to zero as unsigned", () => {
+    const parts = formatMoneyParts("-0.004", { locale: "en", signDisplay: "always" });
+    expect(parts.sign).toBe("");
+    expect(parts.isNegative).toBe(false);
+  });
+
+  it("returns an empty fraction when decimals is 0", () => {
+    expect(formatMoneyParts("47400.00", { locale: "en", decimals: 0 }).fraction).toBe("");
+  });
+});
+
+describe("currencyLabel", () => {
+  it("localises the currency label", () => {
+    expect(currencyLabel("EGP", "ar")).toBe("ج.م.");
+    expect(currencyLabel("EGP", "en")).toBe("EGP");
   });
 });
 

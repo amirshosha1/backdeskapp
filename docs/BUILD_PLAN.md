@@ -29,10 +29,10 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 - [ ] Prices in EGP for Solo, Pro and Business (monthly and annual), the Setup Kit, and the founding-member terms — needed before the pre-order campaign starts (after Phase P)
 
 ### How to run the build
-1. For each phase, send the **Standard phase prompt** (§5.0) with the phase id, in this order: **P, 1, 0a, 0b, 2, 3 → Validation Gate → 5, 6, 7, 8, 4, 10 → LAUNCH → 9**.
+1. For each phase, send the **Standard phase prompt** (§5.0) with the phase id, in this order: **P, P.1, 1, P.2, 0a, 0b, 2, 3 → Validation Gate → 5, 6, 7, 8, 4, 10 → LAUNCH → 9**.
 2. Approve the plan, let it build, review the diff, and test the Vercel preview on your phone.
 3. Clear the context between phases (`/clear`); `CLAUDE.md` and `docs/PROGRESS.md` carry the memory. A Claude Code on the web session can continue any phase the same way.
-4. Start selling founding-member pre-orders as soon as the Phase P prototype is live. Until Phase 5, track InstaPay pre-orders outside the app. Do not skip the **Validation Gate** before Phase 5.
+4. The prototype stays for your review only until Phase 1 lands (live calculator, varied sample units); then show it to hosts and start selling founding-member pre-orders. Until Phase 5, track InstaPay pre-orders outside the app. Do not skip the **Validation Gate** before Phase 5.
 
 ---
 
@@ -297,8 +297,8 @@ Projections: 12-month model with monthly occupancy and ADR multipliers (seasonal
 
 ### 5.0 Execution order and prompts
 
-**Order:** P → 1 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 → 10 → 🚀 LAUNCH → 9.
-Phase numbers are kept stable and the sections below follow execution order. Phase 1 runs right after P because the engine needs no database or auth. Phase 4 (payments and legal) runs just before launch. Phase 9 is post-launch growth.
+**Order:** P → P.1 → 1 → P.2 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 → 10 → 🚀 LAUNCH → 9.
+Phase numbers are kept stable and the sections below follow execution order. P.1 fixes and redesigns the prototype after Amir's phone review. Phase 1 runs right after it because the engine needs no database or auth. P.2 then makes the demo interactive on the real engine, with data kept in the browser only. Phase 4 (payments and legal) runs just before launch. Phase 9 is post-launch growth.
 
 **Kickoff prompt (sent once on 2026-09-26; kept for reference):**
 ```
@@ -353,6 +353,24 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 - [ ] IBM Plex Sans Arabic, as served, shows tabular numerals in money columns (or a fallback is chosen and recorded).
 - [ ] `pnpm lint && pnpm typecheck && pnpm test` pass (at least one render smoke test per screen).
 
+### Phase P.1 — Prototype fixes and redesign (no database, no login)
+**Goal:** after Amir's phone review ("feels broken, design is weak"), make every tap work or explain itself, and move the prototype to a premium, fintech-grade look before Phase 1.
+
+**Scope**
+- **Tap audit:** every tappable element on every `/demo` screen at 360 px either works or shows a clear Arabic message (a toast such as "متاحة في النسخة الكاملة"). No silent taps and no disabled placeholder buttons; forms say what is missing.
+- **Design direction A2** (chosen from three Home directions, see `CLAUDE.md` §7), applied to every screen: royal-blue hero with frosted-glass tiles, a swipeable glass unit carousel on Home (one card per unit: name, operating model, profit; tapping opens Units), pill quick actions under the hero ("إضافة مصروف"; "إضافة دخل" as a toast; "تقرير الشهر" in the owner view as a toast until P.2; "كشف حساب" in the co-host view, opening the Downtown statement), one month-over-month delta chip (SAMPLE), lists as rows with circular icon avatars, a floating dark pill nav with the active tab as a filled circle, and an expense-details screen ("التفاصيل") with glass bubbles sized by share and exact percentages inside. The owner statement keeps a paper-ledger style.
+- **Language:** the Arabic/English switch (moved here from Phase 0a); the locale comes from the URL only, and switching keeps the current screen.
+- **Copy:** "شقة المدينتي" → "شقة مدينتي"; every Arabic string reviewed for natural wording for the Egyptian market (simple MSA with Egyptian terms); English kept complete.
+- **Fixes:** minus signs on the correct side of numbers in RTL, a localized 404, safe-area insets, a favicon, and the bottom nav never covering the last content.
+
+**Acceptance**
+- [ ] An e2e crawler taps every visible button and link on every `/demo` screen and finds none that does nothing.
+- [ ] Every screen renders in Arabic RTL at 360 px with no horizontal scroll, and the nav never hides the last content when scrolled to the bottom.
+- [ ] The language switch keeps the current screen in both directions; an English browser still lands on Arabic `/demo`.
+- [ ] Add expense still completes in ≤ 4 taps.
+- [ ] Negative amounts show the minus sign to the left of the digits in RTL.
+- [ ] `pnpm lint && pnpm typecheck && pnpm test` and the e2e suite pass; 360 px screenshots of every screen are sent to Amir.
+
 ### Phase 1 — Finance engine (no database, no auth)
 **Scope**
 - Implement §4 as pure modules: `money.ts` (decimal, half-up, split with leftover cents), `fx.ts`, `period.ts` (nights available, proration, per-month stay allocations, posting period for locked months, availability-conflict warning), `fees.ts` (platform-fee allocation), `kpis.ts`, `commission.ts`, `tax.ts`, `statement.ts` (cash and accrual bases, opening balance, owner payouts), `breakeven.ts` (piecewise solver, `break_even_ADR`), `investment.ts`, `projection.ts` (12-month seasonal; server-only), `sensitivity.ts`, `org-profit.ts` (owner and co-host views).
@@ -368,10 +386,25 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 - [ ] `projection.ts` cannot be imported from client code (the build fails if it is).
 - [ ] The `/demo` calculator, fed the Example A and B inputs, shows the engine's results (component or e2e test).
 
+### Phase P.2 — Interactive demo, data in the browser only (no database, no login)
+**Goal:** hosts try the product with their own numbers before any account exists.
+
+**Scope**
+- In `/demo`, a visitor can add a unit, add expenses and record income, and Home updates live through the Phase 1 engine. The data lives in the browser only: no account, nothing sent to a server.
+- "تقرير الشهر" (owner view) opens each unit's monthly report instead of a toast.
+- The "بيانات تجريبية" banner, `noindex` and the no-silent-taps rule stay. The fixture data remains the starting point, with a way to reset to it.
+- At sign-up (Phase 0b onward), the visitor's browser data migrates into their new org by default — the same policy as the anonymous calculator draft (`docs/PROGRESS.md`, kickoff decisions) — through a server-side import path with the usual Zod validation and `audit_log` entries.
+
+**Acceptance**
+- [ ] Adding a unit, an expense or income updates Home immediately, with every figure computed by `src/lib/finance/` (component or e2e test).
+- [ ] No network request carries demo data (e2e check on requests).
+- [ ] Reloading the page keeps the visitor's data; resetting restores the fixtures.
+- [ ] The e2e tap crawler still passes on every `/demo` screen.
+
 ### Phase 0a — Foundation: app shell (no database)
 **Scope**
 - Prettier and the remaining pnpm scripts in `CLAUDE.md` §4 that do not need a database (ESLint, Vitest and the core scripts exist since Phase P).
-- Complete English messages; locale switcher; a test that `ar.json` and `en.json` have identical keys.
+- English messages kept complete for any new strings (the locale switch arrived in Phase P.1, and the `ar.json`/`en.json` key-parity test exists since Phase P).
 - Light and dark themes from the design tokens; empty states for every tab.
 - PWA: manifest with the Arabic name "صافي", placeholder icons, Serwist service worker, offline fallback page. Check that Serwist works with the current Next.js bundler; if it needs webpack, build production with webpack.
 - Global error boundary, `.env.example`.

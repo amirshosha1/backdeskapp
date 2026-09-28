@@ -1,9 +1,10 @@
+import { Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Money } from "@/components/common/money";
 import { SampleBadge } from "@/components/common/sample-badge";
+import { HeroTitle, RoyalHero } from "@/components/layout/royal-hero";
 import { PlanCard } from "./plan-card";
-import { FoundingOffer } from "./founding-offer";
+import { PreorderAction } from "./preorder-button";
 import type { AppLocale } from "@/i18n/routing";
 import type { FOUNDING_OFFER, PlanFixture, SETUP_KIT } from "@/demo/fixtures/pricing";
 
@@ -18,27 +19,36 @@ export function PricingScreen({ plans, setupKit, foundingOffer }: PricingScreenP
   const locale = useLocale() as AppLocale;
 
   return (
-    <div className="flex flex-col gap-4 p-4 pb-24">
-      <h1 className="text-xl font-semibold">{t("title")}</h1>
-
-      <FoundingOffer offer={foundingOffer} />
-
-      {plans.map((plan) => (
-        <PlanCard key={plan.code} plan={plan} />
-      ))}
-
-      <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>{setupKit.name[locale]}</CardTitle>
-          <span className="flex items-center gap-2 font-semibold">
-            <Money amount={setupKit.price} />
-            <SampleBadge />
+    <div>
+      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>}>
+        <section className="glass mt-6 rounded-card p-5">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
           </span>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-foreground-muted">{setupKit.description[locale]}</p>
-        </CardContent>
-      </Card>
+          <h2 className="mt-3 text-xl font-semibold">{foundingOffer.title[locale]}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-white/80">{foundingOffer.description[locale]}</p>
+          <PreorderAction className="mt-4 bg-white text-navy-900">{t("preorderCta")}</PreorderAction>
+        </section>
+      </RoyalHero>
+
+      <div className="flex flex-col gap-4 px-4 pt-6">
+        <p className="rounded-tile bg-amber-soft px-4 py-3 text-center text-xs text-amber">{t("samplePricesNote")}</p>
+
+        {plans.map((plan) => (
+          <PlanCard key={plan.code} plan={plan} />
+        ))}
+
+        <article className="rounded-card bg-fill p-5">
+          <h2 className="text-lg font-semibold">{setupKit.name[locale]}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted">{setupKit.description[locale]}</p>
+          <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <Money amount={setupKit.price} decimals={0} className="text-3xl font-semibold" />
+            <span className="text-sm text-muted">{t("oneTime")}</span>
+            <SampleBadge />
+          </div>
+          <PreorderAction className="mt-5 bg-ink text-white">{t("orderSetupKit")}</PreorderAction>
+        </article>
+      </div>
     </div>
   );
 }

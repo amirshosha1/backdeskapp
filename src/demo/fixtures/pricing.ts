@@ -25,9 +25,9 @@ export const PLANS: PlanFixture[] = [
     priceMonthly: null,
     priceAnnual: null,
     features: [
-      { ar: "دفتر يومية كامل لوحدة واحدة", en: "Full manual ledger for one unit" },
-      { ar: "حاسبة الجدوى بلا حدود", en: "Unlimited feasibility calculator runs" },
-      { ar: "دليل الإعداد (نظرة عامة)", en: "Setup guide (overview)" },
+      { ar: "حسابات كاملة لوحدة واحدة", en: "Full books for one unit" },
+      { ar: "حاسبة الجدوى بلا حدود", en: "Unlimited feasibility calculations" },
+      { ar: "دليل التجهيز (نظرة عامة)", en: "Setup guide (overview)" },
     ],
   },
   {
@@ -38,7 +38,7 @@ export const PLANS: PlanFixture[] = [
     priceAnnual: "2490.00",
     features: [
       { ar: "حتى 3 وحدات", en: "Up to 3 units" },
-      { ar: "استيراد كشوف المنصات", en: "Payout import" },
+      { ar: "استيراد تقارير Airbnb", en: "Payout import" },
       { ar: "كشوف حساب الملاك", en: "Owner statements" },
     ],
   },
@@ -50,8 +50,8 @@ export const PLANS: PlanFixture[] = [
     priceAnnual: "5490.00",
     features: [
       { ar: "حتى 10 وحدات", en: "Up to 10 units" },
-      { ar: "الإدخال الذكي بالذكاء الاصطناعي", en: "AI smart entry" },
-      { ar: "تنبيهات ذكية", en: "Alerts" },
+      { ar: "تسجيل المصروفات بالذكاء الاصطناعي", en: "AI smart entry" },
+      { ar: "تنبيهات تلقائية", en: "Alerts" },
     ],
     highlighted: true,
   },
@@ -63,25 +63,25 @@ export const PLANS: PlanFixture[] = [
     priceAnnual: "9990.00",
     features: [
       { ar: "حتى 30 وحدة", en: "Up to 30 units" },
-      { ar: "تصدير كامل (CSV, XLSX, PDF)", en: "Full exports (CSV, XLSX, PDF)" },
-      { ar: "دعوات الفريق", en: "Team invitations" },
+      { ar: "تصدير Excel وPDF", en: "Excel and PDF exports" },
+      { ar: "حسابات لفريق العمل", en: "Team accounts" },
     ],
   },
 ];
 
 export const SETUP_KIT = {
-  name: { ar: "حقيبة التأسيس", en: "Setup Kit" } as Localized,
+  name: { ar: "باقة تجهيز الشقة", en: "Setup Kit" } as Localized,
   price: "1500.00",
   description: {
-    ar: "قوائم مفصّلة لكل بند، بميزانية تقديرية جاهزة.",
-    en: "Detailed lists for every item, with a ready cost estimate.",
+    ar: "قوائم مفصّلة لكل بند في الشقة، مع ميزانية تقديرية جاهزة.",
+    en: "Detailed lists for every item in the apartment, with a ready cost estimate.",
   } as Localized,
 };
 
 export const FOUNDING_OFFER = {
-  title: { ar: "عرض الأعضاء المؤسسين", en: "Founding-member offer" } as Localized,
+  title: { ar: "كن من الأعضاء المؤسسين", en: "Become a founding member" } as Localized,
   description: {
-    ar: "احجز مكانك الآن بسعر تأسيسي ثابت مدى الاشتراك، قبل إطلاق التطبيق.",
-    en: "Lock in a fixed founding price for as long as you stay subscribed, before launch.",
+    ar: "احجز مكانك قبل الإطلاق. نعلن شروط عرض المؤسسين قبل فتح الحجز.",
+    en: "Reserve your place before launch. Founding terms are announced before pre-orders open.",
   } as Localized,
 };

@@ -21,10 +21,10 @@ export const STATEMENT = {
   netPayout: "40053.00",
   ownerExpenses: [
     { category: { ar: "التنظيف", en: "Cleaning" } as Localized, amount: "-2100.00" },
-    { category: { ar: "المستلزمات", en: "Consumables" } as Localized, amount: "-900.00" },
-    { category: { ar: "المرافق", en: "Utilities" } as Localized, amount: "-2500.00" },
+    { category: { ar: "مستلزمات الضيوف", en: "Guest supplies" } as Localized, amount: "-900.00" },
+    { category: { ar: "الكهرباء والمياه", en: "Utilities" } as Localized, amount: "-2500.00" },
     { category: { ar: "الإنترنت", en: "Internet" } as Localized, amount: "-600.00" },
-    { category: { ar: "رسوم الكمبوند", en: "Compound fees" } as Localized, amount: "-1000.00" },
+    { category: { ar: "مصاريف الكمبوند", en: "Compound fees" } as Localized, amount: "-1000.00" },
     { category: { ar: "الصيانة", en: "Repairs" } as Localized, amount: "-800.00" },
   ],
   ownerExpensesTotal: "-7900.00",

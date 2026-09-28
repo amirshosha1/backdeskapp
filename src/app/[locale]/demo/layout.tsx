@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
-import { DemoBanner } from "@/components/demo/demo-banner";
-import { FeedbackButton } from "@/components/demo/feedback-button";
-import { BottomNav } from "@/components/layout/bottom-nav";
+import { ToastProvider } from "@/components/common/toast";
 
 // BUILD_PLAN.md Phase P: every /demo screen stays out of search results
 // until docs/LAUNCH.md's checklist removes this. next.config.ts also sets
@@ -23,11 +21,8 @@ export default async function DemoLayout({
   setRequestLocale(locale);
 
   return (
-    <div className="min-h-dvh bg-background">
-      <DemoBanner />
-      <main className="pb-[4.5rem]">{children}</main>
-      <BottomNav />
-      <FeedbackButton />
-    </div>
+    <ToastProvider>
+      <div className="min-h-dvh bg-page">{children}</div>
+    </ToastProvider>
   );
 }

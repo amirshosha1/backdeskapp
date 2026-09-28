@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,10 +10,19 @@ import "@/styles/globals.css";
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
-  weight: ["400", "600"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-plex-arabic",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Lets the layout reach under the iPhone home bar; the navigation pill
+  // pads itself with env(safe-area-inset-bottom).
+  viewportFit: "cover",
+  themeColor: "#071a4f",
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

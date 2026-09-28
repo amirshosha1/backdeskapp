@@ -1,44 +1,56 @@
 /**
  * Design tokens — the single file CLAUDE.md §7 requires for colors, radii,
- * spacing and type. Until Safi has a brand, the palette is calm and neutral:
- * deep teal primary, warm neutral surfaces. Only the light theme is built in
- * Phase P; dark mode is added in Phase 0a.
+ * spacing and type. Direction A2 ("royal"), chosen by Amir in Phase P.1:
+ * a royal-blue hero (deep navy at the top to bright blue lower down),
+ * frosted-glass tiles on the blue, soft solid grey cards on the light page,
+ * a floating dark navigation pill. Light theme only; dark mode is Phase 0a.
  *
  * These are Tailwind v4 theme variables (`@theme`), so every name below is
- * also a utility class: `bg-primary`, `text-loss`, `rounded-md`, `font-sans`.
+ * also a utility class: `bg-royal-500`, `text-loss`, `rounded-card`.
  */
 
 @theme {
-  /* Brand */
-  --color-primary: #0f5c56;
-  --color-primary-foreground: #f3faf9;
-  --color-primary-hover: #0c4a45;
+  /* Royal-blue hero ramp (navy -> bright blue) */
+  --color-navy-950: #040e2e;
+  --color-navy-900: #071a4f;
+  --color-royal-700: #123a9c;
+  --color-royal-600: #1d4ed8;
+  --color-royal-500: #2563eb;
+  --color-royal-400: #4b83f0;
 
-  /* Surfaces */
-  --color-background: #faf8f5;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1ede7;
-  --color-border: #e4ddd3;
+  /* Brand: links and brand actions on light surfaces (6.7:1 on white) */
+  --color-brand: #1d4ed8;
+  --color-brand-soft: #e8efff;
+
+  /* Light page */
+  --color-page: #ffffff;
+  --color-fill: #f2f4f8;
+  --color-fill-strong: #e7ebf2;
+  --color-line: #e9edf3;
 
   /* Text */
-  --color-foreground: #211c17;
-  --color-foreground-muted: #6b6258;
-  --color-foreground-subtle: #948a7d;
+  --color-ink: #0a1224;
+  --color-ink-2: #3a4458;
+  --color-muted: #5f687c;
 
-  /* Financial semantics */
-  --color-profit: #0f7a4a;
-  --color-profit-foreground: #eaf7ef;
-  --color-loss: #b23b3b;
-  --color-loss-foreground: #fbecec;
-  --color-warning: #a8681a;
-  --color-warning-foreground: #fdf1e3;
-  --color-sample: #8a5a12;
-  --color-sample-foreground: #fdf3e1;
-  --color-locked: #6b6258;
-  --color-locked-foreground: #f1ede7;
+  /* Financial semantics — always paired with a sign or icon, never color alone */
+  --color-profit: #0f7b55;
+  --color-profit-soft: #e3f4ec;
+  --color-loss: #c23b32;
+  --color-loss-soft: #fbe8e6;
+  --color-amber: #9c5c0a;
+  --color-amber-track: #f5ddb5;
+  --color-amber-soft: #fcefd9;
 
-  /* Radii (beyond Tailwind's default scale) */
-  --radius-card: 1rem;
+  /* Owner statement: keeps the ledger look of direction B */
+  --color-paper: #fbf8f1;
+  --color-rule: #d8cfbf;
+  --color-rule-strong: #b9ad97;
+
+  /* Radii (8pt grid) */
+  --radius-tile: 1.5rem;
+  --radius-card: 1.75rem;
+  --radius-hero: 2rem;
 
   /* Type */
   --font-sans: var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;

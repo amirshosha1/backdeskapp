@@ -75,15 +75,19 @@
 - Mobile-first PWA (360 px baseline), thumb-reachable primary actions, bottom navigation, numeric keypads (`inputMode="decimal"`).
 - Occupancy is never clamped silently: if booked nights exceed available nights, show a data warning and cap the displayed occupancy at 100%.
 - For owner-operated and rental-arbitrage units, the UI calls the unit's agreement record **"unit settings"**, never "agreement".
-- Every `/demo` screen shows a clear "بيانات تجريبية" banner, and `/demo` is `noindex` until launch.
+- Every `/demo` screen shows a clear "بيانات تجريبية" banner, and `/demo` is `noindex` until launch. Until Phase P.2, `/demo` sends nothing anywhere; from P.2 its data lives in the browser only (no account, nothing sent to a server).
 - **Add expense in at most 4 taps** from the home screen, not counting the digits of the amount. Real-user speed is measured by a PostHog timing event (target: median ≤ 10 s).
 - Performance budget: LCP under 2.5 s on a mid-range Android device over 4G.
-- Design tone: calm, trustworthy, fintech-grade. Design tokens (colors, radii, spacing, type) live in one file; until a brand exists the palette is calm and neutral (deep teal primary, warm neutral surfaces).
+- Design tone: calm, trustworthy, fintech-grade. Design tokens (colors, radii, spacing, type) live in one file (`src/styles/tokens.css`). The approved direction (Phase P.1, "A2"): a royal-blue hero gradient (deep navy at the top to bright blue lower down, no teal); frosted-glass tiles **only** on the hero and the floating bottom nav, always with a solid fallback where `backdrop-filter` is unsupported; soft solid grey cards without outline borders on light surfaces, with shadows only where elevation matters; radii 24–32 px on an 8 pt grid; one icon stroke weight (1.75); tabular numbers. Owner statements keep a paper-ledger style. Section links ("عرض الكل", "التفاصيل") are brand blue.
+- **No silent taps.** Every tappable element either works or explains itself (a toast such as "متاحة في النسخة الكاملة"); no disabled buttons as placeholders, and a form's primary button says what is missing instead of doing nothing. The e2e tap crawler (`e2e/taps.spec.ts`) enforces this on every `/demo` screen.
+- The floating bottom nav must never cover the last content of a screen scrolled to the bottom (`BOTTOM_NAV_CLEARANCE`).
+- The locale comes from the URL only (`/demo` is Arabic, `/en/demo` English): no `Accept-Language` detection and no locale cookie, so a shared link opens in the language it was shared in. The Arabic/English switch keeps the current screen.
+- Arabic copy register: simple Modern Standard Arabic with the terms Egyptian hosts actually use (e.g. "الكمبوند", "إعادة تأجير", "الكهرباء والمياه").
 - The first element on the home dashboard answers "كم ربحت فعلاً هذا الشهر؟" according to the operating model: owner view = net profit; co-host view = commission minus manager-borne costs, summed across managed units (see **Org profit**).
 
 ## 8. How to work in this repo
 
-- Phase order: **P → 1 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 (payments and legal) → 10 → 🚀 LAUNCH → 9 (post-launch growth)**.
+- Phase order: **P → P.1 → 1 → P.2 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 (payments and legal) → 10 → 🚀 LAUNCH → 9 (post-launch growth)**.
 - Work **one phase at a time** from `docs/BUILD_PLAN.md`. Start by presenting a plan (files, migrations, RLS policies, tests) and wait for approval.
 - If a requirement is ambiguous or conflicts with this file, stop and ask, offering 2–3 concrete options with a recommended default.
 - Every change to finance logic, entitlements or RLS ships with tests.

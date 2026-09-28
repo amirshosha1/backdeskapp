@@ -1,0 +1,70 @@
+import type { ReactNode } from "react";
+import { ChevronLeft } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { DemoBanner } from "@/components/demo/demo-banner";
+import { LanguageSwitch } from "./language-switch";
+import { cn } from "@/lib/utils";
+
+export interface RoyalHeroProps {
+  /** Start of the top bar: the logo mark or a back button. Empty by default (a spacer keeps the title centred). */
+  leading?: ReactNode;
+  /** Middle of the top bar: a title or a control (Home's view switch). */
+  center?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+}
+
+/**
+ * The royal-blue panel every tab screen opens with: sample-data banner,
+ * top bar (leading · centre · language switch), then the screen's key
+ * figure. Rounded at the bottom; the light page continues underneath.
+ */
+export function RoyalHero({ leading, center, children, className }: RoyalHeroProps) {
+  return (
+    <section
+      className={cn(
+        "royal-hero relative overflow-hidden rounded-b-[var(--radius-hero)] px-4 pb-6 text-white",
+        className,
+      )}
+    >
+      <DemoBanner onHero />
+      <div className="mt-2 flex items-center gap-2">
+        {leading ?? <span className="h-11 w-11 shrink-0" aria-hidden="true" />}
+        <div className="min-w-0 flex-1">{center}</div>
+        <LanguageSwitch />
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/** The circular brand mark used as the hero's leading element. */
+export function LogoMark({ label, mark }: { label: string; mark: string }) {
+  return (
+    <span
+      aria-label={label}
+      role="img"
+      className="glass flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg font-bold"
+    >
+      <span aria-hidden="true">{mark}</span>
+    </span>
+  );
+}
+
+/** A centred screen title for the hero's top bar. */
+export function HeroTitle({ children }: { children: ReactNode }) {
+  return <h1 className="truncate text-center text-base font-semibold">{children}</h1>;
+}
+
+/** A frosted back button for the hero's leading slot (points to the reading start). */
+export function HeroBackLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      className="glass tap flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+    >
+      <ChevronLeft className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
+    </Link>
+  );
+}

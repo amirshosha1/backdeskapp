@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import type { AppLocale } from "@/i18n/routing";
-import type { DigitStyle } from "./money";
+import { intlLocaleTag, LRI, PDI, type DigitStyle } from "./money";
 
 /**
  * Occupancy is never clamped silently (CLAUDE.md §7, BUILD_PLAN.md §4.1).
@@ -16,22 +16,38 @@ export function capDisplayRatio(ratio: number): { display: number; isOverCapacit
   };
 }
 
-/** Formats a ratio (0.633) as a percentage string ("63.3%"), half-up. */
+/**
+ * Formats a ratio (0.633) as a percentage string ("63.3%"), half-up.
+ * `signDisplay: "always"` gives "+8.4%" for a change; `isolate` wraps the
+ * result in LRI…PDI so "%" and the sign stay put inside Arabic sentences.
+ */
 export function formatPercent(
   ratio: number,
   {
     locale,
     digitStyle = "latn",
     decimals = 1,
-  }: { locale: AppLocale; digitStyle?: DigitStyle; decimals?: number },
+    signDisplay = "auto",
+    isolate = false,
+  }: {
+    locale: AppLocale;
+    digitStyle?: DigitStyle;
+    decimals?: number;
+    signDisplay?: "auto" | "always";
+    isolate?: boolean;
+  },
 ): string {
-  const percentValue = new Decimal(ratio)
-    .times(100)
-    .toDecimalPlaces(decimals, Decimal.ROUND_HALF_UP);
-  const base = locale === "ar" ? "ar-EG" : "en-US";
-  const digits = new Intl.NumberFormat(`${base}-u-nu-${digitStyle}`, {
+  const percentValue = new Decimal(ratio).times(100).toDecimalPlaces(decimals, Decimal.ROUND_HALF_UP);
+  const digits = new Intl.NumberFormat(intlLocaleTag(locale, digitStyle), {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(percentValue.toNumber());
-  return `${digits}%`;
+  }).format(percentValue.abs().toNumber());
+  const sign =
+    percentValue.isNegative() && !percentValue.isZero()
+      ? "-"
+      : signDisplay === "always" && !percentValue.isZero()
+        ? "+"
+        : "";
+  const text = `${sign}${digits}%`;
+  return isolate ? `${LRI}${text}${PDI}` : text;
 }

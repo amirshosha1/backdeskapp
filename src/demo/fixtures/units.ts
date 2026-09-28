@@ -7,14 +7,13 @@ import type { UnitFixture } from "./types";
  * than the managed model those examples were written for. Downtown Cairo
  * keeps Example A exactly as written (managed, 20% commission on net
  * payout). Rehab reuses the same base revenue under Example C's hybrid
- * commission. This is a Phase P simplification — every unit looking alike
- * is a known gap, closed in Phase 1 when the calculator generates varied
- * scenarios (see docs/PROGRESS.md).
+ * commission. Every unit looking alike is a known Phase P gap, closed in
+ * Phase 1 when the engine generates varied sample data (docs/PROGRESS.md).
  */
 export const UNITS: UnitFixture[] = [
   {
     id: "madinaty",
-    name: { ar: "شقة المدينتي", en: "Madinaty apartment" },
+    name: { ar: "شقة مدينتي", en: "Madinaty apartment" },
     area: { ar: "مدينتي، القاهرة الجديدة", en: "Madinaty, New Cairo" },
     operatingModel: "owner_operated",
     currency: "EGP",
@@ -57,7 +56,14 @@ export const UNITS: UnitFixture[] = [
     adr: "2500.00",
     revpar: "1500.00",
     managerProfit: "4740.00",
-    owner: { ar: "منى عزيز", en: "Mona Aziz" },
+    // Spelled with ya (مني), not the grammatically-standard alif maksura
+    // (منى): at UI text sizes the nun's dot sits right against alif
+    // maksura's tail and reads as invisible in every font tested
+    // (IBM Plex Sans Arabic, the system sans fallback, monospace) — not a
+    // rendering bug, just how this specific letter pair looks small. Ya's
+    // two dots make the nun unambiguous. Sample data, so no real name is
+    // affected by the respelling.
+    owner: { ar: "مني عزيز", en: "Mona Aziz" },
     hasStatement: false,
   },
 ];

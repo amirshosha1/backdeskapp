@@ -1,33 +1,29 @@
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
+import { ToastButton } from "@/components/common/toast";
+import { cn } from "@/lib/utils";
 
 /**
- * BUILD_PLAN.md §6, question 2: destination supplied by Amir via
- * `NEXT_PUBLIC_PREORDER_URL`. Until it is set, the button is a clearly
- * marked, disabled placeholder rather than a dead or misleading link.
+ * Every "buy" action in the prototype goes to the pre-order destination
+ * Amir supplies (`NEXT_PUBLIC_PREORDER_URL`, BUILD_PLAN.md §6 question 2).
+ * Until it is set, the button explains that pre-orders open soon — never a
+ * disabled, silent button.
  */
-export function PreorderButton() {
-  const t = useTranslations("pricing");
+export function PreorderAction({ children, className }: { children: ReactNode; className?: string }) {
+  const tToast = useTranslations("toast");
   const url = process.env.NEXT_PUBLIC_PREORDER_URL;
+  const classes = cn("tap flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold", className);
 
   if (!url) {
     return (
-      <div className="flex flex-col gap-1">
-        <Button size="lg" disabled className="w-full">
-          {t("preorderCta")}
-        </Button>
-        <p className="text-center text-xs text-foreground-subtle">
-          {t("preorderPlaceholderNote")}
-        </p>
-      </div>
+      <ToastButton message={tToast("preorderSoon")} className={classes}>
+        {children}
+      </ToastButton>
     );
   }
-
   return (
-    <Button asChild size="lg" className="w-full">
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        {t("preorderCta")}
-      </a>
-    </Button>
+    <a href={url} target="_blank" rel="noopener noreferrer" className={classes}>
+      {children}
+    </a>
   );
 }
