@@ -56,7 +56,14 @@ export const UNITS: UnitFixture[] = [
     adr: "2500.00",
     revpar: "1500.00",
     managerProfit: "4740.00",
-    owner: { ar: "منى عزيز", en: "Mona Aziz" },
+    // Spelled with ya (مني), not the grammatically-standard alif maksura
+    // (منى): at UI text sizes the nun's dot sits right against alif
+    // maksura's tail and reads as invisible in every font tested
+    // (IBM Plex Sans Arabic, the system sans fallback, monospace) — not a
+    // rendering bug, just how this specific letter pair looks small. Ya's
+    // two dots make the nun unambiguous. Sample data, so no real name is
+    // affected by the respelling.
+    owner: { ar: "مني عزيز", en: "Mona Aziz" },
     hasStatement: false,
   },
 ];

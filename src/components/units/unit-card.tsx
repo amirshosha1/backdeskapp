@@ -57,7 +57,9 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
 
       {isManaged && (
         <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="truncate text-xs text-muted">{t("ownerLabel", { name: unit.owner![locale] })}</span>
+          <span className="truncate text-xs leading-snug text-muted">
+            {t("ownerLabel", { name: unit.owner![locale] })}
+          </span>
           {unit.hasStatement ? (
             <Link
               href={`/demo/units/${unit.id}/statement`}
