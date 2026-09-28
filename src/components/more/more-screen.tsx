@@ -35,7 +35,10 @@ export function MoreScreen() {
         <button
           type="button"
           data-testid="more-language"
-          onClick={() => router.replace(pathname, { locale: locale === "ar" ? "en" : "ar" })}
+          onClick={() => {
+            const search = typeof window !== "undefined" ? window.location.search : "";
+            router.replace(`${pathname}${search}`, { locale: locale === "ar" ? "en" : "ar" });
+          }}
           className={`tap ${ROW}`}
         >
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-ink-2">

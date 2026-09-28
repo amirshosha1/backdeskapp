@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { ArrowUpRight, Landmark } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { HeroFigure } from "@/components/common/hero-figure";
@@ -24,6 +24,24 @@ export interface HomeScreenProps {
   coHostView: typeof HOME_COHOST_VIEW;
 }
 
+const VIEW_PARAM = "view";
+const noopSubscribe = () => () => {};
+
+/**
+ * Reads the owner/co-host mode from the URL, not component state, so the
+ * language switch's full navigation (a different locale segment) doesn't
+ * reset it back to owner. A plain reload of the bare "/demo" URL (no query)
+ * still starts from "owner" — e.g. the tap-audit crawler's per-element
+ * reload, which relies on every reload starting from the same state.
+ */
+function readViewFromUrl(): HomeView {
+  try {
+    return new URLSearchParams(window.location.search).get(VIEW_PARAM) === "cohost" ? "cohost" : "owner";
+  } catch {
+    return "owner";
+  }
+}
+
 /**
  * Home (direction A2): the royal hero answers "كم ربحت فعلاً هذا الشهر؟",
  * the units swipe as glass cards at its bottom, quick actions sit under it,
@@ -34,7 +52,28 @@ export function HomeScreen({ period, ownerView, coHostView }: HomeScreenProps) {
   const t = useTranslations("home");
   const tCommon = useTranslations("common");
   const locale = useLocale() as AppLocale;
-  const [view, setView] = useState<HomeView>("owner");
+  // The server (and the pre-hydration client) always render "owner"; once
+  // hydrated, this switches synchronously to whatever the URL says.
+  const urlView = useSyncExternalStore(noopSubscribe, readViewFromUrl, () => "owner" as HomeView);
+  const [manualView, setManualView] = useState<HomeView | null>(null);
+  const view = manualView ?? urlView;
+
+  function setView(next: HomeView) {
+    setManualView(next);
+    try {
+      const url = new URL(window.location.href);
+      if (next === "owner") url.searchParams.delete(VIEW_PARAM);
+      else url.searchParams.set(VIEW_PARAM, next);
+      // A query-string tweak, not a route change: history.replaceState keeps
+      // this off the Next.js router (no re-render of server data, no entry
+      // in back/forward for every toggle) while still being what the
+      // language switch's real navigation carries over.
+      window.history.replaceState(null, "", url);
+    } catch {
+      // Private browsing or a restricted context: the mode just won't persist.
+    }
+  }
+
   const data = view === "owner" ? ownerView : coHostView;
 
   return (
