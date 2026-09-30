@@ -1,7 +1,7 @@
 # PROGRESS — Safi (صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-09-28 (Phase P.1.1 fix pass built).
+> Last updated: 2026-09-29 (Phase 2 benchmark-source decision recorded, docs only; Phase 1 still in progress).
 
 ## Current status
 
@@ -11,6 +11,7 @@
 - **Next step:** Amir reviews the P.1.1 preview on his phone and merges; then Phase **1** (finance engine + live `/demo` calculator). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`.
 - **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link stays hidden until then). The prototype is for Amir's review only until Phase 1 lands — no pre-order push yet.
 - **Deferred to Phase 1 / P.2 (explicitly out of scope for P.1.1):** an editable calculator (Phase 1 wires `/demo/calculator` to the real engine), varied per-unit sample data (Phase 1: every unit and both Home views currently show the same 60% occupancy / 2,500 ADR / 1,500 RevPAR), and live Home updates after saving an expense (Phase P.2: data stays browser-only, nothing is wired to Home yet).
+- **Docs-only, 2026-09-29:** Phase 2's market-benchmark source is now decided (the AirROI API, with the curated CSV as a fallback) and recorded in `docs/BUILD_PLAN.md` §5 and in "Phase 2 pre-decisions" below. Nothing is implemented yet — Phase 1 is still in progress.
 
 ## Phase checklist (in execution order)
 
@@ -23,7 +24,7 @@
 | P.2 — Interactive demo, data in the browser only | Not started |
 | 0a — App shell, i18n, PWA, CI | Not started |
 | 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project |
-| 2 — Free calculator | Not started |
+| 2 — Free calculator | Not started. Benchmark data source decided (AirROI API, 2026-09-29) |
 | 3 — Setup guide, checklists, Setup Kit, minimal `units` table | Not started |
 | ⛔ Validation Gate | Waiting for 20 pre-orders paid by InstaPay (tracked by Amir outside the app) and the exact line `Gate passed: {number} paid pre-orders.` |
 | 5 — ERP core (+ basic team invitations) | Blocked by the gate |
@@ -125,6 +126,16 @@
 - **Copy register:** simple MSA with Egyptian terms (confirmed by Amir). "شقة المدينتي" → "شقة مدينتي". In English, the utilities category is "Utilities" (the Arabic stays "الكهرباء والمياه").
 - **Month-over-month change chip** on Home: a SAMPLE value (+8.4% owner, +5.2% co-host), requested for the design review and not in §4.6. From Phase 1 it comes from real data or is hidden.
 
+### Phase 2 pre-decisions (2026-09-29)
+
+Recorded ahead of the phase starting — a docs-only change, nothing implemented; Phase 1 is still in progress.
+
+- **Market benchmarks are sourced from the AirROI API** (airroi.com), not manual curation alone. Self-serve, pay-per-call, $0.01/call, no monthly minimum. Confirmed coverage so far: New Cairo City, Second New Cairo, Nasr City and Cairo — the remaining launch areas (Rehab, Sheikh Zayed, Sahel, Gouna) and Madinaty specifically are unconfirmed (`docs/BUILD_PLAN.md` §6, question 4).
+- **Architecture:** a scheduled job, not a live per-request call, pulls area-level data into the existing `benchmarks` table (`source = 'api'`, a new enum value alongside `curated` and `aggregated` — §3). Server-side only; the key lives in `AIRROI_API_KEY`, never a `NEXT_PUBLIC_` variable.
+- **`sample_size` doesn't need adding — it's already in the `benchmarks` table** (§3, decided at kickoff on 2026-09-26). What's new: a row with `sample_size` below 30 shows a "عينة محدودة" (limited sample) flag instead of being presented as a solid market figure. This extends CLAUDE.md §2's existing rule (no benchmark without a real, cited source) — a thin AirROI sample is still real and cited, just flagged as thin rather than hidden or shown as SAMPLE. An area with no benchmark data at all (neither AirROI nor curated) still hides the feature entirely, per the existing rule.
+- **Madinaty may have no direct AirROI coverage as a standalone area.** Confirm against the live API before building Phase 2; fall back to the wider compound/city area AirROI does cover, or hide the benchmark for Madinaty units, per the hide-if-no-data rule.
+- `data/seed/benchmarks.csv` (manually curated) is downgraded from "the" benchmark source to a fallback for areas AirROI doesn't cover; Amir's prep checklist in §0 is updated accordingly, and a new checklist item asks for an AirROI account and API key.
+
 ### Phase P.1.1 decisions (2026-09-28)
 
 - **Break-even now includes the maintenance/irregular allowance by default.** Amir's review found the Home tile claiming Sheikh Zayed "needs about one more night" to break even, when at 19 booked nights (one more than the fixture's 18) the unit still loses 788.50 — the excluded-by-default figure (18.99 nights) understated what a host actually needs. **New rule:** break-even's `fixed_costs` include the monthly maintenance/irregular allowance (e.g. repairs) by default; a per-scenario toggle excludes it. Verified by script: fixed 39,900 (35,000 rent + 2,500 utilities + 600 internet + 1,000 compound + 800 repairs) ÷ contribution 2,058.50 = 19.38 nights (64.6%; 20 whole nights, rounded up since a fractional night doesn't clear the line = 66.7%); excluded, fixed drops to 39,100 → 18.99 nights (63.3%, kept as "Example B2"). `docs/BUILD_PLAN.md` §4.3 and Example B/B2 updated; Phase 1 must implement these values. The UI (calculator) shows the included-by-default figure as the primary result, with the excluded variant as a secondary line; Home's compact tile shows only the primary figure (18 booked, break-even at 20 nights, needs about 2 more).
@@ -212,6 +223,7 @@
   - Does Serwist work with the current Next.js bundler? (Phase 0a — not yet checked)
   - ~~Does IBM Plex Sans Arabic, as served, expose tabular numerals?~~ **Resolved in Phase P:** yes for Western digits (the default); Arabic-Indic digits are not tabular — see "Phase P build notes" above.
   - ~~Format Western digits in Arabic with `ar-EG-u-nu-latn`.~~ **Resolved in Phase P:** confirmed and implemented in `src/lib/format/`.
+- **AirROI coverage to confirm before Phase 2:** whether Madinaty has standalone coverage (it may not — fall back to a wider area or hide the benchmark), and coverage for the other launch-area presets (Rehab, Sheikh Zayed, Sahel, Gouna). Only New Cairo City, Second New Cairo, Nasr City and Cairo are confirmed so far. See "Phase 2 pre-decisions" above and `docs/BUILD_PLAN.md` §6, question 4.
 - **Invited users and personal orgs (decide in Phase 5):** users who join through an invitation should not get an auto-created personal org. The Phase 0b sign-up trigger creates one for every new user, so Phase 5 must change that behaviour in a new migration (migrations are forward-only). Options to weigh then: (a) the trigger skips the personal org when a valid invitation exists for the email; (b) the personal org is created lazily, on the first sign-in of a user who belongs to no org. To keep that change small, Phase 0b should put org creation in its own database function.
 - **Identical sample KPIs:** every unit, and both Home views, show 60% occupancy, 2,500 ADR and 1,500 RevPAR (see "Fixture design" below). Closed in Phase 1 when the engine produces varied sample data.
 - **`DataWarning`** (`src/components/common/data-warning.tsx`) is unused: no fixture has booked nights above available nights. Phase 1 wires it to the engine's `availability_conflict` warning.
