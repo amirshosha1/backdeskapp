@@ -1,7 +1,7 @@
 # PROGRESS — Safi (صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-09-29 (Phase 2 benchmark-source decision recorded, docs only; Phase 1 still in progress).
+> Last updated: 2026-09-30 (Phase 2 benchmark design revised to area medians with regional roll-up, docs only; Phase 1 still in progress).
 
 ## Current status
 
@@ -9,7 +9,7 @@
 - **Phase P.1 (prototype fixes and redesign) is built** on branch `claude/phase-p-clickable-prototype-wxl8za` and opened as a pull request: tap audit (no silent taps, enforced by an e2e crawler), design direction A2 on every screen, an expense-details screen, the Arabic/English switch, the Arabic copy pass, and bidi/404/safe-area fixes. Lint, typecheck, 88 unit/component tests and 55 e2e tests pass. See "Phase P.1 decisions" and "Phase P.1 build notes" below.
 - **Next step:** Amir reviews the P.1 preview on his phone and merges; then Phase **1** (finance engine + live `/demo` calculator). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`.
 - **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link stays hidden until then). The prototype is for Amir's review only until Phase 1 lands — no pre-order push yet.
-- **Docs-only, 2026-09-29:** Phase 2's market-benchmark source is now decided (the AirROI API, with the curated CSV as a fallback) and recorded in `docs/BUILD_PLAN.md` §5 and in "Phase 2 pre-decisions" below. Nothing is implemented yet — Phase 1 is still in progress.
+- **Docs-only, 2026-09-29 and 2026-09-30:** Phase 2's benchmark design is decided. Benchmarks are area medians from the AirROI API, refreshed quarterly and rolled up through a `regions` hierarchy, with `curated` own-portfolio rows taking precedence. It is recorded in `docs/BUILD_PLAN.md` §3, §5 and §6, and in "Phase 2 decision revision (2026-09-30)" below, which supersedes the AirROI parts of the 2026-09-29 pre-decisions. Nothing is implemented yet: Phase 1 is still in progress, and two pre-build gates (coverage spike, licensing) come first.
 
 ## Phase checklist (in execution order)
 
@@ -22,7 +22,7 @@
 | P.2 — Interactive demo, data in the browser only | Not started |
 | 0a — App shell, i18n, PWA, CI | Not started |
 | 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project |
-| 2 — Free calculator | Not started. Benchmark data source decided (AirROI API, 2026-09-29) |
+| 2 — Free calculator | Not started. Benchmark design decided (AirROI area medians with regional roll-up, revised 2026-09-30); pre-build gates pending |
 | 3 — Setup guide, checklists, Setup Kit, minimal `units` table | Not started |
 | ⛔ Validation Gate | Waiting for 20 pre-orders paid by InstaPay (tracked by Amir outside the app) and the exact line `Gate passed: {number} paid pre-orders.` |
 | 5 — ERP core (+ basic team invitations) | Blocked by the gate |
@@ -124,9 +124,42 @@
 - **Copy register:** simple MSA with Egyptian terms (confirmed by Amir). "شقة المدينتي" → "شقة مدينتي". In English, the utilities category is "Utilities" (the Arabic stays "الكهرباء والمياه").
 - **Month-over-month change chip** on Home: a SAMPLE value (+8.4% owner, +5.2% co-host), requested for the design review and not in §4.6. From Phase 1 it comes from real data or is hidden.
 
+### Phase 2 decision revision (2026-09-30)
+
+Decided, not implemented: a docs-only change while Phase 1 is still in progress. **This supersedes the AirROI parts of "Phase 2 pre-decisions (2026-09-29)" below**, and where the two conflict, this section wins.
+
+- **Goal:** the calculator needs a reference average for any area in Egypt, not a listing-level dataset. Benchmarks become a small lookup table of medians, refreshed quarterly, over a new geographic hierarchy (`docs/BUILD_PLAN.md` §3 and §5, Phase 2 scope).
+- **Data model (`docs/BUILD_PLAN.md` §3):**
+  - **New `regions` table:** `name_ar`, `name_en`, `level` (area, city, governorate, national), `parent_id` (null only for `national`), `is_seasonal`, `peak_months`. A `city`-level parent may be a tourism region such as الساحل الشمالي.
+  - **`benchmarks` revised, reconciled column by column against the existing shape:**
+    - Kept: `bedrooms` (now defined as 0 = studio … 4 = 4+), `sample_size` (already existed; nothing added), `source` (already `curated`/`api`/`aggregated`; nothing added), `as_of` (now defined as the period the figures describe).
+    - Added: `region_id` (→ `regions`), `season` (annual, peak, off_peak), `adr_median`, `occupancy_median`, `annual_revenue_median`, `currency`, `fetched_at`, and a unique key `(region_id, bedrooms, season, source)`.
+    - Replaced: the free-text `area_code` and `city` by `region_id`; the long format (`metric` + `p50`) by the wide `*_median` columns.
+    - Dropped: `p25` and `p75`, because only medians are stored, never means.
+    - Types follow CLAUDE.md §6.2 (`numeric(14,2)` for money, `numeric(7,4)` for occupancy). These are global reference tables, so they have no `org_id`; RLS is enabled, only the service role writes, and `benchmarks` is read only by server-side, entitlement-checked code. That last point is my addition, to keep them consistent with CLAUDE.md §6.4–6.5.
+- **Lookup rule:** start at the user's region, bedroom count and `annual` season. Pick by source precedence and ignore rows older than 12 months. If there is no row, or `sample_size < MIN_SAMPLE` (config, default 30), move to the parent region. At `national`, use the row regardless of sample size. If nothing is found at any level, hide the benchmark. The result carries `resolved_level`, `resolved_region_name` and `sample_size`.
+- **Source precedence, including where `aggregated` goes:** `curated` → `aggregated` → `api`. The spec fixed curated first and api after it, and left `aggregated` for me to place from its existing definition. That definition (Phase 9) is anonymized, real booked performance from opted-in orgs' Safi ledgers, with at least 5 units per cell. It is first-party actuals like `curated`, but not verified by hand, so it sits between the two. It doesn't exist until after launch, so this ordering has no effect in Phase 2.
+- **UI:** label the resolved level when it differs from the one requested ("بناءً على متوسط <region>"). "عينة محدودة" only at the national fallback. For seasonal regions, the annual headline sits alongside peak and off-peak figures when those rows exist.
+- **Pre-build gates — results pending, to be recorded here before any implementation:**
+  - **Coverage spike:** one AirROI request each for Madinaty, New Cairo, North Coast and Hurghada. Record the sample sizes and whether market-level summary endpoints exist. *Not run yet.*
+  - **Licensing:** confirm AirROI's terms allow storing and displaying derived medians. *Not checked yet.*
+- **Changed from 2026-09-29, point by point:**
+  1. *"A scheduled job … pulls area-level data"* (frequency unset) → **quarterly job or manual trigger; no daily schedule.** Prefer market-level summary endpoints; if only listing-level data exists, compute medians in memory and persist only aggregated rows.
+  2. *No rule on listing data* → **raw listings are never stored.** This rule is new.
+  3. *"A row with `sample_size` below 30 shows 'عينة محدودة'"* (on any row) → **roll-up replaces the flag.** A thin row sends the lookup to the parent region, and the flag appears only at the national fallback.
+  4. *"Madinaty: confirm coverage; fall back to the wider area or hide"* → **Madinaty is in the coverage spike, and an uncovered or thin area rolls up automatically.** It is hidden only if no level, national included, has a row.
+  5. *"`benchmarks.csv` … a fallback for areas AirROI doesn't cover"* → **`curated` rows (verified own-portfolio performance) take precedence everywhere** and act as a sanity check on API figures.
+  6. *"Confirmed coverage: New Cairo City, Second New Cairo, Nasr City and Cairo"* → **treated as unverified until the coverage spike records actual sample sizes.** The seed's priority list is new: Madinaty, New Cairo, Sheikh Zayed, 6th of October, North Coast, Ain Sokhna, Hurghada, El Gouna, Sharm El Sheikh, Alexandria.
+  7. *`docs/BUILD_PLAN.md` §6 question 4 (confirm coverage for Rehab, Sheikh Zayed, Sahel, Gouna and Madinaty)* → **replaced by the two pre-build gates.** Questions 10–13 are new (calibrating `MIN_SAMPLE`, the returned currency and FX source, peak months, market-level summaries).
+- **Unchanged from 2026-09-29:** AirROI is the API source (self-serve, $0.01/call, no monthly minimum). `AIRROI_API_KEY` stays server-only and is never a `NEXT_PUBLIC_` variable. Rows use `source = 'api'`. The hide-if-no-data rule stands.
+- **Raised while reconciling; needs Amir's decision (`docs/BUILD_PLAN.md` §6, questions 14–15):**
+  - **Question 14 (fall-through):** as written, the lookup checks only the top-precedence row at each level. A small `curated` own-portfolio row, which will almost always have `sample_size < 30`, would then force a roll-up to the parent region even when the same area has a solid `api` row. Recommended change: try the next source at the same level before rolling up. The spec is recorded as written until you decide.
+  - **Question 15 (setup cost):** the revised `benchmarks` has no setup-cost column (the old long format could hold one, and §0's `benchmarks.csv` listed setup-cost figures). Recommended default: setup-cost references come from Phase 3's inventory budget planner.
+  - **FX display:** "convert at display" has to respect CLAUDE.md §6.3 (no implicit or automatic FX). Question 11's default shows figures in the returned currency, labelled, until an explicit rate source is chosen.
+
 ### Phase 2 pre-decisions (2026-09-29)
 
-Recorded ahead of the phase starting — a docs-only change, nothing implemented; Phase 1 is still in progress.
+Recorded ahead of the phase starting — a docs-only change, nothing implemented; Phase 1 is still in progress. **The AirROI parts are superseded by "Phase 2 decision revision (2026-09-30)" above**; kept here as history.
 
 - **Market benchmarks are sourced from the AirROI API** (airroi.com), not manual curation alone. Self-serve, pay-per-call, $0.01/call, no monthly minimum. Confirmed coverage so far: New Cairo City, Second New Cairo, Nasr City and Cairo — the remaining launch areas (Rehab, Sheikh Zayed, Sahel, Gouna) and Madinaty specifically are unconfirmed (`docs/BUILD_PLAN.md` §6, question 4).
 - **Architecture:** a scheduled job, not a live per-request call, pulls area-level data into the existing `benchmarks` table (`source = 'api'`, a new enum value alongside `curated` and `aggregated` — §3). Server-side only; the key lives in `AIRROI_API_KEY`, never a `NEXT_PUBLIC_` variable.
@@ -201,7 +234,7 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
   - Does Serwist work with the current Next.js bundler? (Phase 0a — not yet checked)
   - ~~Does IBM Plex Sans Arabic, as served, expose tabular numerals?~~ **Resolved in Phase P:** yes for Western digits (the default); Arabic-Indic digits are not tabular — see "Phase P build notes" above.
   - ~~Format Western digits in Arabic with `ar-EG-u-nu-latn`.~~ **Resolved in Phase P:** confirmed and implemented in `src/lib/format/`.
-- **AirROI coverage to confirm before Phase 2:** whether Madinaty has standalone coverage (it may not — fall back to a wider area or hide the benchmark), and coverage for the other launch-area presets (Rehab, Sheikh Zayed, Sahel, Gouna). Only New Cairo City, Second New Cairo, Nasr City and Cairo are confirmed so far. See "Phase 2 pre-decisions" above and `docs/BUILD_PLAN.md` §6, question 4.
+- **Phase 2 benchmark pre-build gates (before any implementation):** (1) the AirROI coverage spike, one request each for Madinaty, New Cairo, North Coast and Hurghada, recording sample sizes and whether market-level summary endpoints exist; (2) confirmation that AirROI's terms allow storing and displaying derived medians. Record both results in "Phase 2 decision revision (2026-09-30)" above. Two decisions are also pending from Amir: lookup fall-through (question 14) and where setup-cost references live (question 15) — see `docs/BUILD_PLAN.md` §6.
 - **Invited users and personal orgs (decide in Phase 5):** users who join through an invitation should not get an auto-created personal org. The Phase 0b sign-up trigger creates one for every new user, so Phase 5 must change that behaviour in a new migration (migrations are forward-only). Options to weigh then: (a) the trigger skips the personal org when a valid invitation exists for the email; (b) the personal org is created lazily, on the first sign-in of a user who belongs to no org. To keep that change small, Phase 0b should put org creation in its own database function.
 - **Identical sample KPIs:** every unit, and both Home views, show 60% occupancy, 2,500 ADR and 1,500 RevPAR (see "Fixture design" below). Closed in Phase 1 when the engine produces varied sample data.
 - **`DataWarning`** (`src/components/common/data-warning.tsx`) is unused: no fixture has booked nights above available nights. Phase 1 wires it to the engine's `availability_conflict` warning.
