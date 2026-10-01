@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { ArrowUpRight, Landmark } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Landmark } from "lucide-react";
+import { DataWarning } from "@/components/common/data-warning";
 import { useLocale, useTranslations } from "next-intl";
 import { HeroFigure } from "@/components/common/hero-figure";
 import { ListRow } from "@/components/common/list-row";
@@ -95,13 +96,24 @@ export function HomeScreen({ period, ownerView, coHostView }: HomeScreenProps) {
         <p className="mt-8 text-center text-xs text-white/55">{period[locale]}</p>
         <h1 className="mt-1 text-center text-[0.9375rem] font-normal text-white/80">{t("heroQuestion")}</h1>
         <HeroFigure amount={data.heroTotal} className="mt-3" />
-        <div className="mt-4 flex justify-center">
-          <span className="glass inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[0.8125rem]">
-            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-            <Percent ratio={data.change.ratio} signDisplay="always" className="font-semibold" />
-            {t("changeVsLastMonth")}
-          </span>
-        </div>
+        {/* Computed by the engine from last month's sample data; null (hidden)
+            when last month was zero or a loss, where a percentage misleads. */}
+        {data.change !== null && (
+          <div className="mt-4 flex justify-center">
+            <span
+              className="glass inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[0.8125rem]"
+              data-testid="change-chip"
+            >
+              {data.change >= 0 ? (
+                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <ArrowDownRight className="h-4 w-4" aria-hidden="true" />
+              )}
+              <Percent ratio={data.change} signDisplay="always" capAt100={false} className="font-semibold" />
+              {t("changeVsLastMonth")}
+            </span>
+          </div>
+        )}
 
         <dl className="mt-6 grid grid-cols-3 gap-2">
           {[
@@ -120,6 +132,7 @@ export function HomeScreen({ period, ownerView, coHostView }: HomeScreenProps) {
       </RoyalHero>
 
       <div className="flex flex-col gap-8 px-4 pt-6">
+        {data.availabilityConflict && <DataWarning message={tCommon("dataWarningOccupancy")} />}
         <QuickActions view={view} />
 
         {view === "owner" ? (
@@ -131,6 +144,7 @@ export function HomeScreen({ period, ownerView, coHostView }: HomeScreenProps) {
               nightsShort={ownerView.breakEven.nightsShort}
               progress={ownerView.breakEven.progress}
               reached={ownerView.breakEven.reached}
+              basis={ownerView.breakEven.basis}
             />
             <TopExpenses items={ownerView.topExpenses} />
           </>
