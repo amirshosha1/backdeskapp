@@ -42,6 +42,7 @@ export function PlanCard({ plan }: { plan: PlanFixture }) {
       </div>
 
       <ul className="mt-4 flex flex-col gap-2 text-sm">
+        {plan.priceMonthly && <li className="text-xs font-medium text-muted">{t("everythingInPrevious")}</li>}
         {plan.features.map((feature) => (
           <li key={feature.en} className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />

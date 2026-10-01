@@ -40,7 +40,10 @@ export function AmountKeypad({ value, onChange, invalid, describedBy }: AmountKe
           value={value}
           // Sized to its digits so the currency label stays beside them.
           style={{ width: `${Math.max(1, value.length) + 0.25}ch` }}
-          onChange={(event) => onChange(event.target.value.replace(/[^0-9.]/g, ""))}
+          // Kept permissive here — Arabic-Indic/Persian digits and Arabic
+          // separators pass through unchanged; `parseAmount` (src/lib/format/)
+          // is the one place that normalizes and validates the result.
+          onChange={(event) => onChange(event.target.value.replace(/[^0-9٠-٩۰-۹.,٫٬-]/g, ""))}
           className={cn(
             "tabular-nums-money max-w-[calc(100vw-7rem)] border-none bg-transparent text-center text-[3.5rem] leading-none font-medium tracking-tight outline-none placeholder:text-fill-strong",
             invalid && "text-loss",

@@ -48,6 +48,7 @@ export function UnitCarousel({ units, label }: { units: UnitFixture[]; label: st
               key={unit.id}
               href="/demo/units"
               data-testid="unit-card"
+              aria-label={`${unit.name[locale]} — ${tModel(unit.operatingModel)}`}
               className="glass tap flex w-[calc(100%-3rem)] shrink-0 flex-col rounded-card p-4"
             >
               <span className="flex items-center gap-3">

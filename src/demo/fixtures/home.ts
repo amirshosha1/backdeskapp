@@ -30,14 +30,20 @@ export const HOME_OWNER_VIEW = {
   breakEven: {
     unitName: { ar: "شقة الشيخ زايد", en: "Sheikh Zayed apartment" } as Localized,
     bookedNights: 18,
-    breakEvenNights: "18.99",
+    // BUILD_PLAN.md §4.3 (decided 2026-09-28): break-even includes the
+    // monthly maintenance/irregular allowance by default. 18.99 is the
+    // excluded-toggle variant (Example B2), shown as the secondary figure
+    // on the calculator; Home shows only the primary (included) figure.
+    breakEvenNights: "19.38",
     availableNights: 30,
     reached: false,
     // Display values derived by hand from the two above (the engine provides
-    // them from Phase 1): 18.99 shown as ~19, one night short, 18 / 18.99.
-    targetNights: 19,
-    nightsShort: 1,
-    progress: 0.948,
+    // them from Phase 1): a night isn't divisible, so the target rounds up
+    // (19.38 → 20), not to the nearest night — at 19 nights the unit still
+    // loses money. 20 − 18 booked = 2 nights short.
+    targetNights: 20,
+    nightsShort: 2,
+    progress: 0.929,
   },
   // Top three of the month's 50,800.00 of expenses (see EXPENSE_BREAKDOWN).
   topExpenses: [

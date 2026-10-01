@@ -35,10 +35,33 @@ describe("<AddExpenseScreen />", () => {
   it("never taps silently: Save says what's missing", () => {
     renderScreen();
     fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("أدخل المبلغ أولًا");
+    expect(screen.getByRole("alert")).toHaveTextContent("أدخل المبلغ");
     typeAmount("120");
     fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
     expect(screen.getByRole("alert")).toHaveTextContent("اختر فئة المصروف");
+  });
+
+  it("shows a distinct message for an invalid amount, never the empty-amount message", () => {
+    renderScreen();
+    typeAmount("12.5.5");
+    fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("المبلغ غير صحيح، اكتب أرقامًا فقط");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("أدخل المبلغ");
+  });
+
+  it("shows a distinct message for a zero amount", () => {
+    renderScreen();
+    typeAmount("0");
+    fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("المبلغ يجب أن يكون أكبر من صفر");
+  });
+
+  it("accepts an Arabic-Indic amount with an Arabic decimal separator", () => {
+    renderScreen();
+    typeAmount("٥٠٠");
+    fireEvent.click(screen.getByRole("radio", { name: RECENT_CATEGORIES[0]!.name.ar }));
+    fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
+    expect(screen.getByText("تم حفظ المصروف (تجريبيًا)")).toBeInTheDocument();
   });
 
   it("preselects the default unit and lets the unit be changed from a sheet", () => {
