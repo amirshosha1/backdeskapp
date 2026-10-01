@@ -202,6 +202,7 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
         </p>
 
         <ChoiceGroup
+          onPage
           label={t("presetsLabel")}
           value={activePreset?.id ?? null}
           options={presets.map((p) => ({ value: p.id, label: t(`presets.${p.id}`) }))}
@@ -294,7 +295,9 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
           {count(
             "bookedNights",
             "nights",
-            occupancy &&
+            // Only for a valid entry: under an invalid field, the last valid occupancy would mislead.
+            !stale &&
+              occupancy &&
               t("occupancyHint", {
                 occupancy: pct(occupancy),
                 available: formatNumber(result.nightsAvailable, { locale, decimals: 0 }),

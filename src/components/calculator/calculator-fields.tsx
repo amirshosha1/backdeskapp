@@ -150,12 +150,15 @@ export function ChoiceGroup<T extends string>({
   value,
   options,
   onChange,
+  onPage,
   className,
 }: {
   label: string;
   value: T | null;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
+  /** On the white page (not inside a grey card): unselected chips take the grey fill so they read as buttons. */
+  onPage?: boolean;
   className?: string;
 }) {
   return (
@@ -171,7 +174,7 @@ export function ChoiceGroup<T extends string>({
             onClick={() => onChange(option.value)}
             className={cn(
               "tap min-h-10 rounded-full px-4 py-2 text-sm font-medium",
-              checked ? "bg-brand text-white" : "bg-page text-ink",
+              checked ? "bg-brand text-white" : onPage ? "bg-fill text-ink" : "bg-page text-ink",
             )}
           >
             {option.label}
