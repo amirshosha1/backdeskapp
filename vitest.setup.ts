@@ -10,4 +10,7 @@ afterEach(cleanup);
 // jsdom's `window.location` is one instance per file, not per test — without
 // this, a component that reads/writes the URL (e.g. Home's `?view=` query
 // param) leaks it into the next test in the same file.
-afterEach(() => window.history.replaceState(null, "", "/"));
+// Finance-engine tests opt into the faster `node` environment, which has no window.
+afterEach(() => {
+  if (typeof window !== "undefined") window.history.replaceState(null, "", "/");
+});
