@@ -28,6 +28,25 @@ const config = [
       ],
     },
   },
+  {
+    // CLAUDE.md §6.5: the 12-month projection never ships to a client.
+    // `import "server-only"` makes `next build` fail if a client module
+    // imports it; this rule catches it earlier, in UI and demo code.
+    files: ["src/components/**", "src/demo/**", "src/lib/format/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/finance/projection", "**/finance/projection"],
+              message: "projection.ts is server-only (CLAUDE.md §6.5); call it from server code.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default config;
