@@ -20,12 +20,13 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 - [ ] Google Cloud OAuth client — whenever convenient; Google sign-in stays off by config until then
 - [ ] Paymob merchant account — start verification early; not needed until the pre-launch payments phase
 - [ ] Anthropic API key (needed from Phase 8)
+- [ ] AirROI account and API key (airroi.com) — needed for Phase 2's benchmark feature (a quarterly refresh plus a small pre-build coverage spike); self-serve, pay-per-call, $0.01/call, no monthly minimum (see Phase 2 scope in §5)
 - [ ] Supabase prod project on a paid plan — only before launch
 
 ### Data to prepare
 - [ ] `data/seed/inventory.csv` — your 81-item list with columns: `code, name_ar, name_en, category, tier (economy|mid|premium), qty_per_unit, unit_cost_min, unit_cost_max, useful_life_months, supplier_name, notes` (Phase 3)
 - [ ] `data/samples/airbnb_earnings.csv` — a real Airbnb earnings export with guest names deleted (Phase 6)
-- [ ] `data/seed/benchmarks.csv` — ADR, occupancy and setup-cost figures you trust per area, each with source and date
+- [ ] `data/seed/benchmarks.csv` — verified performance of your own portfolio (median ADR, occupancy and annual revenue per area and bedroom count, each with its period and source). Imported as `curated` benchmark rows, which take precedence over AirROI figures and act as a sanity check on them (Phase 2 scope in §5, revised 2026-09-30)
 - [ ] Prices in EGP for Solo, Pro and Business (monthly and annual), the Setup Kit, and the founding-member terms — needed before the pre-order campaign starts (after Phase P)
 
 ### How to run the build
@@ -124,7 +125,8 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 | `owner_grants` | owner access: `owner_party_id`, `email`, `user_id` (set after the owner signs in), `created_by`, `revoked_at`. Grants read access to **finalized** statements of units whose agreement names that owner, and nothing else. |
 | `period_locks` | `org_id`, `unit_id`, `month` |
 | `alerts` | `unit_id`, `type`, `severity`, `payload` jsonb, `read_at` |
-| `benchmarks` | `area_code`, `city`, `bedrooms`, `metric`, `p25`, `p50`, `p75`, `sample_size`, `source` (curated, aggregated), `as_of` |
+| `regions` | geographic hierarchy for benchmark roll-up: `name_ar`, `name_en`, `level` (area, city, governorate, national), `parent_id` (→ `regions`; null only for `national`), `is_seasonal` (true for coastal and resort regions), `peak_months` (smallint[], seasonal regions only). A `city`-level parent may be a tourism region (e.g. الساحل الشمالي) rather than an administrative city. Global reference data — see the design note below the table. |
+| `benchmarks` | one row per region × bedrooms × season × source: `region_id` (→ `regions`), `bedrooms` (0 = studio, 1, 2, 3, 4 = 4+), `season` (annual, peak, off_peak; `peak`/`off_peak` only for seasonal regions), `adr_median`, `occupancy_median` (0–1), `annual_revenue_median` (`annual` rows only), `currency`, `sample_size`, `source` (curated, api — e.g. AirROI, aggregated), `as_of` (the period the figures describe), `fetched_at` (when the row was written). Unique key `(region_id, bedrooms, season, source)`. Medians only, never arithmetic means. |
 | `calculator_presets` | default assumptions per area, each with `source` and a `is_sample` flag |
 | `inventory_templates` | imported from `data/seed/inventory.csv` |
 | `unit_checklist_progress` | `unit_id`, `item_id`, `done_at`, `actual_cost` |
@@ -135,6 +137,11 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 - Readable by the org's `owner` and `admin` roles.
 - Personal-data columns are listed in one registry (e.g. `profiles.full_name`, `parties.name`, `parties.phone`, `owner_grants.email`).
 - On account or party deletion, a service-role-only function removes those keys from `before` and `after` and sets `redacted_at`. That is the only permitted modification.
+
+**`regions` and `benchmarks` design (built in Phase 2; revised 2026-09-30):**
+- Both are global reference data, not org data, so they carry no `org_id`. RLS is still enabled (CLAUDE.md §6.4); only the service role writes them (the seed and the refresh job). `benchmarks` is read only by server-side, entitlement-checked code, never by a Free client (CLAUDE.md §6.5).
+- Column types follow CLAUDE.md §6.2: `adr_median` and `annual_revenue_median` are `numeric(14,2)`, `occupancy_median` is `numeric(7,4)`, and `currency` is `char(3)` as returned by the source (converted only at display, with an explicit rate — see §6).
+- Changes from the earlier `benchmarks` shape: `region_id` replaces the free-text `area_code` and `city`; the long format (`metric` plus `p25`/`p50`/`p75`) becomes one row per region × bedrooms × season × source with the medians as columns (`p50` → `adr_median`/`occupancy_median`/`annual_revenue_median`; `p25`/`p75` are dropped because only medians are stored); `season`, `currency` and `fetched_at` are new. `bedrooms`, `sample_size`, `source` and `as_of` are kept.
 
 ---
 
@@ -446,7 +453,22 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 - Results: monthly and annual net profit, margin, break-even occupancy and ADR, payback months, cash-on-cash, 3 × 3 sensitivity grid, and a plain-language verdict generated by rules, not AI (e.g. "Profitable above 63% occupancy").
 - Paid teasers: 12-month projection and area benchmark as blurred **placeholder** visuals with an "Unlock with Pro" call to action. The real projection and benchmarks are computed only on the server, for paid orgs.
 - Defaults from `calculator_presets`, editable, each labelled SAMPLE until a source is supplied.
-- Curated benchmarks: import `data/seed/benchmarks.csv` (each figure with source and date) into `benchmarks`, so the paid comparison has data at launch. Aggregated benchmarks come after launch (Phase 9). Benchmark rows without a source are never shown to paying users; if the file has no sourced figures at launch, the benchmark feature (paid comparison and Free teaser) is hidden instead of showing SAMPLE data.
+- **Benchmarks: area medians from the AirROI API, with regional roll-up** (decided 2026-09-29, revised 2026-09-30; not yet implemented while Phase 1 is in progress). The calculator needs a reference average for any area in Egypt, not a listing-level dataset: `benchmarks` is a small lookup table of medians over `regions` (§3), refreshed quarterly. AirROI is self-serve and pay-per-call ($0.01/call, no monthly minimum).
+  - **Pre-build gates** (record the results in `docs/PROGRESS.md` before any implementation):
+    - **Coverage spike:** one AirROI request each for Madinaty, New Cairo, North Coast and Hurghada. Record the sample sizes returned and whether market-level summary endpoints exist.
+    - **Licensing:** confirm AirROI's terms allow storing and displaying derived medians.
+  - **Refresh:** a quarterly low-frequency job or a manual trigger; no daily schedule. Prefer AirROI's market-level summary endpoints. If only listing-level data is available, compute medians in memory and persist only the aggregated rows, never raw listings. Upsert on the unique key and set `as_of` and `fetched_at`. `AIRROI_API_KEY` stays server-only, never a `NEXT_PUBLIC_` variable, and the client never calls AirROI.
+  - **Seed:** `regions` from national → governorates → priority cities/regions → priority areas. Initial priority list: Madinaty, New Cairo, Sheikh Zayed, 6th of October, North Coast, Ain Sokhna, Hurghada, El Gouna, Sharm El Sheikh, Alexandria. Expand after the coverage spike.
+  - **Curated data:** verified own-portfolio performance is entered as `curated` rows (from `data/seed/benchmarks.csv`). These take precedence and act as a sanity check on API figures.
+  - **Lookup rule** (server-only module):
+    1. Start at the user's region, bedroom count and season `annual`.
+    2. Pick the candidate row by source precedence: `curated`, then `aggregated`, then `api`. Ignore rows whose `as_of` is older than 12 months. `aggregated` (anonymized performance from opted-in orgs, minimum 5 units per cell — Phase 9) sits between the two because it is real booked performance computed from Safi ledgers, like `curated`, but not verified by hand; it doesn't exist until after launch.
+    3. If there is no row, or its `sample_size` is below `MIN_SAMPLE` (a config constant, default 30), move to the parent region with the same bedroom count and repeat.
+    4. At `national`, use the row regardless of sample size.
+    5. If nothing is found at any level, hide the benchmark (the existing hide-if-no-data rule; never SAMPLE data in its place).
+    6. Return the figures plus `resolved_level`, `resolved_region_name` and `sample_size`.
+  - **UI:** when the resolved level differs from the requested one, label it (e.g. "بناءً على متوسط <region>"). Show "عينة محدودة" only when the resolved row's `sample_size` is below `MIN_SAMPLE`, which can only happen at the national fallback. For seasonal regions the `annual` row drives the headline figure; peak and off-peak ADR and occupancy are shown alongside when those rows exist.
+  - **Removed from the 2026-09-29 plan:** a scheduled job of unset frequency (now quarterly or manual, and never daily) and any listing-level storage. The standalone "sample size below 30" flag on any row is replaced by the roll-up rule; the flag now appears only at the national fallback. Madinaty no longer needs a special fallback decision: an uncovered or thin area rolls up to its parent automatically.
 - Saving a scenario requires sign-up (the conversion moment); the browser draft is then saved to the user's org. Free keeps 1 saved scenario.
 - **Share card:** a generated image (OG image route) of the headline results with branding, designed for host WhatsApp and Facebook groups. Sensitive inputs hidden by default.
 - Analytics events: `calculator_started`, `step_completed`, `results_viewed`, `teaser_clicked`, `scenario_saved`, `share_clicked`.
@@ -456,6 +478,11 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 - [ ] Results match the finance-engine outputs for the Example A and B inputs (e2e test).
 - [ ] Network inspection and a bundle check show no paid data and no projection or benchmark code in the Free client.
 - [ ] An anonymous user who signs up keeps the draft scenario, now saved to the org.
+- [ ] Any seeded region returns a benchmark via roll-up, and the UI shows the resolved level.
+- [ ] All stored figures are medians; no raw listing data exists in the database.
+- [ ] Seasonal regions display peak and off-peak figures when available.
+- [ ] Rows with `as_of` older than 12 months are never used.
+- [ ] "عينة محدودة" appears only when the resolved row's `sample_size` is below `MIN_SAMPLE` (the national fallback); when no level has a row, the benchmark is hidden rather than showing SAMPLE data.
 
 ### Phase 3 — Setup guide, checklists and Setup Kit
 **Scope**
@@ -593,14 +620,22 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 1 | Domain for Safi (Resend sending domain, production URLs) | Phase 0b | Dev sign-in emails reach only Amir's own address |
 | 2 | Where the prototype's pre-order button goes (e.g. a WhatsApp number or a form) | Phase P | Placeholder link, clearly marked |
 | 3 | Prices for Solo, Pro and Business (monthly, annual), the Setup Kit, and founding-member terms | Pre-order campaign (after Phase P) | SAMPLE prices in the prototype |
-| 4 | Launch areas for presets (e.g. Madinaty, Rehab, New Cairo, Sheikh Zayed, Sahel, Gouna) and the source for each default | Phase 2 | — |
+| 4 | Phase 2 benchmark pre-build gates: the AirROI coverage spike (Madinaty, New Cairo, North Coast, Hurghada) and confirmation that AirROI's terms allow storing and displaying derived medians (see Phase 2 scope in §5) | Phase 2 implementation | — (a gate, not a default: nothing is built until both results are recorded) |
 | 5 | Is `inventory.csv` ready in the specified columns? | Phase 3 | — |
 | 6 | Paymob account status; is recurring card billing enabled? | Phase 4 | Manual-renewal fallback |
 | 7 | Real Airbnb earnings CSV sample (guest names removed) | Phase 6 | — |
 | 8 | Speech-to-text provider | Phase 8 | — |
 | 9 | WhatsApp Business API number | Phase 9 (post-launch) | — |
+| 10 | Calibrate `MIN_SAMPLE` after the first data pull; 30 may push most areas up to governorate level | Phase 2 (after the first pull) | 30 |
+| 11 | Which currency AirROI returns, and which FX rate source to use for display conversion | Phase 2 | Show figures in the currency returned, clearly labelled, until an explicit rate source is chosen (CLAUDE.md §6.3: no implicit FX) |
+| 12 | Peak months for each seasonal region | Phase 2 (seed) | That region shows its `annual` row only |
+| 13 | Does AirROI offer market-level summaries? This determines the refresh design | Phase 2 (pre-build gate) | Compute medians in memory from listing-level data and persist only the aggregated rows |
+| 14 | Lookup rule: when the top-precedence row at a level has `sample_size` below `MIN_SAMPLE`, should the lookup try the next source at the same level before rolling up? (raised while reconciling, 2026-09-30) | Phase 2 | The rule as written (no fall-through). Recommended change: fall through, because a small `curated` own-portfolio row (likely fewer than 30 units) would otherwise always force a roll-up, even when the same area has a solid API figure |
+| 15 | Setup-cost benchmarks: the revised `benchmarks` table has no setup-cost column, but the earlier long format could hold one and §0's `benchmarks.csv` listed setup-cost figures (raised while reconciling, 2026-09-30) | Phase 2 | Setup-cost references come from Phase 3's inventory budget planner, not from `benchmarks` |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
+
+Resolved on 2026-09-29, revised 2026-09-30: Phase 2's benchmarks are area medians from the AirROI API, with regional roll-up; `curated` own-portfolio rows take precedence (§3 and §5, Phase 2 scope). Still open: questions 4 and 10–15 above.
 
 ---
 
