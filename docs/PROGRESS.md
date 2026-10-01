@@ -1,15 +1,14 @@
 # PROGRESS — Safi (صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-09-30 (Phase 2 benchmark design revised to area medians with regional roll-up, docs only; Phase 1 still in progress).
-> Last updated: 2026-09-28 (Phase P.1.1 fix pass built).
+> Last updated: 2026-10-02 (Phase P.1.1 merged in #3, the Phase 2 benchmark design merged in #4, docs only; Phase 1 is next).
 
 ## Current status
 
 - **Phase P (clickable prototype)** was merged into `main` (amirshosha1/str-money-finder#1). Amir reviewed it on his phone: it felt broken (silent taps) and the design was weak, which led to Phase P.1.
 - **Phase P.1 (prototype fixes and redesign) is built**: tap audit (no silent taps, enforced by an e2e crawler), design direction A2 on every screen, an expense-details screen, the Arabic/English switch, the Arabic copy pass, and bidi/404/safe-area fixes. See "Phase P.1 decisions" and "Phase P.1 build notes" below.
 - **Phase P.1.1 (fix pass on an independent end-to-end test) is built**, on top of P.1: the break-even rule changed (fixed costs now include the monthly maintenance/irregular allowance by default — see "Phase P.1.1 decisions" below, and `docs/BUILD_PLAN.md` §4.3 and Example B/B2), a shared `parseAmount` utility (`src/lib/format/amount.ts`) handles Arabic-Indic/Persian digits and Arabic separators on every numeric input, three expense categories were added, the language switch now keeps the current owner/co-host mode (via a `?view=` query param, not just the screen), commission basis is shown on managed units and the statement, the desktop shell is constrained to ~480px, the "نص مبدئي" UI label is gone, an axe-core accessibility sweep runs on every screen, paid pricing tiers say "كل ما في الباقة السابقة، بالإضافة إلى:", and the pre-order button's real `href`/`target`/`rel` now has its own e2e coverage. See "Phase P.1.1 decisions" and "Phase P.1.1 build notes" below.
-- **Next step:** Amir reviews the P.1.1 preview on his phone and merges; then Phase **1** (finance engine + live `/demo` calculator). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`.
+- **Next step:** Phase **1** (finance engine + live `/demo` calculator). Send the standard phase prompt from `docs/BUILD_PLAN.md` §5.0 with `{N} = 1`. Phase P.1.1 was merged into `main` on 2026-10-02 (amirshosha1/str-money-finder#3).
 - **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link stays hidden until then). The prototype is for Amir's review only until Phase 1 lands — no pre-order push yet.
 - **Deferred to Phase 1 / P.2 (explicitly out of scope for P.1.1):** an editable calculator (Phase 1 wires `/demo/calculator` to the real engine), varied per-unit sample data (Phase 1: every unit and both Home views currently show the same 60% occupancy / 2,500 ADR / 1,500 RevPAR), and live Home updates after saving an expense (Phase P.2: data stays browser-only, nothing is wired to Home yet).
 - **Docs-only, 2026-09-29 and 2026-09-30:** Phase 2's benchmark design is decided. Benchmarks are area medians from the AirROI API, refreshed quarterly and rolled up through a `regions` hierarchy, with `curated` own-portfolio rows taking precedence. It is recorded in `docs/BUILD_PLAN.md` §3, §5 and §6, and in "Phase 2 decision revision (2026-09-30)" below, which supersedes the AirROI parts of the 2026-09-29 pre-decisions. Nothing is implemented yet: Phase 1 is still in progress, and two pre-build gates (coverage spike, licensing) come first.
@@ -20,7 +19,7 @@
 |---|---|
 | Kickoff: review, decisions, docs | ✅ Done (2026-09-26) |
 | P — Clickable prototype | ✅ Merged (2026-09-26) |
-| P.1 — Prototype fixes and redesign | ✅ Built (2026-09-27), fix pass built (2026-09-28, "P.1.1"); PR awaiting Amir's review |
+| P.1 — Prototype fixes and redesign | ✅ Merged (2026-10-02, #3): built 2026-09-27, fix pass "P.1.1" built 2026-09-28 |
 | 1 — Finance engine (+ wire the `/demo` calculator to it) | ⏭ Next |
 | P.2 — Interactive demo, data in the browser only | Not started |
 | 0a — App shell, i18n, PWA, CI | Not started |
