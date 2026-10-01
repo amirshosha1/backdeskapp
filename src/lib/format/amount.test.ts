@@ -66,3 +66,23 @@ describe("parseAmount", () => {
     expect(error(parseAmount("-"))).toBe("invalid");
   });
 });
+
+describe("parseAmount options (Phase 1 calculator)", () => {
+  it("allowZero accepts zero (never as negative zero) and rejects negatives as `negative`", () => {
+    expect(value(parseAmount("0", { allowZero: true }))).toBe("0");
+    expect(value(parseAmount("-0", { allowZero: true }))).toBe("0");
+    expect(value(parseAmount("٠٫٠٠", { allowZero: true }))).toBe("0");
+    expect(error(parseAmount("-5", { allowZero: true }))).toBe("negative");
+    expect(value(parseAmount("35,000", { allowZero: true }))).toBe("35000");
+  });
+
+  it("maxDecimals: 0 accepts whole numbers only (nights)", () => {
+    expect(value(parseAmount("١٨", { allowZero: true, maxDecimals: 0 }))).toBe("18");
+    expect(error(parseAmount("18.5", { allowZero: true, maxDecimals: 0 }))).toBe("invalid");
+  });
+
+  it("the defaults are unchanged for add-expense", () => {
+    expect(error(parseAmount("0"))).toBe("non_positive");
+    expect(error(parseAmount("1.234"))).toBe("invalid");
+  });
+});
