@@ -1,11 +1,9 @@
-import type { ReactNode } from "react";
 import { Download, Link2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Money } from "@/components/common/money";
 import { ToastButton } from "@/components/common/toast";
-import { formatPercent } from "@/lib/format/percent";
 import type { AppLocale } from "@/i18n/routing";
 import type { STATEMENT } from "@/demo/fixtures/statement";
 import { cn } from "@/lib/utils";
@@ -44,21 +42,23 @@ export function OwnerStatement({ statement }: { statement: typeof STATEMENT }) {
             <Line label={t("grossRevenueLabel")} amount={statement.grossRevenue} />
             <Line label={t("platformFeesLabel")} amount={statement.platformFees} />
             <Line label={t("netPayoutLabel")} amount={statement.netPayout} total />
-            <Line label={t("ownerExpensesLabel")} amount={statement.ownerExpensesTotal}>
-              <ul className="mt-2 flex flex-col gap-1.5 ps-3 text-xs text-muted">
-                {statement.ownerExpenses.map((line) => (
-                  <li key={line.category.en} className="flex items-baseline gap-2">
-                    <span>{line.category[locale]}</span>
-                    <span className="flex-1 border-b border-dotted border-rule" aria-hidden="true" />
-                    <Money amount={line.amount} hideCurrency />
-                  </li>
-                ))}
-              </ul>
-            </Line>
+            <Line label={t("ownerExpensesLabel")} amount={statement.ownerExpensesTotal} />
+          </dl>
+          {/* A plain list, not part of either <dl> above: a <dl>'s child div may
+              only contain dt/dd (axe: definition-list), so this breakdown sits
+              between the two <dl>s instead of nested inside the expenses line. */}
+          <ul className="flex flex-col gap-1.5 border-t border-dashed border-rule-strong py-3 ps-3 text-xs text-muted">
+            {statement.ownerExpenses.map((line) => (
+              <li key={line.category.en} className="flex items-baseline gap-2">
+                <span>{line.category[locale]}</span>
+                <span className="flex-1 border-b border-dotted border-rule" aria-hidden="true" />
+                <Money amount={line.amount} hideCurrency />
+              </li>
+            ))}
+          </ul>
+          <dl className="text-sm">
             <Line
-              label={t("commissionLabel", {
-                rate: formatPercent(statement.commissionRate, { locale, decimals: 0, isolate: true }),
-              })}
+              label={t("commissionLabel", { basis: statement.commissionBasis[locale] })}
               amount={statement.commission}
             />
             <Line label={t("ownerNetLabel")} amount={statement.ownerNet} total />
@@ -93,31 +93,29 @@ function Line({
   amount,
   total,
   grand,
-  children,
 }: {
   label: string;
   amount: string;
   total?: boolean;
   grand?: boolean;
-  children?: ReactNode;
 }) {
   return (
+    // dt/dd sit directly in this div — the one wrapping div a <dl> allows
+    // per child group (axe: definition-list/dlitem) — rather than in an
+    // extra nested flex div, which put them two levels below the <dl>.
     <div
       className={cn(
-        "py-3",
+        "flex items-baseline gap-2 py-3",
         total
           ? "border-t border-ink shadow-[inset_0_3px_0_-2px_var(--color-paper),inset_0_4px_0_-2px_var(--color-ink)]"
           : "border-t border-dashed border-rule-strong",
       )}
     >
-      <div className="flex items-baseline gap-2">
-        <dt className={cn(total ? "font-semibold text-ink" : "text-ink-2", grand && "text-base")}>{label}</dt>
-        <span className="flex-1 border-b border-dotted border-rule" aria-hidden="true" />
-        <dd className={cn("font-semibold", grand && "text-lg")}>
-          <Money amount={amount} />
-        </dd>
-      </div>
-      {children}
+      <dt className={cn(total ? "font-semibold text-ink" : "text-ink-2", grand && "text-base")}>{label}</dt>
+      <span className="flex-1 border-b border-dotted border-rule" aria-hidden="true" />
+      <dd className={cn("font-semibold", grand && "text-lg")}>
+        <Money amount={amount} />
+      </dd>
     </div>
   );
 }

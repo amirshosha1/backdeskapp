@@ -121,7 +121,10 @@ export const CALCULATOR_STEPS: WalkthroughStep[] = [
       },
       {
         kind: "money",
-        label: { ar: "الصيانة (غير منتظمة، خارج حساب التعادل)", en: "Repairs (irregular, left out of break-even)" },
+        label: {
+          ar: "الصيانة (غير منتظمة، ضمن حساب التعادل افتراضيًا)",
+          en: "Repairs (irregular, included in break-even by default)",
+        },
         amount: "800.00",
       },
       {
@@ -150,7 +153,12 @@ export const CALCULATOR_RESULTS = {
   rent: "-35000.00",
   noi: "-2847.00",
   contributionPerNight: "2058.50",
-  breakEvenNights: "18.99",
-  breakEvenOccupancy: 0.633,
+  // Primary: maintenance/irregular costs included by default (BUILD_PLAN.md
+  // §4.3, Example B). Secondary: the per-scenario excluded toggle
+  // (Example B2), shown as a smaller line under the primary figure.
+  breakEvenNights: "19.38",
+  breakEvenOccupancy: 0.646,
+  breakEvenNightsExcludingMaintenance: "18.99",
+  breakEvenOccupancyExcludingMaintenance: 0.633,
   isProfitable: false,
 };

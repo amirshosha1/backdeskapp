@@ -29,6 +29,7 @@ export const STATEMENT = {
   ],
   ownerExpensesTotal: "-7900.00",
   commissionRate: 0.2,
+  commissionBasis: { ar: "20% من صافي المحوّل", en: "20% of net payout" } as Localized,
   commission: "-8010.60",
   ownerNet: "24142.40",
   ownerPayouts: "-20000.00",

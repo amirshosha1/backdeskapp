@@ -9,7 +9,9 @@ import { cn } from "@/lib/utils";
 /**
  * Switches between Arabic and English and stays on the same screen. The
  * URL is the only source of the language (src/i18n/routing.ts), so this is
- * a plain navigation between `/demo/...` and `/en/demo/...`.
+ * a plain navigation between `/demo/...` and `/en/demo/...` — carrying over
+ * any query string (e.g. Home's `?view=cohost`) so a screen's UI state
+ * survives the switch too.
  */
 export function LanguageSwitch({ tone = "glass", className }: { tone?: "glass" | "soft"; className?: string }) {
   const locale = useLocale() as AppLocale;
@@ -26,7 +28,12 @@ export function LanguageSwitch({ tone = "glass", className }: { tone?: "glass" |
       aria-label={t("switchLanguage")}
       data-testid="language-switch"
       disabled={pending}
-      onClick={() => startTransition(() => router.replace(pathname, { locale: next }))}
+      onClick={() =>
+        startTransition(() => {
+          const search = typeof window !== "undefined" ? window.location.search : "";
+          router.replace(`${pathname}${search}`, { locale: next });
+        })
+      }
       className={cn(
         "tap flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
         tone === "glass" ? "glass text-white" : "bg-fill text-ink",

@@ -34,7 +34,13 @@ export function Money({
   const locale = useLocale() as AppLocale;
   const parts = formatMoneyParts(amount, { locale, currency, signDisplay, decimals });
   const number = (
-    <bdi dir="ltr" className="tabular-nums-money">
+    // The sign/color semantics belong to the number, not the currency label:
+    // a currency label dimmed by opacity *and* recolored red/green (below)
+    // dropped under the 4.5:1 contrast minimum (axe: color-contrast).
+    <bdi
+      dir="ltr"
+      className={cn("tabular-nums-money", colorBySign && (parts.isNegative ? "text-loss" : "text-profit"))}
+    >
       {parts.sign}
       {parts.integer}
       {parts.fraction}
@@ -45,13 +51,7 @@ export function Money({
   );
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-baseline gap-1 whitespace-nowrap",
-        colorBySign && (parts.isNegative ? "text-loss" : "text-profit"),
-        className,
-      )}
-    >
+    <span className={cn("inline-flex items-baseline gap-1 whitespace-nowrap", className)}>
       {locale === "ar" ? (
         <>
           {number}

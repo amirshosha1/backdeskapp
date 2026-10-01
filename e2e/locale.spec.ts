@@ -19,6 +19,14 @@ test("switching language keeps the current screen, both ways", async ({ page }) 
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 });
 
+test("switching language keeps the co-host mode on Home", async ({ page }) => {
+  await page.goto("/demo");
+  await page.getByRole("radio", { name: "أدير لملاك" }).click();
+  await page.getByTestId("language-switch").click();
+  await expect(page).toHaveURL(/\/en\/demo\?view=cohost$/);
+  await expect(page.getByRole("radio", { name: "I manage" })).toHaveAttribute("aria-checked", "true");
+});
+
 test("the language row on More switches too", async ({ page }) => {
   await page.goto("/demo/more");
   await page.getByTestId("more-language").click();

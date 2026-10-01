@@ -58,6 +58,16 @@ export function CalculatorScreen({ steps, results }: CalculatorScreenProps) {
           />
           <HeroTile label={t("tileAdr")} value={<Money amount={results.adr} decimals={0} hideCurrency />} />
         </dl>
+        <p className="mt-3 text-center text-xs text-white/55">
+          {t("breakEvenExcludingMaintenance", {
+            nights: formatNumber(results.breakEvenNightsExcludingMaintenance, { locale }),
+            occupancy: formatPercent(results.breakEvenOccupancyExcludingMaintenance, {
+              locale,
+              decimals: 1,
+              isolate: true,
+            }),
+          })}
+        </p>
       </RoyalHero>
 
       <div className="flex flex-col gap-4 px-4 pt-6">

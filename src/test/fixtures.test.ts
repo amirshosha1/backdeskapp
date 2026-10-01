@@ -36,7 +36,9 @@ describe("home fixtures", () => {
 
   it("break-even display values agree with booked and break-even nights", () => {
     const be = HOME_OWNER_VIEW.breakEven;
-    const target = new Decimal(be.breakEvenNights).toDecimalPlaces(0, Decimal.ROUND_HALF_UP).toNumber();
+    // A fractional night doesn't clear break-even, so the whole-night target
+    // rounds up (BUILD_PLAN.md §4.3), not to the nearest night.
+    const target = new Decimal(be.breakEvenNights).toDecimalPlaces(0, Decimal.ROUND_UP).toNumber();
     expect(be.targetNights).toBe(target);
     expect(be.nightsShort).toBe(target - be.bookedNights);
     expect(be.progress).toBeCloseTo(be.bookedNights / Number(be.breakEvenNights), 3);

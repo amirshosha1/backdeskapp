@@ -10,6 +10,10 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  // NEXT_PUBLIC_PREORDER_URL is inlined at build time, so exercising it for
+  // real needs its own build (playwright.preorder.config.ts) with the
+  // env var set — this default build has none.
+  testIgnore: ["**/preorder-env.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

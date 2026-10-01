@@ -24,9 +24,10 @@ describe("<StageList />", () => {
 describe("<StageDetailScreen />", () => {
   const stage = GUIDE_STAGES.find((s) => s.id === "3")!;
 
-  it("shows the draft notice without anyone's name, and the full checklist", () => {
+  it("shows the stage content without a draft label or anyone's name, and the full checklist", () => {
     renderWithIntl(<StageDetailScreen stage={stage} checklist={STAGE_3_CHECKLIST} />);
-    expect(screen.getByText("نص مبدئي")).toBeInTheDocument();
+    expect(stage.draft).toBe(true);
+    expect(screen.queryByText("نص مبدئي")).toBeNull();
     expect(screen.queryByText(/أمير/)).toBeNull();
     for (const item of STAGE_3_CHECKLIST) expect(screen.getByText(item.ar)).toBeInTheDocument();
   });

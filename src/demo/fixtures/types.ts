@@ -37,6 +37,8 @@ export interface UnitFixture {
   /** Present for managed units only. */
   managerProfit?: string;
   owner?: Localized;
+  /** Present for managed units only, e.g. "20% من صافي المحوّل". */
+  commissionBasis?: Localized;
   hasStatement?: boolean;
 }
 

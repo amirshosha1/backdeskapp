@@ -1,4 +1,4 @@
-import { ChevronRight, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Money } from "@/components/common/money";
@@ -21,7 +21,13 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
 
   return (
     <article className="rounded-card bg-fill p-4" data-testid="unit-card">
-      <ToastButton message={tToast("unitPage")} className="flex w-full items-center gap-3 text-start">
+      {/* Tapping only shows a toast (the unit page isn't built yet), so no
+          disclosure chevron — that's reserved for taps that actually navigate. */}
+      <ToastButton
+        message={tToast("unitPage")}
+        aria-label={`${unit.name[locale]} — ${t(`operatingModel.${unit.operatingModel}`)}`}
+        className="flex w-full items-center gap-3 text-start"
+      >
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-page text-ink-2">
           <UnitGlyph model={unit.operatingModel} />
         </span>
@@ -31,7 +37,6 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
             {t(`operatingModel.${unit.operatingModel}`)} · {unit.area[locale]}
           </span>
         </span>
-        <ChevronRight className="h-4 w-4 shrink-0 text-muted rtl:rotate-180" aria-hidden="true" />
       </ToastButton>
 
       <dl className="mt-4 grid grid-cols-3 gap-2 rounded-tile bg-page p-3 text-center">
@@ -56,27 +61,32 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
       </dl>
 
       {isManaged && (
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="truncate text-xs leading-snug text-muted">
-            {t("ownerLabel", { name: unit.owner![locale] })}
-          </span>
-          {unit.hasStatement ? (
-            <Link
-              href={`/demo/units/${unit.id}/statement`}
-              className="tap flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
-            >
-              <FileText className="h-4 w-4" aria-hidden="true" />
-              {t("viewStatementCta")}
-            </Link>
-          ) : (
-            <ToastButton
-              message={tToast("statementLater")}
-              className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
-            >
-              <FileText className="h-4 w-4" aria-hidden="true" />
-              {t("viewStatementCta")}
-            </ToastButton>
-          )}
+        <div className="mt-3 flex flex-col gap-1.5">
+          <p className="truncate text-xs leading-snug text-muted">
+            {t("commissionBasisLabel", { basis: unit.commissionBasis![locale] })}
+          </p>
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate text-xs leading-snug text-muted">
+              {t("ownerLabel", { name: unit.owner![locale] })}
+            </span>
+            {unit.hasStatement ? (
+              <Link
+                href={`/demo/units/${unit.id}/statement`}
+                className="tap flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
+              >
+                <FileText className="h-4 w-4" aria-hidden="true" />
+                {t("viewStatementCta")}
+              </Link>
+            ) : (
+              <ToastButton
+                message={tToast("statementLater")}
+                className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
+              >
+                <FileText className="h-4 w-4" aria-hidden="true" />
+                {t("viewStatementCta")}
+              </ToastButton>
+            )}
+          </div>
         </div>
       )}
     </article>
