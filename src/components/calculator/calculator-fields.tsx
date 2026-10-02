@@ -1,6 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { useLocale } from "next-intl";
+import { formatTypedAmount } from "@/lib/format/amount";
+import type { AppLocale } from "@/i18n/routing";
 import { SampleBadge } from "@/components/common/sample-badge";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +39,9 @@ export function NumberFieldRow({
   error?: string;
   sample?: boolean;
 }) {
+  const locale = useLocale() as AppLocale;
+  // Raw digits while typing; thousands separators once the field loses focus.
+  const [focused, setFocused] = useState(false);
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   return (
@@ -57,7 +63,9 @@ export function NumberFieldRow({
             id={id}
             inputMode="decimal"
             autoComplete="off"
-            value={value}
+            value={focused ? value : formatTypedAmount(value, locale)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             aria-invalid={error ? true : undefined}
             aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
             // Permissive on purpose: `parseAmount` is the one place that

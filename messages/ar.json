@@ -113,7 +113,7 @@
     "introNote": "عدّل أي رقم وتتغير النتائج فورًا. ابدأ من أحد المثالين أو اكتب أرقامك.",
     "presetsLabel": "أمثلة جاهزة",
     "presets": {
-      "arbitrage": "إعادة تأجير — الشيخ زايد",
+      "arbitrage": "مثال: إعادة تأجير",
       "managed": "إدارة لمالك — وسط البلد"
     },
     "stepLabel": "الخطوة {step} من {total}",
@@ -204,16 +204,20 @@
     "breakEvenWithDepreciation": "التعادل شاملًا الإهلاك: {nights} ليلة ({occupancy})",
     "breakEvenWithDepreciationUnreachable": "التعادل شاملًا الإهلاك: غير ممكن خلال الشهر بهذه الأرقام",
     "contributionPerNightLabel": "ربح الليلة قبل المصاريف الثابتة",
-    "investedLabel": "إجمالي المبلغ المستثمر",
-    "paybackLabel": "مدة استرداد المبلغ المستثمر",
+    "investedLabel": "{deposit, select, yes {تكلفة التجهيز والتأمين} other {تكلفة التجهيز}}",
+    "paybackLabel": "{deposit, select, yes {مدة الاسترداد على تكلفة التجهيز والتأمين فقط} other {مدة الاسترداد على تكلفة التجهيز فقط}}",
     "paybackValue": "{months} شهر",
     "paybackNever": "لا يُسترد بهذه الأرقام",
     "paybackNoInvestment": "لا توجد تكلفة تجهيز",
-    "cashOnCashLabel": "العائد النقدي السنوي",
+    "cashOnCashLabel": "{deposit, select, yes {العائد على تكلفة التجهيز والتأمين فقط} other {العائد على تكلفة التجهيز فقط}}",
     "basisNote": "الربح في الأعلى ونقطة التعادل بجانبه قبل إهلاك التجهيز، ويشملان الصيانة. صافي الربح بعد الإهلاك له نقطة تعادل خاصة به بجانبه.",
     "breakEvenNightsLabel": "ليالي التعادل",
     "breakEvenOccupancyLabel": "إشغال التعادل",
-    "projectionTeaserTitle": "توقعات 12 شهرًا حسب المواسم"
+    "projectionTeaserTitle": "توقعات 12 شهرًا حسب المواسم",
+    "contributionBeforeCommissionLabel": "ربح الليلة قبل عمولة الإدارة",
+    "contributionAfterCommissionLabel": "ربح الليلة بعد عمولة الإدارة",
+    "breakEvenFixedCostsLabel": "التكاليف الشهرية الثابتة في حساب التعادل",
+    "returnNote": "لا يشمل ثمن الشقة"
   },
   "guide": {
     "title": "دليل التجهيز",

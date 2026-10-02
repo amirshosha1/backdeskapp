@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import Decimal from "decimal.js";
 import { Info, TrendingDown, TrendingUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { DataWarning } from "@/components/common/data-warning";
@@ -152,6 +153,8 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
   const VerdictIcon = result.verdict.kind === "profitable" || result.verdict.kind === "at_break_even" ? TrendingUp : TrendingDown;
   const isArbitrage = form.operatingModel === "rental_arbitrage";
   const isManaged = form.operatingModel === "managed_for_owner";
+  // The return metrics cover only what was entered: the setup cost, plus the deposit on arbitrage.
+  const hasDeposit = lastValid.operatingModel === "rental_arbitrage" && !new Decimal(lastValid.deposit).isZero() ? "yes" : "no";
 
   return (
     <div>
@@ -356,10 +359,39 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
               : t("breakEvenWithDepreciationUnreachable")}
           </p>
           <dl className="mt-3 divide-y divide-line border-t border-line text-sm">
-            <ResultRow label={t("contributionPerNightLabel")} value={<Money amount={toMoneyString(result.contributionPerNight)} />} />
-            <ResultRow label={t("investedLabel")} value={<Money amount={toMoneyString(result.investment.totalCashInvested)} />} />
+            {/* The break-even's own terms: fixed costs ÷ contribution after commission = break-even nights. */}
+            {isManaged && (
+              <ResultRow
+                label={t("contributionBeforeCommissionLabel")}
+                testId="result-contribution-before-commission"
+                value={<Money amount={toMoneyString(result.contributionPerNight)} />}
+              />
+            )}
+            {primary.kind === "reached" ? (
+              <>
+                <ResultRow
+                  label={isManaged ? t("contributionAfterCommissionLabel") : t("contributionPerNightLabel")}
+                  testId="result-contribution"
+                  value={<Money amount={toMoneyString(primary.contributionPerNight)} />}
+                />
+                <ResultRow
+                  label={t("breakEvenFixedCostsLabel")}
+                  testId="result-break-even-fixed-costs"
+                  value={<Money amount={toMoneyString(primary.fixedCosts)} />}
+                />
+              </>
+            ) : (
+              !isManaged && (
+                <ResultRow
+                  label={t("contributionPerNightLabel")}
+                  testId="result-contribution"
+                  value={<Money amount={toMoneyString(result.contributionPerNight)} />}
+                />
+              )
+            )}
+            <ResultRow label={t("investedLabel", { deposit: hasDeposit })} value={<Money amount={toMoneyString(result.investment.totalCashInvested)} />} />
             <ResultRow
-              label={t("paybackLabel")}
+              label={t("paybackLabel", { deposit: hasDeposit })}
               testId="result-payback"
               value={
                 result.investment.paybackMonths
@@ -371,11 +403,15 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
             />
             {result.investment.cashOnCash && (
               <ResultRow
-                label={t("cashOnCashLabel")}
+                label={t("cashOnCashLabel", { deposit: hasDeposit })}
+                testId="result-cash-on-cash"
                 value={<Percent ratio={result.investment.cashOnCash.toNumber()} capAt100={false} signDisplay="always" />}
               />
             )}
           </dl>
+          <p className="mt-1 text-xs text-muted" data-testid="return-note">
+            {t("returnNote")}
+          </p>
           <p className="mt-3 text-xs leading-relaxed text-muted">{t("basisNote")}</p>
         </section>
 

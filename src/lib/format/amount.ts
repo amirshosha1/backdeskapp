@@ -1,4 +1,6 @@
 import Decimal from "decimal.js";
+import type { AppLocale } from "@/i18n/routing";
+import { formatNumber } from "./money";
 
 /**
  * Shared amount parser for every numeric input in `/demo` (BUILD_PLAN.md
@@ -81,4 +83,17 @@ export function parseAmount(input: string, { allowZero = false, maxDecimals = 2 
   if (value.isZero() || value.isNegative()) return { ok: false, error: "non_positive" };
 
   return { ok: true, value };
+}
+
+/**
+ * How a typed amount is shown once the field loses focus: grouped with
+ * thousands separators in the display locale ("35000" → "35,000",
+ * "١٥٫٥" → "15.5"), keeping the decimals the host typed. Anything that
+ * doesn't parse is shown exactly as typed, so the error stays visible.
+ * The stored value is never changed — this is display only.
+ */
+export function formatTypedAmount(raw: string, locale: AppLocale): string {
+  const parsed = parseAmount(raw, { allowZero: true, maxDecimals: 2 });
+  if (!parsed.ok) return raw;
+  return formatNumber(parsed.value, { locale, decimals: parsed.value.decimalPlaces() });
 }

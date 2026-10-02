@@ -102,6 +102,10 @@ describe("break-even (§4.3, §4.7)", () => {
         expect(result.nights.greaterThanOrEqualTo(0)).toBe(true);
         expect(result.nights.lessThanOrEqualTo(available)).toBe(true);
         expect(profit(result.nights).abs().lessThanOrEqualTo("0.01")).toBe(true);
+        // The break-even's own linear piece: fixed costs ÷ contribution after commission = nights.
+        if (result.nights.greaterThan(0)) {
+          expect(result.fixedCosts.dividedBy(result.contributionPerNight).minus(result.nights).abs().lessThan("1e-6")).toBe(true);
+        }
         for (let i = 0; i < 20; i++) {
           const n = result.nights.times(i).dividedBy(20);
           if (n.lessThan(result.nights.minus("1e-6"))) expect(profit(n).lessThan(0)).toBe(true);

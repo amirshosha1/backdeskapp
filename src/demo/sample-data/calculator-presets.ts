@@ -47,8 +47,9 @@ export const CALCULATOR_PRESETS: CalculatorPreset[] = [
   {
     id: "arbitrage",
     unit: {
-      city: { ar: "الجيزة", en: "Giza" },
-      area: { ar: "الشيخ زايد", en: "Sheikh Zayed" },
+      // Generic on purpose: Home's Sheikh Zayed sample unit has different figures (24,000 rent).
+      city: { ar: "القاهرة الكبرى", en: "Greater Cairo" },
+      area: { ar: "مثال عام", en: "Generic example" },
       bedrooms: "2",
       bathrooms: "2",
       maxGuests: "4",

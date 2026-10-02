@@ -171,6 +171,18 @@ describe("Example A — managed unit, 20% of net payout, owner bears all costs",
   });
 });
 
+describe("Example A — break-even after the 20% commission", () => {
+  it("contribution after commission 1,613.47 and fixed costs 4,900.00 give 3.04 nights", () => {
+    const result = computeScenario({ ...SCENARIO_B, operatingModel: "managed_for_owner", rent: 0, commission: NET_PAYOUT_20 });
+    const be = result.breakEven.primary;
+    if (be.kind !== "reached") throw new Error("unreachable");
+    expect(fx2(result.contributionPerNight)).toBe("2058.50");
+    expect(fx2(be.contributionPerNight)).toBe("1613.47");
+    expect(fx2(be.fixedCosts)).toBe("4900.00");
+    expect(fx2(be.nights)).toBe("3.04");
+  });
+});
+
 describe("Example A2 — cleaning fees excluded from the commission base", () => {
   const terms = { ...NET_PAYOUT_20, includeCleaningFees: false };
 
