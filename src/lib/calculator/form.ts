@@ -1,15 +1,19 @@
 import Decimal from "decimal.js";
 import { NO_COMMISSION, type CommissionBasis, type OperatingModel, type PercentBasis, type ScenarioInput } from "@/lib/finance";
-import { scenarioInputSchema } from "@/lib/finance/schemas";
 import { parseAmount, type ParseAmountOptions } from "@/lib/format/amount";
 
 /**
  * The live calculator's form (BUILD_PLAN.md Phase 1): what the host typed,
- * as raw strings, turned into a validated `ScenarioInput` for the engine —
- * or a typed error per field. Every number goes through `parseAmount`, the
- * shared parser (Arabic-Indic digits, Arabic separators); cross-field rules
- * come from the engine's own Zod schema. No financial formula lives here:
- * the only arithmetic is turning a typed percentage into a rate.
+ * as raw strings, turned into a valid `ScenarioInput` for the engine — or a
+ * typed error per field. Every number goes through `parseAmount`, the
+ * shared parser (Arabic-Indic digits, Arabic separators). No financial
+ * formula lives here: the only arithmetic is turning a percentage into a rate.
+ *
+ * This runs in the browser, so it does not import the engine's Zod schemas
+ * (~97 KB gzipped of client JavaScript for one screen). Instead it applies
+ * the same bounds itself, and `form.test.ts` proves, property-based, that
+ * every input it accepts also passes `scenarioInputSchema` — the schema
+ * stays the one definition, enforced at the server boundary (CLAUDE.md §6.6).
  */
 
 export const DAYS_IN_PERIOD = 30;
@@ -88,6 +92,8 @@ const PARSE_OPTIONS: Record<FieldKind, ParseAmountOptions> = {
 /** The largest amount `numeric(14,2)` can hold (CLAUDE.md §6.2). */
 const MAX_MONEY = new Decimal("999999999999.99");
 const MAX_COUNT = 999;
+/** The engine schema's ceiling on a useful life (50 years). */
+const MAX_USEFUL_LIFE_MONTHS = 600;
 
 export const commissionUsesRate = (basis: ManagedBasis) => basis !== "fixed_monthly";
 export const commissionUsesFixedFee = (basis: ManagedBasis) => basis === "fixed_monthly" || basis === "hybrid";
@@ -130,6 +136,7 @@ export function parseField(field: NumberField, raw: string): { ok: true; value: 
   if (!parsed.ok) return { ok: false, error: parsed.error === "invalid" && kind === "count" ? "invalid_whole" : parsed.error };
   if (kind === "money" && parsed.value.greaterThan(MAX_MONEY)) return { ok: false, error: "too_large" };
   if (kind === "count" && parsed.value.greaterThan(MAX_COUNT)) return { ok: false, error: "too_large" };
+  if (field === "usefulLifeMonths" && parsed.value.greaterThan(MAX_USEFUL_LIFE_MONTHS)) return { ok: false, error: "too_large" };
   if (kind === "percent" && parsed.value.greaterThan(100)) return { ok: false, error: "percent_range" };
   return { ok: true, value: parsed.value };
 }
@@ -137,12 +144,6 @@ export function parseField(field: NumberField, raw: string): { ok: true; value: 
 export type ParsedForm =
   | { ok: true; input: ScenarioInput }
   | { ok: false; errors: Partial<Record<NumberField, FieldError>> };
-
-/** Schema issues on the assembled input, mapped back to the field that caused them. */
-const SCHEMA_PATH_TO_FIELD: Record<string, { field: NumberField; error: FieldError }> = {
-  blockedNights: { field: "blockedNights", error: "blocked_too_many" },
-  usefulLifeMonths: { field: "usefulLifeMonths", error: "life_required" },
-};
 
 export function parseCalculatorForm(form: CalculatorForm): ParsedForm {
   const errors: Partial<Record<NumberField, FieldError>> = {};
@@ -152,6 +153,9 @@ export function parseCalculatorForm(form: CalculatorForm): ParsedForm {
     if (parsed.ok) value[field] = parsed.value;
     else errors[field] = parsed.error;
   }
+  // Cross-field rules (the same ones `scenarioInputSchema` refines).
+  if (value.blockedNights?.greaterThan(DAYS_IN_PERIOD)) errors.blockedNights = "blocked_too_many";
+  if (value.setupCost?.greaterThan(0) && value.usefulLifeMonths?.isZero()) errors.usefulLifeMonths = "life_required";
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const isArbitrage = form.operatingModel === "rental_arbitrage";
@@ -192,19 +196,7 @@ export function parseCalculatorForm(form: CalculatorForm): ParsedForm {
         }
       : NO_COMMISSION,
   };
-
-  // The engine's boundary schema has the last word (cross-field rules).
-  const checked = scenarioInputSchema.safeParse(input);
-  if (checked.success) return { ok: true, input };
-  for (const issue of checked.error.issues) {
-    const mapped = SCHEMA_PATH_TO_FIELD[String(issue.path[0])];
-    if (mapped) errors[mapped.field] = mapped.error;
-  }
-  // Anything the schema rejects that no field explains is a bug in this form, not user input.
-  if (Object.keys(errors).length === 0) {
-    throw new Error(`Calculator form produced an invalid scenario: ${checked.error.issues.map((i) => i.message).join("; ")}`);
-  }
-  return { ok: false, errors };
+  return { ok: true, input };
 }
 
 /** Whether the form still holds exactly a preset's values (its chip shows as selected). */
