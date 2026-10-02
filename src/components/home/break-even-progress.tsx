@@ -2,18 +2,24 @@ import { CircleAlert, CircleCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/routing";
 import type { Localized } from "@/demo/fixtures/types";
+import type { ProfitBasis } from "@/lib/finance";
 import { cn } from "@/lib/utils";
 
 export interface BreakEvenProgressProps {
   unitName: Localized;
   bookedNights: number;
-  /** Rounded break-even nights to show, e.g. 19 for 18.99. */
+  /** Whole nights needed: break-even rounded up (19.38 → 20), from the engine. */
   targetNights: number;
-  /** Nights still needed, from the fixture (the engine provides it from Phase 1). */
+  /** Nights still needed, from the engine. */
   nightsShort: number;
-  /** Bar fill, 0–1 (booked ÷ break-even nights, presentation only). */
+  /** Bar fill, 0–1 (booked ÷ break-even nights), from the engine. */
   progress: number;
   reached: boolean;
+  /**
+   * Which costs the break-even covers — always the same as the profit shown
+   * for the unit; the tile states it so the two can't be misread.
+   */
+  basis: ProfitBasis;
 }
 
 /** "How close is this unit to covering its costs?" — a meter, not a chart. */
@@ -24,6 +30,7 @@ export function BreakEvenProgress({
   nightsShort,
   progress,
   reached,
+  basis,
 }: BreakEvenProgressProps) {
   const t = useTranslations("home");
   const locale = useLocale() as AppLocale;
@@ -66,6 +73,12 @@ export function BreakEvenProgress({
         <span>{t("breakEvenBooked", { nights: bookedNights })}</span>
         <span>{t("breakEvenAt", { nights: targetNights })}</span>
       </div>
+      <p className="mt-2 text-xs text-muted" data-testid="break-even-basis">
+        {t("breakEvenBasis", {
+          repairs: basis.includeIrregular ? "yes" : "no",
+          depreciation: basis.includeDepreciation ? "yes" : "no",
+        })}
+      </p>
     </div>
   );
 }

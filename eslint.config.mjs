@@ -28,6 +28,32 @@ const config = [
       ],
     },
   },
+  {
+    // CLAUDE.md §6.5: the 12-month projection never ships to a client.
+    // `import "server-only"` makes `next build` fail if a client module
+    // imports it; this rule catches it earlier, in UI and demo code.
+    // Zod (and the engine's schemas) stay out of client code too: they
+    // validate server boundaries (§6.6) and cost ~97 KB gzipped in a bundle.
+    files: ["src/components/**", "src/demo/**", "src/lib/format/**", "src/lib/calculator/**"],
+    ignores: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/finance/projection", "**/finance/projection"],
+              message: "projection.ts is server-only (CLAUDE.md §6.5); call it from server code.",
+            },
+            {
+              group: ["zod", "zod/*", "@/lib/finance/schemas", "**/finance/schemas"],
+              message: "Zod schemas validate server boundaries (CLAUDE.md §6.6); keep them out of client bundles.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default config;

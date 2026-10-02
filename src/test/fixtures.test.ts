@@ -1,126 +1,184 @@
 import Decimal from "decimal.js";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { HOME_COHOST_VIEW, HOME_OWNER_VIEW } from "@/demo/fixtures/home";
-import { UNITS, PORTFOLIO_OVERHEAD } from "@/demo/fixtures/units";
+import { modelPnl, perNightModelFromActuals, toMoneyString } from "@/lib/finance";
+import { HOME_COHOST_VIEW, HOME_OWNER_VIEW, NET_PROFIT_BASIS } from "@/demo/fixtures/home";
+import { PORTFOLIO_OVERHEAD, UNIT_RESULTS, UNITS } from "@/demo/fixtures/units";
 import { STATEMENT } from "@/demo/fixtures/statement";
-import { CALCULATOR_RESULTS } from "@/demo/fixtures/calculator";
 import { EXPENSE_BREAKDOWN } from "@/demo/fixtures/expense";
 
 /**
- * Phase P fixtures carry no formulas (CLAUDE.md §6.1), but several of their
- * figures are hand-derived sums or ratios that BUILD_PLAN.md §4.6 does not
- * state. They are checked here to whole-piastre precision so the demo never
- * shows numbers that don't add up. Phase 1 re-derives all of it from the
- * real engine.
+ * Phase 1: every `/demo` figure comes from the finance engine. These tests
+ * (1) forbid hand-typed amounts in the fixture modules, (2) re-check the
+ * engine's totals with independent Decimal arithmetic, (3) pin the sample
+ * units agreed in the Phase 1 plan review, and (4) check that the Home
+ * break-even tile uses the same cost basis as the net profit it sits with.
  */
-function sum(...amounts: string[]): Decimal {
-  return amounts.reduce((total, amount) => total.plus(amount), new Decimal(0));
-}
 
-describe("home fixtures", () => {
-  it("owner-view hero total is the sum of its units' net profit", () => {
-    const expected = sum(...HOME_OWNER_VIEW.units.map((u) => u.netProfit!));
-    expect(new Decimal(HOME_OWNER_VIEW.heroTotal).equals(expected)).toBe(true);
-  });
+const sum = (...amounts: Decimal.Value[]) => amounts.reduce<Decimal>((t, a) => t.plus(a), new Decimal(0));
+const byId = (id: string) => UNITS.find((u) => u.id === id)!;
+const resultFor = (id: string) => UNIT_RESULTS.find((r) => r.unit.id === id)!;
 
-  it("co-host hero total is managers' profit minus portfolio overhead", () => {
-    const expected = sum(...HOME_COHOST_VIEW.units.map((u) => u.managerProfit!), PORTFOLIO_OVERHEAD);
-    expect(new Decimal(HOME_COHOST_VIEW.heroTotal).equals(expected)).toBe(true);
-  });
+describe("no hand-typed totals in fixture modules", () => {
+  const dir = join(process.cwd(), "src/demo/fixtures");
+  // pricing.ts holds SAMPLE plan prices (inputs, not computed figures) and guide.ts holds no money.
+  const exempt = new Set(["pricing.ts", "guide.ts"]);
+  const files = readdirSync(dir).filter((f) => f.endsWith(".ts") && !exempt.has(f));
 
-  it("owner view carries only owner-run units; co-host view only managed ones", () => {
-    expect(HOME_OWNER_VIEW.units.every((u) => u.operatingModel !== "managed_for_owner")).toBe(true);
-    expect(HOME_COHOST_VIEW.units.every((u) => u.operatingModel === "managed_for_owner")).toBe(true);
-    expect(HOME_OWNER_VIEW.units.length + HOME_COHOST_VIEW.units.length).toBe(UNITS.length);
-  });
-
-  it("break-even display values agree with booked and break-even nights", () => {
-    const be = HOME_OWNER_VIEW.breakEven;
-    // A fractional night doesn't clear break-even, so the whole-night target
-    // rounds up (BUILD_PLAN.md §4.3), not to the nearest night.
-    const target = new Decimal(be.breakEvenNights).toDecimalPlaces(0, Decimal.ROUND_UP).toNumber();
-    expect(be.targetNights).toBe(target);
-    expect(be.nightsShort).toBe(target - be.bookedNights);
-    expect(be.progress).toBeCloseTo(be.bookedNights / Number(be.breakEvenNights), 3);
-    expect(be.reached).toBe(be.bookedNights >= Number(be.breakEvenNights));
-    expect(be.bookedNights / be.availableNights).toBe(HOME_OWNER_VIEW.occupancy);
-  });
-
-  it("home's top expenses are the three largest categories of the breakdown", () => {
-    const topThree = [...EXPENSE_BREAKDOWN.categories]
-      .sort((a, b) => new Decimal(b.amount).comparedTo(a.amount))
-      .slice(0, 3);
-    expect(HOME_OWNER_VIEW.topExpenses).toEqual(topThree);
+  it.each(files)("%s contains no decimal amount literals", (file) => {
+    const code = readFileSync(join(dir, file), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    expect(code.match(/["'`]-?\d[\d,]*\.\d+["'`]/g) ?? []).toEqual([]);
+    expect(code.match(/(?<![\w.])\d+\.\d+(?![\w.])/g) ?? []).toEqual([]);
   });
 });
 
-describe("expense breakdown fixture", () => {
-  it("categories sum exactly to the month's total", () => {
-    const expected = sum(...EXPENSE_BREAKDOWN.categories.map((c) => c.amount));
-    expect(new Decimal(EXPENSE_BREAKDOWN.total).equals(expected)).toBe(true);
+describe("sample units (Phase 1 plan review, 2026-10-01)", () => {
+  it("Madinaty: 20 nights (66.7%) at about 2,033", () => {
+    const m = resultFor("madinaty").pnl;
+    expect(m.kpis.bookedNights.toNumber()).toBe(20);
+    expect(m.kpis.occupancy!.toFixed(3)).toBe("0.667");
+    expect(toMoneyString(m.kpis.adr!)).toBe("2032.50");
   });
 
-  it("the month's total is both owner units' opex plus the arbitrage rent (§4.6 A and B)", () => {
-    expect(new Decimal(EXPENSE_BREAKDOWN.total).equals(sum("7900.00", "7900.00", "35000.00"))).toBe(true);
+  it("Sheikh Zayed: rental arbitrage at 24,000 rent, 17 nights at about 1,759", () => {
+    const s = resultFor("sheikh-zayed").pnl;
+    expect(s.kpis.bookedNights.toNumber()).toBe(17);
+    expect(toMoneyString(s.kpis.adr!)).toBe("1758.82");
+    expect(s.opexByBehavior.fixed.greaterThanOrEqualTo(24000)).toBe(true);
   });
 
-  it("bubbles cover the same total, with the tail folded into one 'other' bubble", () => {
-    const expected = sum(...EXPENSE_BREAKDOWN.bubbles.map((b) => b.amount));
-    expect(new Decimal(EXPENSE_BREAKDOWN.total).equals(expected)).toBe(true);
+  it("Downtown Cairo is §4.6 Example A exactly", () => {
+    const d = resultFor("downtown-cairo").pnl;
+    expect(toMoneyString(d.grossRevenue)).toBe("47400.00");
+    expect(toMoneyString(d.platformFees)).toBe("7347.00");
+    expect(toMoneyString(d.noi)).toBe("32153.00");
+    expect(toMoneyString(d.commission)).toBe("8010.60");
+    expect(byId("downtown-cairo").managerProfit).toBe("8010.60");
+  });
+
+  it("Rehab: about 1,600 a night, and the 3,000 minimum applies (10% of gross is less)", () => {
+    const r = resultFor("rehab").pnl;
+    expect(toMoneyString(r.kpis.adr!)).toBe("1600.00");
+    expect(r.grossRevenue.times("0.10").lessThan(3000)).toBe(true);
+    expect(toMoneyString(r.commission)).toBe("3000.00");
+    expect(toMoneyString(r.managerProfit)).toBe(toMoneyString(r.commission.minus(r.managerBorneOpex)));
+  });
+
+  it("the units differ: no two share both occupancy and ADR", () => {
+    const keys = UNITS.map((u) => `${u.occupancy.toFixed(3)}@${u.adr}`);
+    expect(new Set(keys).size).toBe(UNITS.length);
+  });
+
+  it("the commission wording on each managed unit matches its agreement", () => {
+    for (const { unit } of UNIT_RESULTS.filter((r) => r.unit.operatingModel === "managed_for_owner")) {
+      const rate = new Decimal(unit.commission.rate).times(100).toString();
+      expect(unit.commissionBasis!.en).toContain(`${rate}%`);
+      expect(unit.commissionBasis!.ar).toContain(`${rate}%`);
+      if (new Decimal(unit.commission.fixedFee).greaterThan(0)) {
+        const fee = new Decimal(unit.commission.fixedFee).toNumber().toLocaleString("en-US");
+        expect(unit.commissionBasis!.en).toContain(fee);
+        expect(unit.commissionBasis!.ar).toContain(fee);
+      }
+    }
+  });
+
+  it("no sample unit triggers an availability warning", () => {
+    expect(UNITS.every((u) => !u.availabilityConflict && u.occupancy <= 1)).toBe(true);
+  });
+});
+
+describe("home totals, re-added independently", () => {
+  it("owner view: Σ net profit of owner-run units", () => {
+    expect(HOME_OWNER_VIEW.heroTotal).toBe(toMoneyString(sum(...HOME_OWNER_VIEW.units.map((u) => u.netProfit!))));
+  });
+
+  it("co-host view: Σ manager profit − portfolio overhead", () => {
+    expect(HOME_COHOST_VIEW.heroTotal).toBe(
+      toMoneyString(sum(...HOME_COHOST_VIEW.units.map((u) => u.managerProfit!), PORTFOLIO_OVERHEAD)),
+    );
+  });
+
+  it("the month-over-month chips compare with the sample August, not made-up values", () => {
+    const owner = UNIT_RESULTS.filter((r) => r.unit.operatingModel !== "managed_for_owner");
+    const managed = UNIT_RESULTS.filter((r) => r.unit.operatingModel === "managed_for_owner");
+    const ownerNow = sum(...owner.map((r) => r.pnl.netProfit));
+    const ownerBefore = sum(...owner.map((r) => r.previous.netProfit));
+    expect(HOME_OWNER_VIEW.change).toBeCloseTo(ownerNow.minus(ownerBefore).dividedBy(ownerBefore).toNumber(), 10);
+    const overhead = new Decimal(PORTFOLIO_OVERHEAD);
+    const coNow = sum(...managed.map((r) => r.pnl.managerProfit), overhead);
+    const coBefore = sum(...managed.map((r) => r.previous.managerProfit), overhead);
+    expect(HOME_COHOST_VIEW.change).toBeCloseTo(coNow.minus(coBefore).dividedBy(coBefore).toNumber(), 10);
+  });
+
+  it("view KPIs are weighted by nights", () => {
+    const owner = UNIT_RESULTS.filter((r) => r.unit.operatingModel !== "managed_for_owner");
+    const booked = sum(...owner.map((r) => r.pnl.kpis.bookedNights));
+    const available = sum(...owner.map((r) => r.pnl.kpis.nightsAvailable));
+    expect(HOME_OWNER_VIEW.occupancy).toBeCloseTo(booked.dividedBy(available).toNumber(), 10);
+    expect(HOME_OWNER_VIEW.adr).toBe(toMoneyString(sum(...owner.map((r) => r.pnl.accommodationRevenue)).dividedBy(booked)));
+  });
+});
+
+describe("Home break-even tile: the same cost basis as the profit shown (Phase 1 review)", () => {
+  const be = HOME_OWNER_VIEW.breakEven;
+  const result = UNIT_RESULTS.find((r) => r.unit.name.en === be.unitName.en)!;
+  const model = perNightModelFromActuals(result.pnl, result.unit.commission);
+  if (!model.ok) throw new Error("no model");
+  const profitAt = (n: number) => modelPnl(model.value, n, be.basis).profit;
+
+  it("covers the costs in net profit: repairs and setup depreciation", () => {
+    expect(be.basis).toEqual(NET_PROFIT_BASIS);
+    expect(result.pnl.depreciation.greaterThan(0)).toBe(true);
+  });
+
+  it("at the unit's booked nights it reproduces the net profit on its card, to the piastre", () => {
+    expect(toMoneyString(profitAt(be.bookedNights))).toBe(UNITS.find((u) => u.id === result.unit.id)!.netProfit);
+  });
+
+  it("at the whole-night target profit is ≥ 0; one night fewer it is < 0", () => {
+    expect(new Decimal(toMoneyString(profitAt(be.targetNights))).greaterThanOrEqualTo(0)).toBe(true);
+    expect(new Decimal(toMoneyString(profitAt(be.targetNights - 1))).lessThan(0)).toBe(true);
+    expect(be.targetNights).toBe(new Decimal(be.breakEvenNights).toDecimalPlaces(0, Decimal.ROUND_UP).toNumber());
+    expect(be.nightsShort).toBe(be.targetNights - be.bookedNights);
+    expect(be.reached).toBe(false);
+  });
+});
+
+describe("expense breakdown", () => {
+  it("categories and bubbles each sum exactly to the month's total", () => {
+    expect(EXPENSE_BREAKDOWN.total).toBe(toMoneyString(sum(...EXPENSE_BREAKDOWN.categories.map((c) => c.amount))));
+    expect(EXPENSE_BREAKDOWN.total).toBe(toMoneyString(sum(...EXPENSE_BREAKDOWN.bubbles.map((b) => b.amount))));
     expect(EXPENSE_BREAKDOWN.bubbles.filter((b) => b.id === "other")).toHaveLength(1);
   });
 
-  it("every share matches its amount to a tenth of a percent", () => {
+  it("the total is the owner-run units' opex (depreciation is not an expense transaction)", () => {
+    const owner = UNIT_RESULTS.filter((r) => r.unit.operatingModel !== "managed_for_owner");
+    expect(EXPENSE_BREAKDOWN.total).toBe(toMoneyString(sum(...owner.map((r) => r.pnl.opex))));
+  });
+
+  it("every share matches its amount; Home's top expenses are the three largest", () => {
     for (const item of [...EXPENSE_BREAKDOWN.categories, ...EXPENSE_BREAKDOWN.bubbles]) {
-      const exact = new Decimal(item.amount).dividedBy(EXPENSE_BREAKDOWN.total).toNumber();
-      expect(Math.abs(item.share - exact), item.id).toBeLessThan(0.0005);
+      expect(item.share).toBeCloseTo(new Decimal(item.amount).dividedBy(EXPENSE_BREAKDOWN.total).toNumber(), 10);
     }
+    expect(HOME_OWNER_VIEW.topExpenses).toEqual(EXPENSE_BREAKDOWN.categories.slice(0, 3));
   });
 });
 
-describe("owner statement fixture (BUILD_PLAN.md §4.6 Example A)", () => {
-  it("net payout equals gross revenue plus platform fees", () => {
-    const expected = sum(STATEMENT.grossRevenue, STATEMENT.platformFees);
-    expect(new Decimal(STATEMENT.netPayout).equals(expected)).toBe(true);
+describe("owner statement (§4.6 Example A, cash basis)", () => {
+  it("lines sum exactly to every total", () => {
+    expect(STATEMENT.netPayout).toBe(toMoneyString(sum(STATEMENT.grossRevenue, STATEMENT.platformFees)));
+    expect(STATEMENT.ownerExpensesTotal).toBe(toMoneyString(sum(...STATEMENT.ownerExpenses.map((l) => l.amount))));
+    expect(STATEMENT.ownerNet).toBe(toMoneyString(sum(STATEMENT.netPayout, STATEMENT.ownerExpensesTotal, STATEMENT.commission)));
+    expect(STATEMENT.balanceDue).toBe(toMoneyString(sum(STATEMENT.openingBalance, STATEMENT.ownerNet, STATEMENT.ownerPayouts)));
   });
 
-  it("owner-borne expense lines sum exactly to the stated total", () => {
-    const expected = sum(...STATEMENT.ownerExpenses.map((line) => line.amount));
-    expect(new Decimal(STATEMENT.ownerExpensesTotal).equals(expected)).toBe(true);
-  });
-
-  it("owner net equals net payout minus owner expenses minus commission", () => {
-    const expected = sum(STATEMENT.netPayout, STATEMENT.ownerExpensesTotal, STATEMENT.commission);
-    expect(new Decimal(STATEMENT.ownerNet).equals(expected)).toBe(true);
-  });
-
-  it("balance due carries the opening balance forward correctly", () => {
-    const expected = sum(STATEMENT.openingBalance, STATEMENT.ownerNet, STATEMENT.ownerPayouts);
-    expect(new Decimal(STATEMENT.balanceDue).equals(expected)).toBe(true);
-  });
-
-  it("commission matches the stated rate applied to net payout (cleaning included)", () => {
-    const expected = new Decimal(STATEMENT.netPayout)
-      .times(STATEMENT.commissionRate)
-      .negated()
-      .toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
-    expect(new Decimal(STATEMENT.commission).equals(expected)).toBe(true);
-  });
-});
-
-describe("calculator fixture (BUILD_PLAN.md §4.6 Example B)", () => {
-  it("NOI equals gross revenue plus platform fees plus opex plus rent", () => {
-    const expected = sum(
-      CALCULATOR_RESULTS.grossRevenue,
-      CALCULATOR_RESULTS.platformFees,
-      CALCULATOR_RESULTS.opex,
-      CALCULATOR_RESULTS.rent,
-    );
-    expect(new Decimal(CALCULATOR_RESULTS.noi).equals(expected)).toBe(true);
-  });
-
-  it("is not profitable at its occupancy, which is below its break-even occupancy", () => {
-    expect(CALCULATOR_RESULTS.isProfitable).toBe(false);
-    expect(CALCULATOR_RESULTS.occupancy).toBeLessThan(CALCULATOR_RESULTS.breakEvenOccupancy);
+  it("matches Example A: commission 8,010.60, owner net 24,142.40, balance due 4,142.40 after the 20,000 payout", () => {
+    expect(STATEMENT.commission).toBe("-8010.60");
+    expect(STATEMENT.ownerNet).toBe("24142.40");
+    expect(STATEMENT.ownerPayouts).toBe("-20000.00");
+    expect(STATEMENT.balanceDue).toBe("4142.40");
   });
 });

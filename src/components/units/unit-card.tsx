@@ -1,6 +1,7 @@
 import { FileText } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { DataWarning } from "@/components/common/data-warning";
 import { Money } from "@/components/common/money";
 import { Percent } from "@/components/common/percent";
 import { ToastButton } from "@/components/common/toast";
@@ -16,6 +17,7 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("units");
   const tToast = useTranslations("toast");
+  const tCommon = useTranslations("common");
   const isManaged = unit.operatingModel === "managed_for_owner";
   const profit = (isManaged ? unit.managerProfit : unit.netProfit)!;
 
@@ -59,6 +61,7 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
           </dd>
         </div>
       </dl>
+      {unit.availabilityConflict && <DataWarning message={tCommon("dataWarningOccupancy")} className="mt-3" />}
 
       {isManaged && (
         <div className="mt-3 flex flex-col gap-1.5">

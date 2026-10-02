@@ -12,7 +12,7 @@ describe("<ExpensesScreen />", () => {
     renderWithIntl(<ExpensesScreen period={HOME_PERIOD} breakdown={EXPENSE_BREAKDOWN} />);
     const bubbles = screen.getAllByTestId("expense-bubble");
     expect(bubbles).toHaveLength(EXPENSE_BREAKDOWN.bubbles.length);
-    expect(bubbles[0]).toHaveTextContent("68.9%");
+    expect(bubbles[0]).toHaveTextContent("58.3%");
   });
 
   it("sizes the bubbles by share (largest first)", () => {
@@ -24,7 +24,7 @@ describe("<ExpensesScreen />", () => {
 
   it("lists every category with its amount under the total", () => {
     renderWithIntl(<ExpensesScreen period={HOME_PERIOD} breakdown={EXPENSE_BREAKDOWN} />);
-    expect(screen.getByText(/50,800\.00/)).toBeInTheDocument();
+    expect(screen.getByText(/41,140\.00/)).toBeInTheDocument();
     for (const category of EXPENSE_BREAKDOWN.categories) {
       expect(screen.getAllByText(category.name.ar).length).toBeGreaterThan(0);
     }

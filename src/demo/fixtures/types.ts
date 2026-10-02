@@ -1,11 +1,11 @@
 /**
- * Shared shapes for `/demo` fixture data (BUILD_PLAN.md Phase P / P.1).
+ * Shared display shapes for `/demo` fixture data.
  *
- * All money amounts are decimal strings, never JS numbers — the same
- * discipline CLAUDE.md §6.2 requires of the real engine, even though these
- * fixtures involve no formulas of their own (every total here is either
- * copied from a worked example in BUILD_PLAN.md §4.6 or hand-summed and
- * checked by `src/test/fixtures.test.ts`).
+ * Money amounts are decimal strings (rounded half-up to piastres), never JS
+ * numbers. Since Phase 1 every figure is computed by the finance engine
+ * from the raw sample inputs in src/demo/sample-data/ — no fixture holds a
+ * hand-typed total (enforced by src/test/fixtures.test.ts). Ratios
+ * (occupancy, shares) are plain numbers: they are only ever displayed.
  */
 
 export type Localized = { ar: string; en: string };
@@ -29,7 +29,10 @@ export interface UnitFixture {
   area: Localized;
   operatingModel: OperatingModel;
   currency: "EGP";
+  /** Displayed occupancy, capped at 100% (see `availabilityConflict`). */
   occupancy: number;
+  /** Booked nights exceed available nights: show a data warning (never clamped silently). */
+  availabilityConflict: boolean;
   adr: string;
   revpar: string;
   /** Present for owner-operated and rental-arbitrage units only. */
@@ -40,12 +43,6 @@ export interface UnitFixture {
   /** Present for managed units only, e.g. "20% من صافي المحوّل". */
   commissionBasis?: Localized;
   hasStatement?: boolean;
-}
-
-/** A sample month-over-month change — not in §4.6, labelled as sample. */
-export interface SampleChange {
-  ratio: number;
-  isSample: true;
 }
 
 export interface ExpenseShare {

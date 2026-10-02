@@ -1,37 +1,56 @@
+import type Decimal from "decimal.js";
+import { ownerStatement, toMoneyString } from "@/lib/finance";
+import { CATEGORIES, type CategoryId } from "@/demo/sample-data/categories";
+import { SAMPLE_MONTH, SAMPLE_UNITS } from "@/demo/sample-data/units";
+import { monthLabel, sampleExpenses, sampleStays } from "./build";
 import type { Localized } from "./types";
 
 /**
- * Owner statement fixture for the Downtown Cairo unit — Example A from
- * §4.6 exactly (managed, 20% commission on net payout, cleaning fees
- * included, owner bears all costs). The owner-payout and balance-due lines
- * are hand-picked sample figures, not part of §4.6; `fixtures.test.ts`
- * checks every line still sums to its stated total.
+ * Owner statement for the Downtown Cairo unit, computed by the engine
+ * (cash basis, the default). Its September is §4.6 Example A exactly
+ * (managed, 20% of net payout, cleaning fees included, owner bears all
+ * costs); the 20,000 owner payout is a sample transfer, not part of §4.6.
+ * Deductions are shown as negative amounts.
  */
 
+const unit = SAMPLE_UNITS.find((u) => u.id === "downtown-cairo")!;
+
+const result = ownerStatement({
+  unitCurrency: unit.currency,
+  period: SAMPLE_MONTH,
+  basis: "cash",
+  stays: sampleStays(unit),
+  expenses: sampleExpenses(unit),
+  commission: unit.commission,
+  bearerRules: unit.bearerRules,
+  ownerPayouts: (unit.ownerPayouts ?? []).map((p) => ({ ...p, currency: unit.currency })),
+  openingBalance: unit.openingBalance ?? 0,
+});
+if (!result.ok) throw new Error(`Sample statement: ${JSON.stringify(result.error)}`);
+const st = result.value;
+
+/** A deduction, shown with its minus sign (a zero stays "0.00"). */
+const negative = (amount: Decimal) => toMoneyString(amount.negated());
+
 export const STATEMENT = {
-  unitName: { ar: "شقة وسط البلد", en: "Downtown Cairo apartment" } as Localized,
-  ownerName: { ar: "أحمد يوسف", en: "Ahmed Youssef" } as Localized,
-  period: { ar: "سبتمبر 2026", en: "September 2026" } as Localized,
+  unitName: unit.name,
+  ownerName: unit.owner!,
+  period: monthLabel(SAMPLE_MONTH),
   number: "0001",
-  basis: "cash" as const,
+  basis: st.basis,
   status: "finalized" as const,
-  openingBalance: "0.00",
-  grossRevenue: "47400.00",
-  platformFees: "-7347.00",
-  netPayout: "40053.00",
-  ownerExpenses: [
-    { category: { ar: "التنظيف", en: "Cleaning" } as Localized, amount: "-2100.00" },
-    { category: { ar: "مستلزمات الضيوف", en: "Guest supplies" } as Localized, amount: "-900.00" },
-    { category: { ar: "الكهرباء والمياه", en: "Utilities" } as Localized, amount: "-2500.00" },
-    { category: { ar: "الإنترنت", en: "Internet" } as Localized, amount: "-600.00" },
-    { category: { ar: "مصاريف الكمبوند", en: "Compound fees" } as Localized, amount: "-1000.00" },
-    { category: { ar: "الصيانة", en: "Repairs" } as Localized, amount: "-800.00" },
-  ],
-  ownerExpensesTotal: "-7900.00",
-  commissionRate: 0.2,
-  commissionBasis: { ar: "20% من صافي المحوّل", en: "20% of net payout" } as Localized,
-  commission: "-8010.60",
-  ownerNet: "24142.40",
-  ownerPayouts: "-20000.00",
-  balanceDue: "4142.40",
+  openingBalance: toMoneyString(st.openingBalance),
+  grossRevenue: toMoneyString(st.grossRevenue),
+  platformFees: negative(st.platformFees),
+  netPayout: toMoneyString(st.netPayout),
+  ownerExpenses: st.ownerExpenses.map((line) => ({
+    category: CATEGORIES[line.categoryId as CategoryId].name as Localized,
+    amount: negative(line.amount),
+  })),
+  ownerExpensesTotal: negative(st.ownerExpensesTotal),
+  commissionBasis: unit.commissionBasis!,
+  commission: negative(st.commission),
+  ownerNet: toMoneyString(st.ownerNet),
+  ownerPayouts: negative(st.ownerPayouts),
+  balanceDue: toMoneyString(st.balanceDue),
 };

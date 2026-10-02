@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { CalculatorScreen } from "@/components/calculator/calculator-screen";
-import { CALCULATOR_RESULTS, CALCULATOR_STEPS } from "@/demo/fixtures/calculator";
+import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
 
 export default async function CalculatorPage({
   params,
@@ -10,5 +10,5 @@ export default async function CalculatorPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <CalculatorScreen steps={CALCULATOR_STEPS} results={CALCULATOR_RESULTS} />;
+  return <CalculatorScreen presets={CALCULATOR_PRESETS} />;
 }
