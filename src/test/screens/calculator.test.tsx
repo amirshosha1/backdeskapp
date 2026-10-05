@@ -135,10 +135,10 @@ describe("<CalculatorScreen /> — live input", () => {
     expect(within(setupRow() as HTMLElement).getByText("تجريبي")).toBeInTheDocument();
     type(/تكلفة التجهيز/, "300000");
     expect(within(setupRow() as HTMLElement).queryByText("تجريبي")).toBeNull();
-    const example = screen.getByRole("radio", { name: "إعادة تأجير — الشيخ زايد" });
+    const example = screen.getByRole("radio", { name: "مثال: إعادة تأجير" });
     expect(example).toHaveAttribute("aria-checked", "false");
     fireEvent.click(example);
-    expect(field(/تكلفة التجهيز/)).toHaveValue("250000");
+    expect(field(/تكلفة التجهيز/)).toHaveValue("250,000");
     expect(example).toHaveAttribute("aria-checked", "true");
   });
 
@@ -153,6 +153,74 @@ describe("<CalculatorScreen /> — live input", () => {
     expect(screen.getByTestId("results")).toHaveTextContent("-4,740.00");
     fireEvent.click(screen.getByRole("switch", { name: /رسوم التنظيف ضمن أساس العمولة/ }));
     expect(screen.getByTestId("results")).toHaveTextContent("-4,500.00");
+  });
+});
+
+/** The number in a displayed amount, e.g. "-8,010.60 ج.م." → -8010.60. */
+const amountIn = (testId: string) => Number(plain(screen.getByTestId(testId)).match(/-?[\d,]+(\.\d+)?/)![0].replace(/,/g, ""));
+
+describe("<CalculatorScreen /> — the break-even's own terms (review 2026-10-02)", () => {
+  const cases: { preset: string; basis?: string; fixedFee?: string; mode?: string }[] = [
+    { preset: "مثال: إعادة تأجير" },
+    { preset: "إدارة لمالك — وسط البلد" },
+    ...["net_payout", "gross_revenue", "noi"].map((basis) => ({ preset: "إدارة لمالك — وسط البلد", basis })),
+    { preset: "إدارة لمالك — وسط البلد", basis: "fixed_monthly", fixedFee: "3000" },
+    { preset: "إدارة لمالك — وسط البلد", basis: "hybrid", fixedFee: "3000", mode: "max" },
+    { preset: "إدارة لمالك — وسط البلد", basis: "hybrid", fixedFee: "3000", mode: "sum" },
+    { preset: "إدارة لمالك — وسط البلد", basis: "hybrid", fixedFee: "9000", mode: "max" },
+  ];
+
+  it.each(cases)("fixed costs ÷ contribution = break-even nights: %o", ({ preset, basis, fixedFee, mode }) => {
+    renderCalculator();
+    fireEvent.click(screen.getByRole("radio", { name: preset }));
+    if (basis) fireEvent.change(screen.getByRole("combobox", { name: "أساس العمولة" }), { target: { value: basis } });
+    if (mode) fireEvent.change(screen.getByRole("combobox", { name: "طريقة الحساب" }), { target: { value: mode } });
+    if (fixedFee) type(/الحد الأدنى الشهري للعمولة|المبلغ الشهري الثابت/, fixedFee);
+    const nights = Number(plain(screen.getByTestId("break-even-nights")));
+    const ratio = amountIn("result-break-even-fixed-costs") / amountIn("result-contribution");
+    expect(Math.abs(ratio - nights)).toBeLessThan(0.01);
+  });
+
+  it("Example A: 2,058.50 before the 20% commission, 1,613.47 after; 4,900.00 ÷ 1,613.47 = 3.04 nights", () => {
+    renderCalculator();
+    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
+    expect(amountIn("result-contribution-before-commission")).toBe(2058.5);
+    expect(amountIn("result-contribution")).toBe(1613.47);
+    expect(amountIn("result-break-even-fixed-costs")).toBe(4900);
+    expect(plain(screen.getByTestId("break-even-nights"))).toBe("3.04");
+  });
+});
+
+describe("<CalculatorScreen /> — return metrics and display", () => {
+  it("says the returns cover the setup cost only, not the apartment's price", () => {
+    renderCalculator();
+    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
+    expect(screen.getByText("العائد على تكلفة التجهيز فقط")).toBeInTheDocument();
+    expect(screen.getByText("مدة الاسترداد على تكلفة التجهيز فقط")).toBeInTheDocument();
+    expect(screen.getByTestId("return-note")).toHaveTextContent("لا يشمل ثمن الشقة");
+  });
+
+  it("on rental arbitrage, names the deposit it includes", () => {
+    renderCalculator();
+    expect(screen.getByText("مدة الاسترداد على تكلفة التجهيز والتأمين فقط")).toBeInTheDocument();
+  });
+
+  it("the arbitrage example is generic, not Sheikh Zayed (Home's unit has other figures)", () => {
+    renderCalculator();
+    expect(screen.getByRole("radio", { name: "مثال: إعادة تأجير" })).toBeInTheDocument();
+    expect(screen.queryByText(/الشيخ زايد/)).toBeNull();
+  });
+
+  it("shows thousands separators on blur and the raw digits while typing", () => {
+    renderCalculator();
+    const rent = field(/الإيجار الشهري/);
+    expect(rent).toHaveValue("35,000");
+    fireEvent.focus(rent);
+    expect(rent).toHaveValue("35000");
+    fireEvent.change(rent, { target: { value: "٤٢٥٠٠" } });
+    expect(rent).toHaveValue("٤٢٥٠٠");
+    fireEvent.blur(rent);
+    expect(rent).toHaveValue("42,500");
   });
 });
 

@@ -28,6 +28,17 @@ export type BreakEvenResult =
       wholeNights: number;
       occupancy: Decimal;
       wholeOccupancy: Decimal;
+      /**
+       * The linear piece of profit(n) that crosses zero, as
+       * profit = contributionPerNight × n − fixedCosts. Contribution is
+       * *after* any commission that varies with nights (e.g. 20% of net
+       * payout); fixedCosts includes any commission that doesn't (a fixed
+       * fee or a minimum in force). So fixedCosts ÷ contributionPerNight =
+       * nights, for every commission basis — the figures a screen can show
+       * next to the break-even.
+       */
+      contributionPerNight: Decimal;
+      fixedCosts: Decimal;
       basis: ProfitBasis;
     }
   | {
@@ -119,6 +130,13 @@ export function breakEvenNights(model: PerNightModel, nightsAvailable: Decimal.V
     return { kind: "unreachable", reason: rising ? "exceeds_available_nights" : "never_profitable", basis };
   }
   const nights = snapToWhole(root);
+  // The linear piece the root lies on: from the last kink below it (or 0).
+  // Kinks within SNAP of the root (e.g. NOI = 0 at the root itself) would make a zero-width piece.
+  const below = breakpoints.filter((x) => x.greaterThan(0) && x.lessThan(root.minus(SNAP)));
+  const left = below.length > 0 ? Decimal.max(...below) : ZERO;
+  const [a, b] = left.lessThan(root) ? [left, root] : [root, root.plus(ONE)];
+  const contributionPerNight = profit(b).minus(profit(a)).dividedBy(b.minus(a));
+  const fixedCosts = contributionPerNight.times(a).minus(profit(a));
   // A night is not divisible: hosts need the ceiling. The one exception is
   // a sub-half-piastre tie, where profit one night earlier already displays
   // as 0.00 — then that night is the first whole night at break-even as
@@ -131,6 +149,8 @@ export function breakEvenNights(model: PerNightModel, nightsAvailable: Decimal.V
     wholeNights,
     occupancy: nights.dividedBy(available),
     wholeOccupancy: new Decimal(wholeNights).dividedBy(available),
+    contributionPerNight,
+    fixedCosts,
     basis,
   };
 }

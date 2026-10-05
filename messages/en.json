@@ -113,7 +113,7 @@
     "introNote": "Edit any number and the results update instantly. Start from one of the examples or type your own.",
     "presetsLabel": "Examples",
     "presets": {
-      "arbitrage": "Rental arbitrage — Sheikh Zayed",
+      "arbitrage": "Example: rental arbitrage",
       "managed": "Managed — Downtown Cairo"
     },
     "stepLabel": "Step {step} of {total}",
@@ -204,16 +204,20 @@
     "breakEvenWithDepreciation": "Break-even including depreciation: {nights} nights ({occupancy})",
     "breakEvenWithDepreciationUnreachable": "Break-even including depreciation: not reachable this month at these numbers",
     "contributionPerNightLabel": "Profit per night before fixed costs",
-    "investedLabel": "Total cash invested",
-    "paybackLabel": "Payback period",
+    "investedLabel": "{deposit, select, yes {Setup cost and deposit} other {Setup cost}}",
+    "paybackLabel": "{deposit, select, yes {Payback on the setup cost and deposit only} other {Payback on the setup cost only}}",
     "paybackValue": "{months} months",
     "paybackNever": "Not recovered at these numbers",
     "paybackNoInvestment": "No setup cost entered",
-    "cashOnCashLabel": "Annual cash-on-cash return",
+    "cashOnCashLabel": "{deposit, select, yes {Return on the setup cost and deposit only} other {Return on the setup cost only}}",
     "basisNote": "The profit at the top and the break-even beside it are before setup depreciation and include repairs. Net profit after depreciation has its own break-even, shown beside it.",
     "breakEvenNightsLabel": "Break-even nights",
     "breakEvenOccupancyLabel": "Break-even occupancy",
-    "projectionTeaserTitle": "12-month seasonal projection"
+    "projectionTeaserTitle": "12-month seasonal projection",
+    "contributionBeforeCommissionLabel": "Profit per night before the management commission",
+    "contributionAfterCommissionLabel": "Profit per night after the management commission",
+    "breakEvenFixedCostsLabel": "Monthly fixed costs in the break-even",
+    "returnNote": "Excludes the price of the apartment"
   },
   "guide": {
     "title": "Setup guide",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseAmount } from "./amount";
+import { formatTypedAmount, parseAmount } from "./amount";
 
 function value(result: ReturnType<typeof parseAmount>): string {
   if (!result.ok) throw new Error(`expected ok, got error "${result.error}"`);
@@ -84,5 +84,17 @@ describe("parseAmount options (Phase 1 calculator)", () => {
   it("the defaults are unchanged for add-expense", () => {
     expect(error(parseAmount("0"))).toBe("non_positive");
     expect(error(parseAmount("1.234"))).toBe("invalid");
+  });
+});
+
+describe("formatTypedAmount (shown on blur)", () => {
+  it("groups thousands and keeps the typed decimals; leaves invalid input as typed", () => {
+    expect(formatTypedAmount("35000", "ar")).toBe("35,000");
+    expect(formatTypedAmount("٢٥٠٠٠٠", "en")).toBe("250,000");
+    expect(formatTypedAmount("15.5", "ar")).toBe("15.5");
+    expect(formatTypedAmount("1234.56", "en")).toBe("1,234.56");
+    expect(formatTypedAmount("0", "ar")).toBe("0");
+    expect(formatTypedAmount("1.2.3", "ar")).toBe("1.2.3");
+    expect(formatTypedAmount("", "ar")).toBe("");
   });
 });

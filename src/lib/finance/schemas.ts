@@ -273,6 +273,8 @@ export const breakEvenResultSchema = z.discriminatedUnion("kind", [
     wholeNights: z.number().int().min(0),
     occupancy: D,
     wholeOccupancy: D,
+    contributionPerNight: D,
+    fixedCosts: D,
     basis: profitBasisSchema,
   }),
   z.object({
