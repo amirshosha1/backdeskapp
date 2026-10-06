@@ -1,4 +1,4 @@
-# BUILD_PLAN.md — Safi (صافي)
+# BUILD_PLAN.md — Backdesk · باك ديسك (formerly Safi / صافي)
 
 Arabic-first financial OS for STR hosts: feasibility calculator, setup guide, and an accounting ERP (Free for one unit, paid plans for more).
 Read together with `CLAUDE.md` at the repo root and `docs/PROGRESS.md`. Section 0 is for Amir; Claude Code starts at Section 1.
@@ -416,7 +416,7 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 - Prettier and the remaining pnpm scripts in `CLAUDE.md` §4 that do not need a database (ESLint, Vitest and the core scripts exist since Phase P).
 - English messages kept complete for any new strings (the locale switch arrived in Phase P.1, and the `ar.json`/`en.json` key-parity test exists since Phase P).
 - Light and dark themes from the design tokens; empty states for every tab.
-- PWA: manifest with the Arabic name "صافي", placeholder icons, Serwist service worker, offline fallback page. Check that Serwist works with the current Next.js bundler; if it needs webpack, build production with webpack.
+- PWA: manifest with the Arabic name "باك ديسك", placeholder icons, Serwist service worker, offline fallback page. Check that Serwist works with the current Next.js bundler; if it needs webpack, build production with webpack.
 - Global error boundary, `.env.example`.
 - GitHub Actions CI: lint, typecheck, unit tests.
 
@@ -463,7 +463,7 @@ RTL and translation issues, missing tests, performance. List issues by severity,
   - **Curated data:** verified own-portfolio performance is entered as `curated` rows (from `data/seed/benchmarks.csv`). These take precedence and act as a sanity check on API figures.
   - **Lookup rule** (server-only module):
     1. Start at the user's region, bedroom count and season `annual`.
-    2. Pick the candidate row by source precedence: `curated`, then `aggregated`, then `api`. Ignore rows whose `as_of` is older than 12 months. `aggregated` (anonymized performance from opted-in orgs, minimum 5 units per cell — Phase 9) sits between the two because it is real booked performance computed from Safi ledgers, like `curated`, but not verified by hand; it doesn't exist until after launch.
+    2. Pick the candidate row by source precedence: `curated`, then `aggregated`, then `api`. Ignore rows whose `as_of` is older than 12 months. `aggregated` (anonymized performance from opted-in orgs, minimum 5 units per cell — Phase 9) sits between the two because it is real booked performance computed from Backdesk ledgers, like `curated`, but not verified by hand; it doesn't exist until after launch.
     3. If there is no row, or its `sample_size` is below `MIN_SAMPLE` (a config constant, default 30), move to the parent region with the same bedroom count and repeat.
     4. At `national`, use the row regardless of sample size.
     5. If nothing is found at any level, hide the benchmark (the existing hide-if-no-data rule; never SAMPLE data in its place).
@@ -618,7 +618,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 
 | # | Question | Blocks | Default if unanswered |
 |---|---|---|---|
-| 1 | Domain for Safi (Resend sending domain, production URLs) | Phase 0b | Dev sign-in emails reach only Amir's own address |
+| 1 | Domain for Backdesk (Resend sending domain, production URLs) | Phase 0b | Dev sign-in emails reach only Amir's own address |
 | 2 | Where the prototype's pre-order button goes (e.g. a WhatsApp number or a form) | Phase P | Placeholder link, clearly marked |
 | 3 | Prices for Solo, Pro and Business (monthly, annual), the Setup Kit, and founding-member terms | Pre-order campaign (after Phase P) | SAMPLE prices in the prototype |
 | 4 | Phase 2 benchmark pre-build gates: the AirROI coverage spike (Madinaty, New Cairo, North Coast, Hurghada) and confirmation that AirROI's terms allow storing and displaying derived medians (see Phase 2 scope in §5) | Phase 2 implementation | — (a gate, not a default: nothing is built until both results are recorded) |

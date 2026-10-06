@@ -80,7 +80,7 @@ export function HomeScreen({ period, ownerView, coHostView }: HomeScreenProps) {
   return (
     <div>
       <RoyalHero
-        leading={<LogoMark label={tCommon("brandName")} mark={tCommon("brandMark")} />}
+        leading={<LogoMark label={tCommon("brandName")} />}
         center={
           <ViewSwitch
             value={view}

@@ -168,7 +168,7 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
               data-testid="verdict"
             >
               <VerdictIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-              {verdictText(result.verdict, t, locale)}
+              {verdictText(result.verdict, t, locale, lastValid.operatingModel === "managed_for_owner")}
             </span>
           </div>
           <dl className="mt-6 grid grid-cols-3 gap-2">
@@ -430,7 +430,8 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
 type Translator = ReturnType<typeof useTranslations<"calculator">>;
 
 /** The verdict's words; the rule itself lives in the engine (verdict.ts). */
-function verdictText(verdict: Verdict, t: Translator, locale: AppLocale): string {
+function verdictText(verdict: Verdict, t: Translator, locale: AppLocale, managed: boolean): string {
+  const owner = managed ? "yes" : "no";
   // Occupancy to the whole point, break-even to one decimal (64.6%), as before Phase 1.
   const occupancy = (ratio: { toNumber(): number } | null) =>
     formatPercent(ratio?.toNumber() ?? 0, { locale, decimals: 0, isolate: true });
@@ -438,10 +439,10 @@ function verdictText(verdict: Verdict, t: Translator, locale: AppLocale): string
   switch (verdict.kind) {
     case "profitable":
       return verdict.breakEvenOccupancy
-        ? t("verdictProfitable", { occupancy: occupancy(verdict.occupancy), breakEven: breakEven(verdict.breakEvenOccupancy) })
-        : t("verdictProfitableNoBreakEven", { occupancy: occupancy(verdict.occupancy) });
+        ? t("verdictProfitable", { occupancy: occupancy(verdict.occupancy), owner, breakEven: breakEven(verdict.breakEvenOccupancy) })
+        : t("verdictProfitableNoBreakEven", { occupancy: occupancy(verdict.occupancy), owner });
     case "loss":
-      return t("verdictNotProfitable", { occupancy: occupancy(verdict.occupancy), breakEven: breakEven(verdict.breakEvenOccupancy) });
+      return t("verdictNotProfitable", { occupancy: occupancy(verdict.occupancy), owner, breakEven: breakEven(verdict.breakEvenOccupancy) });
     case "at_break_even":
       return t("verdictAtBreakEven", { occupancy: occupancy(verdict.occupancy) });
     case "unreachable":

@@ -1,18 +1,17 @@
 {
   "meta": {
-    "siteName": "صافي",
-    "description": "صافي: حسابات واضحة لمضيفي الإيجار قصير المدة"
+    "siteName": "باك ديسك",
+    "description": "باك ديسك: حسابات واضحة لمضيفي الإيجار قصير المدة"
   },
   "common": {
-    "brandName": "صافي",
-    "brandMark": "ص",
+    "brandName": "باك ديسك",
     "sampleDataBanner": "بيانات تجريبية",
     "sampleBadge": "تجريبي",
     "dataWarningOccupancy": "الليالي المحجوزة أكثر من الليالي المتاحة. راجع عدد الليالي المغلقة.",
     "unlockWithPro": "عرض الباقات",
     "lockedTeaserBody": "متاح في الباقات المدفوعة",
     "feedbackCta": "رأيك؟",
-    "feedbackPrefill": "ملاحظتي على شاشة {path} في النسخة التجريبية من صافي:",
+    "feedbackPrefill": "ملاحظتي على شاشة {path} في النسخة التجريبية من باك ديسك:",
     "bottomNavLabel": "التنقل الرئيسي",
     "switchLanguage": "Switch to English",
     "back": "رجوع",
@@ -97,11 +96,11 @@
   "calculator": {
     "title": "حاسبة الجدوى",
     "heroLabel": "الربح الشهري قبل الإهلاك",
-    "verdictNotProfitable": "بإشغال {occupancy} الوحدة تخسر، والتعادل عند {breakEven}",
-    "verdictProfitable": "بإشغال {occupancy} الوحدة تربح، والتعادل عند {breakEven}",
-    "verdictProfitableNoBreakEven": "بإشغال {occupancy} الوحدة تربح",
+    "verdictNotProfitable": "بإشغال {occupancy}: {owner, select, yes {خسارة المالك} other {خسارة}}، والتعادل عند {breakEven}",
+    "verdictProfitable": "بإشغال {occupancy}: {owner, select, yes {مكسب المالك} other {مكسب}}، والتعادل عند {breakEven}",
+    "verdictProfitableNoBreakEven": "بإشغال {occupancy}: {owner, select, yes {مكسب المالك} other {مكسب}}",
     "verdictAtBreakEven": "بإشغال {occupancy} الوحدة عند نقطة التعادل تمامًا",
-    "verdictNeverProfitable": "بهذه الأسعار والتكاليف الوحدة تخسر مهما زاد الإشغال",
+    "verdictNeverProfitable": "كل ليلة محجوزة تزيد الخسارة، فلا تعادل بهذه الأرقام.",
     "verdictExceedsAvailable": "حتى مع حجز كل الليالي المتاحة، الوحدة لا تغطي تكاليفها بهذه الأرقام",
     "verdictNoNights": "لا توجد ليالٍ متاحة هذا الشهر",
     "tileBreakEvenOccupancy": "إشغال التعادل",
@@ -285,7 +284,7 @@
     "language": "اللغة",
     "languageValue": "العربية",
     "about": "عن النسخة التجريبية",
-    "aboutBody": "هذه نسخة تجريبية من صافي لعرض الفكرة. كل الأرقام أمثلة، ولا يُحفظ أي شيء تكتبه. الحسابات الحقيقية تبدأ مع النسخة الكاملة.",
+    "aboutBody": "هذه نسخة تجريبية من باك ديسك لعرض الفكرة. كل الأرقام أمثلة، ولا يُحفظ أي شيء تكتبه. الحسابات الحقيقية تبدأ مع النسخة الكاملة.",
     "feedback": "أرسل رأيك على واتساب"
   },
   "notFound": {

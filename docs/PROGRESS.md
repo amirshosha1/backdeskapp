@@ -1,7 +1,7 @@
-# PROGRESS — Safi (صافي)
+# PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-02 (Phase 1 built: finance engine + live `/demo` calculator, on branch `ccr-4744ba80-d9ofg0`, awaiting Amir's review).
+> Last updated: 2026-10-06 (rename to Backdesk, branch `rename-backdesk`; before that: Phase 1 built: finance engine + live `/demo` calculator, on branch `ccr-4744ba80-d9ofg0`, awaiting Amir's review).
 
 ## Current status
 
@@ -42,14 +42,14 @@
 - Local machine: Windows 11, Node 24.15, pnpm 9.15, Git 2.54. **No Docker, WSL, Supabase CLI or `gh`, by design.** Do not ask Amir to install anything.
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
 - Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
-- Supabase: no Safi project exists yet. The dev project (Frankfurt, free plan, Amir's last free slot) is created in Phase 0b only after approval. **Amir's other Supabase projects are off-limits.**
+- Supabase: no Backdesk project exists yet. The dev project (Frankfurt, free plan, Amir's last free slot) is created in Phase 0b only after approval. **Amir's other Supabase projects are off-limits.**
 - Vercel is connected to the repo (Amir reviewed the Phase P preview on his phone). Not set up yet: Resend sending domain, PostHog, Google OAuth client, Paymob, Anthropic key, prod Supabase project.
 - Phase P was built from a Claude Code on the web session (cloud container, Node 22.22, pnpm 10.33 available there — `package.json` still pins `packageManager: pnpm@9.15.0` to match Amir's machine; both installed the same lockfile cleanly). `pnpm dev`, `build`, `lint`, `typecheck`, `test` and `test:e2e` all exist now.
 
 ## Decisions (2026-09-26)
 
 ### Product and plans
-- Working name: **صافي / Safi**.
+- Working name: **Backdesk · باك ديسك** (formerly **Safi / صافي**; renamed 2026-10-06, see "Rename to Backdesk" below).
 - The home screen depends on the operating model. The owner view shows net profit. The co-host view shows commission minus manager-borne costs, summed across managed units, with portfolio-level overhead subtracted as its own line.
 - "Never hide the answer" stays. **Free** gets a manual ledger for 1 unit with full history, including agreements and commission calculation, recurring rules and receipt photos. On Free, receipt photos are compressed in the browser and capped by `receipt_photos_max` in the plan entitlements. **Paid** unlocks 2+ units, payout import, owner statements, AI entry, alerts and exports.
 - Fixed paid tiers: **Solo** up to 3 units, **Pro** up to 10, **Business** up to 30. They have identical features and differ only by unit limit. Prices live in the `plan_prices` table.
@@ -127,6 +127,25 @@
 - **Copy register:** simple MSA with Egyptian terms (confirmed by Amir). "شقة المدينتي" → "شقة مدينتي". In English, the utilities category is "Utilities" (the Arabic stays "الكهرباء والمياه").
 - **Month-over-month change chip** on Home: a SAMPLE value (+8.4% owner, +5.2% co-host), requested for the design review and not in §4.6. From Phase 1 it comes from real data or is hidden. *(Done in Phase 1: computed from a sample August, see "Phase 1 decisions".)*
 
+### Rename to Backdesk (2026-10-06)
+
+Rename-only batch (brand name, logo, verdict wording), branch `rename-backdesk`; no feature, finance-engine, layout, auth or Supabase change.
+
+**Done**
+- Product name is now **Backdesk · باك ديسك** (formerly Safi / صافي): `meta.siteName`, `meta.description`, `common.brandName`, `feedbackPrefill` and the demo's about text in both locales; the page `<title>` follows `meta.siteName`. There is no manifest and no `og:site_name` yet, so none was added (BUILD_PLAN Phase 0a still plans the PWA manifest, now named "باك ديسك").
+- The "ص" letter mark is replaced by one `BrandMark` component (`src/components/common/brand-mark.tsx`, the approved key logo, coordinates verbatim); `LogoMark` renders it with the brand name as its accessible name; the `common.brandMark` key is removed. It carries no transform or `rtl:` utility, and `brand-mark.test.tsx` checks the orientation (ring left, bars rising left to right, tallest bar mint) in `ar` and `en`.
+- `src/app/icon.svg` is replaced with the approved app icon. No other icon or social-image files exist.
+- Verdict wording uses accounting nouns: "مكسب" / "خسارة" and, for the managed-for-owner model, "مكسب المالك" / "خسارة المالك" (English: Profit / Loss, Owner profit / Owner loss). The calculator passes an `owner` select argument (yes for managed-for-owner) to the verdict strings; the wording lives only in `messages/*.json` and the engine's verdict kinds are untouched.
+- `package.json` `name` is `backdesk`; `pnpm-lock.yaml` does not contain the package name, so it needed no change (`pnpm install --frozen-lockfile` passes). `.env.example`'s header comment names Backdesk (no variable renamed).
+
+**Decisions and left untouched**
+- "صافي" meaning "net" (صافي الربح, صافي المحوّل, صافي الدخل التشغيلي, صافي المالك, ...) is unchanged everywhere.
+- The home hero question "كم ربحت فعلاً هذا الشهر؟" (`home.heroQuestion`) is a question, and CLAUDE.md §7 prescribes it word for word, so it was not rewritten as a verdict.
+- No localStorage/sessionStorage keys, cookies or analytics event names contain "safi" (the repo has none yet), so nothing needed leaving in place.
+- Not touched: GitHub repo name, Vercel project, routes, env var names, URLs, domains, `metadataBase`.
+
+**Next step:** unchanged (Amir reviews the Phase 1 PR and the preview; then Phase P.2).
+
 ### Phase 1 decisions (2026-10-01)
 
 Plan approved by Amir with the four proposed defaults and three changes of his own.
@@ -177,7 +196,7 @@ Decided, not implemented: a docs-only change while Phase 1 is still in progress.
     - Dropped: `p25` and `p75`, because only medians are stored, never means.
     - Types follow CLAUDE.md §6.2 (`numeric(14,2)` for money, `numeric(7,4)` for occupancy). These are global reference tables, so they have no `org_id`; RLS is enabled, only the service role writes, and `benchmarks` is read only by server-side, entitlement-checked code. That last point is my addition, to keep them consistent with CLAUDE.md §6.4–6.5.
 - **Lookup rule:** start at the user's region, bedroom count and `annual` season. Pick by source precedence and ignore rows older than 12 months. If there is no row, or `sample_size < MIN_SAMPLE` (config, default 30), move to the parent region. At `national`, use the row regardless of sample size. If nothing is found at any level, hide the benchmark. The result carries `resolved_level`, `resolved_region_name` and `sample_size`.
-- **Source precedence, including where `aggregated` goes:** `curated` → `aggregated` → `api`. The spec fixed curated first and api after it, and left `aggregated` for me to place from its existing definition. That definition (Phase 9) is anonymized, real booked performance from opted-in orgs' Safi ledgers, with at least 5 units per cell. It is first-party actuals like `curated`, but not verified by hand, so it sits between the two. It doesn't exist until after launch, so this ordering has no effect in Phase 2.
+- **Source precedence, including where `aggregated` goes:** `curated` → `aggregated` → `api`. The spec fixed curated first and api after it, and left `aggregated` for me to place from its existing definition. That definition (Phase 9) is anonymized, real booked performance from opted-in orgs' Backdesk ledgers, with at least 5 units per cell. It is first-party actuals like `curated`, but not verified by hand, so it sits between the two. It doesn't exist until after launch, so this ordering has no effect in Phase 2.
 - **UI:** label the resolved level when it differs from the one requested ("بناءً على متوسط <region>"). "عينة محدودة" only at the national fallback. For seasonal regions, the annual headline sits alongside peak and off-peak figures when those rows exist.
 - **Pre-build gates — results pending, to be recorded here before any implementation:**
   - **Coverage spike:** one AirROI request each for Madinaty, New Cairo, North Coast and Hurghada. Record the sample sizes and whether market-level summary endpoints exist. *Not run yet.*
