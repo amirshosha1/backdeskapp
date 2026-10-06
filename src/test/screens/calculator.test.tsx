@@ -27,7 +27,7 @@ describe("<CalculatorScreen /> — Example B (default)", () => {
   it("leads with Example B's profit before depreciation (= NOI −2,847.00) and the engine's verdict", () => {
     renderCalculator();
     expect(screen.getByTestId("hero-figure")).toHaveTextContent("-2,847.00");
-    expect(verdict()).toBe("بإشغال 60% الوحدة تخسر، والتعادل عند 64.6%");
+    expect(verdict()).toBe("بإشغال 60%: خسارة، والتعادل عند 64.6%");
   });
 
   it("shows break-even 19.38 nights (64.6%) with maintenance, and 18.99 (63.3%) without", () => {
@@ -64,6 +64,12 @@ describe("<CalculatorScreen /> — Example A", () => {
     expect(within(results).getByText("-8,010.60")).toBeInTheDocument();
     expect(within(results).getByText("+32,153.00")).toBeInTheDocument();
   });
+
+  it("words the managed-for-owner verdict as owner profit, not as a verb", () => {
+    renderCalculator();
+    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
+    expect(verdict()).toMatch(/^بإشغال \d+%: مكسب المالك، والتعادل عند/);
+  });
 });
 
 describe("<CalculatorScreen /> — live input", () => {
@@ -72,7 +78,7 @@ describe("<CalculatorScreen /> — live input", () => {
     type(/الليالي المحجوزة/, "20");
     // 2,058.50 × 20 − 39,900 = 1,270.00
     expect(screen.getByTestId("hero-figure")).toHaveTextContent("1,270.00");
-    expect(verdict()).toBe("بإشغال 67% الوحدة تربح، والتعادل عند 64.6%");
+    expect(verdict()).toBe("بإشغال 67%: مكسب، والتعادل عند 64.6%");
     expect(paragraphWith("إشغال 66.7% من 30 ليلة متاحة")).toBeInTheDocument();
   });
 
@@ -238,7 +244,7 @@ describe("<CalculatorScreen /> — rest of the screen", () => {
 
   it("works in English", () => {
     renderCalculator("en");
-    expect(verdict()).toBe("At 60% occupancy this unit loses money; break-even is 64.6%");
+    expect(verdict()).toBe("At 60% occupancy: Loss; break-even is 64.6%");
     expect(screen.getByText("Monthly profit before depreciation")).toBeInTheDocument();
   });
 });

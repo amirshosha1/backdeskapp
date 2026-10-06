@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { BrandMark } from "@/components/common/brand-mark";
 import { DemoBanner } from "@/components/demo/demo-banner";
 import { LanguageSwitch } from "./language-switch";
 import { cn } from "@/lib/utils";
@@ -38,15 +39,15 @@ export function RoyalHero({ leading, center, children, className }: RoyalHeroPro
   );
 }
 
-/** The circular brand mark used as the hero's leading element. */
-export function LogoMark({ label, mark }: { label: string; mark: string }) {
+/** The circular brand chip used as the hero's leading element; its accessible name is the brand name. */
+export function LogoMark({ label }: { label: string }) {
   return (
     <span
       aria-label={label}
       role="img"
-      className="glass flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg font-bold"
+      className="glass flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
     >
-      <span aria-hidden="true">{mark}</span>
+      <BrandMark />
     </span>
   );
 }

@@ -1,11 +1,11 @@
-# CLAUDE.md — Safi (صافي)
+# CLAUDE.md — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Persistent context for Claude Code. Read this before every task.
 > The full specification and build phases live in `docs/BUILD_PLAN.md`. Status, decisions and open issues live in `docs/PROGRESS.md`.
 
 ## 1. Product in one paragraph
 
-**Safi (صافي)** (working name) is an Arabic-first financial operating system for short-term-rental (STR) hosts, starting in Egypt and expanding to the GCC. It answers one question with precision: **"How much does this unit really make, and why?"** It covers three jobs: (1) feasibility and profit calculation before launch, (2) a step-by-step setup guide from empty apartment to first guest, and (3) a lightweight accounting ERP that records income and expenses, computes platform fees, management commissions, owner payouts and profitability, and produces owner statements. Free includes a manual ledger for one unit; the paid plans (Solo, Pro, Business) unlock more units, payout import, owner statements, AI entry, alerts and exports.
+**Backdesk · باك ديسك** (formerly Safi / صافي; working name) is an Arabic-first financial operating system for short-term-rental (STR) hosts, starting in Egypt and expanding to the GCC. It answers one question with precision: **"How much does this unit really make, and why?"** It covers three jobs: (1) feasibility and profit calculation before launch, (2) a step-by-step setup guide from empty apartment to first guest, and (3) a lightweight accounting ERP that records income and expenses, computes platform fees, management commissions, owner payouts and profitability, and produces owner statements. Free includes a manual ledger for one unit; the paid plans (Solo, Pro, Business) unlock more units, payout import, owner statements, AI entry, alerts and exports.
 
 ## 2. Hard non-goals — never build these
 

@@ -1,18 +1,17 @@
 {
   "meta": {
-    "siteName": "Safi",
-    "description": "Safi: clear books for short-term-rental hosts"
+    "siteName": "Backdesk",
+    "description": "Backdesk: clear books for short-term-rental hosts"
   },
   "common": {
-    "brandName": "Safi",
-    "brandMark": "ص",
+    "brandName": "Backdesk",
     "sampleDataBanner": "Sample data",
     "sampleBadge": "SAMPLE",
     "dataWarningOccupancy": "Booked nights exceed available nights. Check the blocked nights.",
     "unlockWithPro": "See plans",
     "lockedTeaserBody": "Available on paid plans",
     "feedbackCta": "Feedback?",
-    "feedbackPrefill": "My feedback on the {path} screen in the Safi prototype:",
+    "feedbackPrefill": "My feedback on the {path} screen in the Backdesk prototype:",
     "bottomNavLabel": "Main navigation",
     "switchLanguage": "التبديل إلى العربية",
     "back": "Back",
@@ -97,11 +96,11 @@
   "calculator": {
     "title": "Feasibility calculator",
     "heroLabel": "Monthly profit before depreciation",
-    "verdictNotProfitable": "At {occupancy} occupancy this unit loses money; break-even is {breakEven}",
-    "verdictProfitable": "At {occupancy} occupancy this unit makes money; break-even is {breakEven}",
-    "verdictProfitableNoBreakEven": "At {occupancy} occupancy this unit makes money",
+    "verdictNotProfitable": "At {occupancy} occupancy: {owner, select, yes {Owner loss} other {Loss}}; break-even is {breakEven}",
+    "verdictProfitable": "At {occupancy} occupancy: {owner, select, yes {Owner profit} other {Profit}}; break-even is {breakEven}",
+    "verdictProfitableNoBreakEven": "At {occupancy} occupancy: {owner, select, yes {Owner profit} other {Profit}}",
     "verdictAtBreakEven": "At {occupancy} occupancy this unit exactly breaks even",
-    "verdictNeverProfitable": "At these prices and costs this unit loses money at any occupancy",
+    "verdictNeverProfitable": "Every booked night adds to the loss, so there is no break-even at these numbers.",
     "verdictExceedsAvailable": "Even with every available night booked, this unit doesn't cover its costs at these numbers",
     "verdictNoNights": "No nights are available this month",
     "tileBreakEvenOccupancy": "Break-even occupancy",
@@ -285,7 +284,7 @@
     "language": "Language",
     "languageValue": "English",
     "about": "About this prototype",
-    "aboutBody": "This is a Safi prototype to show the idea. Every number is an example and nothing you type is saved. Real books start with the full version.",
+    "aboutBody": "This is a Backdesk prototype to show the idea. Every number is an example and nothing you type is saved. Real books start with the full version.",
     "feedback": "Send feedback on WhatsApp"
   },
   "notFound": {
