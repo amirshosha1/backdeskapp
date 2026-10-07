@@ -14,3 +14,11 @@ afterEach(cleanup);
 afterEach(() => {
   if (typeof window !== "undefined") window.history.replaceState(null, "", "/");
 });
+
+// The visitor's data lives in browser storage (src/lib/guest/), which jsdom
+// keeps for a whole file: every test starts with an empty browser.
+afterEach(() => {
+  if (typeof window === "undefined") return;
+  window.localStorage.clear();
+  window.sessionStorage.clear();
+});
