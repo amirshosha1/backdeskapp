@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { SEEN, storageStateFor } from "./e2e/guest";
 
 /**
  * Phase P / P.1 e2e coverage (BUILD_PLAN.md §5): navigation reachability,
@@ -22,6 +23,9 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:3000",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
+    // A returning visitor by default: the first-run flow is already seen, so
+    // the app entry shows Home. e2e/first-run.spec.ts starts from an empty browser.
+    storageState: storageStateFor(SEEN),
   },
   projects: [
     {

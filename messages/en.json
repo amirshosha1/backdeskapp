@@ -15,7 +15,8 @@
     "bottomNavLabel": "Main navigation",
     "switchLanguage": "التبديل إلى العربية",
     "back": "Back",
-    "close": "Close"
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "nav": {
     "home": "Home",
@@ -35,6 +36,93 @@
     "shareLink": "Sharing with the owner comes in the full version",
     "preorderSoon": "Pre-orders open soon",
     "signupSoon": "Sign-up opens at launch"
+  },
+  "firstRun": {
+    "skip": "Skip",
+    "progressLabel": "Question {current} of {total}",
+    "welcome": "Welcome to Backdesk",
+    "modelTitle": "Start with one apartment. How do you run it?",
+    "modelsLabel": "How you run the apartment",
+    "modelHint": "A few questions and you'll know: profit or loss. You add your other apartments once you're in.",
+    "models": {
+      "owner_operated": {
+        "title": "I own it and run it",
+        "sub": "No rent and no management commission"
+      },
+      "rental_arbitrage": {
+        "title": "I rent it and re-let it",
+        "sub": "You pay the owner a monthly rent"
+      },
+      "managed_for_owner": {
+        "title": "I manage it for an owner",
+        "sub": "You take a share of the payout; the result shows the owner's profit"
+      }
+    },
+    "next": "Next",
+    "showResult": "Show the result",
+    "price": {
+      "title": "What nightly rate do you expect?",
+      "caption": "The month's average, before the platform fee",
+      "dec": "Lower the rate by {step}",
+      "inc": "Raise the rate by {step}"
+    },
+    "nights": {
+      "title": "How many nights are booked a month?",
+      "caption": "{occupancy} occupancy of {available, plural, one {# night} other {# nights}}",
+      "unit": "{count, plural, one {night} other {nights}}",
+      "dec": "One night fewer",
+      "inc": "One night more"
+    },
+    "rent": {
+      "title": "How much rent do you pay a month?",
+      "caption": "The rent you pay the owner",
+      "dec": "Lower the rent by {step}",
+      "inc": "Raise the rent by {step}"
+    },
+    "commission": {
+      "title": "What's your management commission?",
+      "caption": "Of the amount the platform pays out",
+      "dec": "Lower the commission by {step}",
+      "inc": "Raise the commission by {step}"
+    },
+    "verdictWord": "{outcome, select, profit {{owner, select, yes {Owner profit} other {Profit}}} other {{owner, select, yes {Owner loss} other {Loss}}}}",
+    "perMonth": "a month",
+    "sentence": {
+      "short": "You break even at {breakEven} nights and you're at {booked}. You need {short, plural, one {# more night} other {# more nights}}.",
+      "above": "You break even at {breakEven} nights and you're at {booked}: {above, plural, one {# night} other {# nights}} above break-even.",
+      "atFirst": "You break even at {breakEven} nights and you're at {booked}: the first profitable night, and one night fewer is a loss.",
+      "beyond": "Break-even is at {breakEven} nights, more than the {available, plural, one {# night} other {# nights}} available this month.",
+      "noBreakEven": "Every booked night adds to the loss, so there is no break-even at these numbers.",
+      "noNights": "No nights are available this month."
+    },
+    "assumedTitle": "The rest uses example values",
+    "assumed": {
+      "platformFee": "Platform fee",
+      "opex": "Operating expenses a month",
+      "setup": "Setup cost",
+      "setupValue": "{amount} over {months, plural, one {# month} other {# months}}",
+      "cleaningFee": "Cleaning fee per stay",
+      "stay": "Average stay",
+      "stayValue": "{nights} {count, plural, one {night} other {nights}}",
+      "deposit": "Deposit",
+      "commissionBasis": "Commission basis",
+      "blocked": "Blocked nights"
+    },
+    "savedNote": "This apartment is saved as your first unit on this device.",
+    "continue": "Continue",
+    "restart": "Start over",
+    "countKicker": "One last question",
+    "countTitle": "How many apartments do you own or manage?",
+    "counts": {
+      "1": "One apartment",
+      "2-3": "Two or three",
+      "4-10": "4 to 10 apartments",
+      "10+": "More than 10 apartments"
+    },
+    "planHead": "Your first apartment is free.",
+    "planOne": "You see its profit or loss every month, with no subscription.",
+    "planMore": "You add your other apartments with a subscription and choose the plan later.",
+    "enter": "Enter the app"
   },
   "home": {
     "viewSwitchLabel": "View",
@@ -91,36 +179,35 @@
     "emptyTitle": "No units yet",
     "emptyBody": "Add your first unit to start tracking what it really makes.",
     "noManagedTitle": "No units managed for owners",
-    "noManagedBody": "When you add a unit you manage for an owner, its management profit shows here."
+    "noManagedBody": "When you add a unit you manage for an owner, its management profit shows here.",
+    "ownTitle": "Your first apartment",
+    "ownHeroNone": "No apartment added yet",
+    "firstFree": "The first one is free",
+    "examplesHeading": "Sample units",
+    "ownNetLabel": "Net after depreciation",
+    "ownOpen": "{name}, {model}: open the calculator",
+    "nightsBooked": "{booked, plural, one {# night booked} other {# nights booked}}",
+    "barBreakEven": "Break-even at {nights} nights",
+    "barBeyond": "Break-even at {nights} nights, more than are available",
+    "barNone": "No break-even at these numbers",
+    "barNoNights": "No nights are available this month",
+    "barLabel": "Booked nights against break-even nights",
+    "commissionTerms": "{basis, select, net_payout {{rate} of net payout} gross_revenue {{rate} of revenue} noi {{rate} of net operating income} fixed_monthly {{fee} a month} other {{mode, select, max {{rate} of {hybridBasis, select, gross_revenue {revenue} net_payout {net payout} other {net operating income}}, minimum {fee} a month} other {{fee} a month + {rate} of {hybridBasis, select, gross_revenue {revenue} net_payout {net payout} other {net operating income}}}}}}",
+    "addFirst": "Add your first apartment",
+    "addFirstSub": "A few questions and you'll know its profit or loss",
+    "addAnother": "Add an apartment",
+    "addAnotherSub": "You own it, rent it, or manage it for an owner",
+    "gateTitle": "A second apartment comes with a subscription",
+    "gateBody": "Your first apartment stays free.",
+    "gatePlans": "See the plans",
+    "gateLater": "Not now"
   },
   "calculator": {
     "title": "Feasibility calculator",
-    "heroLabel": "Monthly profit before depreciation",
-    "verdictNotProfitable": "At {occupancy} occupancy: {owner, select, yes {Owner loss} other {Loss}}; break-even is {breakEven}",
-    "verdictProfitable": "At {occupancy} occupancy: {owner, select, yes {Owner profit} other {Profit}}; break-even is {breakEven}",
-    "verdictProfitableNoBreakEven": "At {occupancy} occupancy: {owner, select, yes {Owner profit} other {Profit}}",
-    "verdictAtBreakEven": "At {occupancy} occupancy this unit exactly breaks even",
-    "verdictNeverProfitable": "Every booked night adds to the loss, so there is no break-even at these numbers.",
-    "verdictExceedsAvailable": "Even with every available night booked, this unit doesn't cover its costs at these numbers",
-    "verdictNoNights": "No nights are available this month",
-    "tileBreakEvenOccupancy": "Break-even occupancy",
-    "tileBreakEvenNights": "Break-even nights",
-    "tileAdr": "Avg. nightly rate",
-    "tileUnavailable": "—",
-    "breakEvenExcludingMaintenance": "Excluding the irregular-maintenance allowance: {nights} nights ({occupancy})",
-    "breakEvenExcludingMaintenanceUnreachable": "Excluding the irregular-maintenance allowance: break-even is not reachable this month",
-    "introNote": "Edit any number and the results update instantly. Start from one of the examples or type your own.",
     "presetsLabel": "Examples",
     "presets": {
       "arbitrage": "Example: rental arbitrage",
       "managed": "Managed — Downtown Cairo"
-    },
-    "stepLabel": "Step {step} of {total}",
-    "steps": {
-      "unit": "Unit",
-      "model": "Operating model",
-      "revenue": "Revenue",
-      "costs": "Costs"
     },
     "unitDetails": {
       "city": "City",
@@ -129,7 +216,6 @@
       "bathrooms": "Bathrooms",
       "maxGuests": "Max guests"
     },
-    "operatingModelLabel": "Model",
     "fields": {
       "rent": "Monthly rent",
       "deposit": "Deposit",
@@ -188,20 +274,8 @@
       "life_required": "Enter a useful life for the setup cost"
     },
     "invalidNotice": "Fix the highlighted field to update the results. The figures shown are from your last valid entry.",
-    "resultsTitle": "Monthly result",
-    "resultsStep": "Step {step}",
-    "grossRevenueLabel": "Gross revenue",
-    "platformFeesLabel": "Platform fees",
     "netPayoutLabel": "Net payout",
-    "opexLabel": "Operating expenses",
-    "rentLabel": "Rent",
     "noiLabel": "Net operating income",
-    "commissionLabel": "Management commission",
-    "profitBeforeDepreciationLabel": "Profit before depreciation",
-    "depreciationLabel": "Setup depreciation (monthly)",
-    "netProfitLabel": "Net profit after depreciation",
-    "breakEvenWithDepreciation": "Break-even including depreciation: {nights} nights ({occupancy})",
-    "breakEvenWithDepreciationUnreachable": "Break-even including depreciation: not reachable this month at these numbers",
     "contributionPerNightLabel": "Profit per night before fixed costs",
     "investedLabel": "{deposit, select, yes {Setup cost and deposit} other {Setup cost}}",
     "paybackLabel": "{deposit, select, yes {Payback on the setup cost and deposit only} other {Payback on the setup cost only}}",
@@ -209,14 +283,78 @@
     "paybackNever": "Not recovered at these numbers",
     "paybackNoInvestment": "No setup cost entered",
     "cashOnCashLabel": "{deposit, select, yes {Return on the setup cost and deposit only} other {Return on the setup cost only}}",
-    "basisNote": "The profit at the top and the break-even beside it are before setup depreciation and include repairs. Net profit after depreciation has its own break-even, shown beside it.",
-    "breakEvenNightsLabel": "Break-even nights",
-    "breakEvenOccupancyLabel": "Break-even occupancy",
     "projectionTeaserTitle": "12-month seasonal projection",
     "contributionBeforeCommissionLabel": "Profit per night before the management commission",
     "contributionAfterCommissionLabel": "Profit per night after the management commission",
-    "breakEvenFixedCostsLabel": "Monthly fixed costs in the break-even",
-    "returnNote": "Excludes the price of the apartment"
+    "heroLabel": "{owner, select, yes {Owner's net profit after depreciation} other {Monthly net profit after depreciation}}",
+    "tabsLabel": "Calculator view",
+    "tabSummary": "Summary",
+    "tabAll": "All numbers",
+    "sentence": {
+      "short": "You need {short, plural, one {# more night} other {# more nights}} to cover the costs.",
+      "above": "You're {above, plural, one {# night} other {# nights}} past break-even.",
+      "atFirst": "You're at the first profitable night; one night fewer and it's a loss.",
+      "beyond": "Break-even is at {breakEven} nights, more than the {available, plural, one {# night} other {# nights}} available this month.",
+      "noBreakEven": "Every booked night adds to the loss, so there is no break-even at these numbers.",
+      "noNights": "No nights are available this month."
+    },
+    "nightsHeader": "{booked, plural, one {# night} other {# nights}} booked of {available}",
+    "occupancyShort": "Occupancy {occupancy}",
+    "breakEvenPill": "Break-even at {nights} nights",
+    "breakEvenBeyondPill": "Break-even at {nights} nights, beyond the month",
+    "breakEvenNonePill": "No break-even at these numbers",
+    "modelsLabel": "Operating model",
+    "modelChip": {
+      "owner_operated": "Owner-run",
+      "rental_arbitrage": "Rental arbitrage",
+      "managed_for_owner": "Managed"
+    },
+    "stepper": {
+      "adr": "Nightly rate",
+      "rent": "Monthly rent",
+      "commission": "Management commission",
+      "platformFee": "Platform fee",
+      "dec": "Lower {label} by {step}",
+      "inc": "Raise {label} by {step}",
+      "atMin": "{label} can't go below {limit}",
+      "atMax": "{label} can't go above {limit}"
+    },
+    "rows": {
+      "revenue": "Revenue",
+      "costs": "All costs, depreciation included",
+      "net": "{owner, select, yes {Owner's net after depreciation} other {Net after depreciation}}"
+    },
+    "staleSummary": "A field in All numbers isn't valid; these figures are from your last valid entry. Tap to fix it.",
+    "exampleNote": "This is an example and isn't saved.",
+    "exampleAdd": "Add your first apartment",
+    "ownNote": "Your first apartment's numbers: your changes are saved on this device only.",
+    "replaceTitle": "Replace your apartment's numbers?",
+    "replaceBody": "The example will replace the numbers saved for “Your first apartment” on this device.",
+    "replaceConfirm": "Replace the numbers",
+    "sections": {
+      "unitDetails": "Unit details",
+      "revenue": "Revenue",
+      "platformFee": "Platform fee",
+      "opex": "Operating expenses",
+      "rent": "Rent",
+      "commission": "Management commission",
+      "beforeDepreciation": "{owner, select, yes {Owner's profit before depreciation} other {Profit before depreciation}}",
+      "depreciation": "Setup depreciation",
+      "other": "Other indicators"
+    },
+    "depositHint": "Not part of monthly profit; it counts in the cash invested and the payback.",
+    "breakEvenAfterLabel": "Break-even after depreciation",
+    "breakEvenValue": "{nights} nights ({occupancy})",
+    "breakEvenBeyondValue": "{nights} nights, more than are available",
+    "breakEvenNoneValue": "No break-even at these numbers",
+    "breakEvenUnreachableValue": "Not reachable this month",
+    "firstProfitableNightLabel": "First profitable night",
+    "firstProfitableNightValue": "Night {night}",
+    "breakEvenFixedCostsLabel": "Fixed costs in the break-even, depreciation included",
+    "breakEvenBeforeLabel": "Break-even before depreciation",
+    "breakEvenBeforeNoMaintenanceLabel": "Break-even before depreciation, without irregular maintenance",
+    "returnNote": "Payback and return use profit before depreciation (cash flow) and exclude the price of the apartment.",
+    "basisNote": "The figure at the top and the break-even beside it are after setup depreciation and include repairs. Anything marked “before depreciation” leaves depreciation out."
   },
   "guide": {
     "title": "Setup guide",
@@ -284,8 +422,12 @@
     "language": "Language",
     "languageValue": "English",
     "about": "About this prototype",
-    "aboutBody": "This is a Backdesk prototype to show the idea. Every number is an example and nothing you type is saved. Real books start with the full version.",
-    "feedback": "Send feedback on WhatsApp"
+    "aboutBody": "This is a Backdesk prototype. The units under “Sample units” and their numbers are examples. Your first apartment, if you add one, is saved on this device only and is not sent anywhere. Real books start with the full version.",
+    "feedback": "Send feedback on WhatsApp",
+    "rerun": "Redo the starting questions",
+    "rerunTitle": "Redo the starting questions?",
+    "rerunBody": "When you reach the result, your new answers replace the numbers saved for “Your first apartment”. If you skip the questions, your numbers stay as they are.",
+    "rerunConfirm": "Start the questions"
   },
   "notFound": {
     "title": "Page not found",

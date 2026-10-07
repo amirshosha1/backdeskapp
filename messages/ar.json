@@ -15,7 +15,8 @@
     "bottomNavLabel": "التنقل الرئيسي",
     "switchLanguage": "Switch to English",
     "back": "رجوع",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "cancel": "إلغاء"
   },
   "nav": {
     "home": "الرئيسية",
@@ -35,6 +36,93 @@
     "shareLink": "رابط المشاركة مع المالك متاح في النسخة الكاملة",
     "preorderSoon": "الحجز المسبق يُفتح قريبًا",
     "signupSoon": "التسجيل يُفتح عند الإطلاق"
+  },
+  "firstRun": {
+    "skip": "تخطَّ",
+    "progressLabel": "السؤال {current} من {total}",
+    "welcome": "أهلاً بك في باك ديسك",
+    "modelTitle": "ابدأ بشقة واحدة. كيف تشغّلها؟",
+    "modelsLabel": "طريقة تشغيل الشقة",
+    "modelHint": "أسئلة قليلة وتعرف: مكسب أم خسارة. باقي شققك تضيفها بعد الدخول.",
+    "models": {
+      "owner_operated": {
+        "title": "أملكها وأديرها",
+        "sub": "لا إيجار ولا عمولة إدارة"
+      },
+      "rental_arbitrage": {
+        "title": "أستأجرها وأعيد تأجيرها",
+        "sub": "تدفع إيجارًا شهريًا للمالك"
+      },
+      "managed_for_owner": {
+        "title": "أديرها لحساب مالك",
+        "sub": "تأخذ نسبة من المحوَّل، والنتيجة تعرض ربح المالك"
+      }
+    },
+    "next": "التالي",
+    "showResult": "اعرض النتيجة",
+    "price": {
+      "title": "كم تتوقع سعر الليلة؟",
+      "caption": "المتوسط على مدار الشهر، قبل عمولة المنصة",
+      "dec": "اخفض السعر {step}",
+      "inc": "ارفع السعر {step}"
+    },
+    "nights": {
+      "title": "كم ليلة تُحجز في الشهر؟",
+      "caption": "إشغال {occupancy} من {available, plural, one {ليلة واحدة} two {ليلتان} few {# ليالٍ} many {# ليلة} other {# ليلة}}",
+      "unit": "{count, plural, one {ليلة} two {ليلتان} few {ليالٍ} many {ليلة} other {ليلة}}",
+      "dec": "انقص ليلة",
+      "inc": "زد ليلة"
+    },
+    "rent": {
+      "title": "كم تدفع إيجارًا في الشهر؟",
+      "caption": "الإيجار الذي تدفعه للمالك",
+      "dec": "اخفض الإيجار {step}",
+      "inc": "ارفع الإيجار {step}"
+    },
+    "commission": {
+      "title": "كم نسبة عمولة الإدارة؟",
+      "caption": "من المبلغ المحوَّل من المنصة",
+      "dec": "اخفض العمولة {step}",
+      "inc": "ارفع العمولة {step}"
+    },
+    "verdictWord": "{outcome, select, profit {{owner, select, yes {مكسب المالك} other {مكسب}}} other {{owner, select, yes {خسارة المالك} other {خسارة}}}}",
+    "perMonth": "في الشهر",
+    "sentence": {
+      "short": "تتعادل عند {breakEven} ليلة وأنت عند {booked}. ينقصك {short, plural, one {ليلة واحدة} two {ليلتان} few {# ليالٍ} many {# ليلة} other {# ليلة}}.",
+      "above": "تتعادل عند {breakEven} ليلة وأنت عند {booked}. فوق التعادل {above, plural, one {بليلة واحدة} two {بليلتين} few {بـ # ليالٍ} many {بـ # ليلة} other {بـ # ليلة}}.",
+      "atFirst": "تتعادل عند {breakEven} ليلة وأنت عند {booked}: أول ليلة تحقق مكسبًا، وبليلة أقل تصبح النتيجة خسارة.",
+      "beyond": "التعادل عند {breakEven} ليلة، أكثر من {available, plural, one {الليلة المتاحة} two {الليلتين المتاحتين} few {# ليالٍ متاحة} many {# ليلة متاحة} other {# ليلة متاحة}} في الشهر.",
+      "noBreakEven": "كل ليلة محجوزة تزيد الخسارة، فلا تعادل بهذه الأرقام.",
+      "noNights": "لا توجد ليالٍ متاحة هذا الشهر."
+    },
+    "assumedTitle": "الباقي محسوب بقيم تجريبية",
+    "assumed": {
+      "platformFee": "عمولة المنصة",
+      "opex": "مصاريف التشغيل في الشهر",
+      "setup": "تكلفة التجهيز",
+      "setupValue": "{amount} على {months, plural, one {شهر واحد} two {شهرين} few {# أشهر} many {# شهرًا} other {# شهر}}",
+      "cleaningFee": "رسوم التنظيف للحجز",
+      "stay": "متوسط الإقامة",
+      "stayValue": "{nights} {count, plural, one {ليلة} two {ليلتان} few {ليالٍ} many {ليلة} other {ليلة}}",
+      "deposit": "مبلغ التأمين",
+      "commissionBasis": "أساس العمولة",
+      "blocked": "الليالي المغلقة"
+    },
+    "savedNote": "تُحفظ هذه الشقة كأول وحدة لك على هذا الجهاز.",
+    "continue": "كمّل",
+    "restart": "ابدأ من جديد",
+    "countKicker": "سؤال أخير",
+    "countTitle": "كم شقة تملك أو تدير؟",
+    "counts": {
+      "1": "شقة واحدة",
+      "2-3": "شقتان أو ثلاث",
+      "4-10": "من 4 إلى 10 شقق",
+      "10+": "أكثر من 10 شقق"
+    },
+    "planHead": "شقتك الأولى مجانية.",
+    "planOne": "تعرف مكسبها أو خسارتها كل شهر بلا اشتراك.",
+    "planMore": "باقي شققك تضيفها ضمن الاشتراك، وتختار الباقة لاحقًا.",
+    "enter": "ادخل التطبيق"
   },
   "home": {
     "viewSwitchLabel": "طريقة العرض",
@@ -91,36 +179,35 @@
     "emptyTitle": "لا توجد وحدات بعد",
     "emptyBody": "أضف أول وحدة لتبدأ في متابعة ربحها الحقيقي.",
     "noManagedTitle": "لا توجد وحدات تديرها لملاك",
-    "noManagedBody": "عند إضافة وحدة بنظام الإدارة لحساب مالك، يظهر ربح الإدارة هنا."
+    "noManagedBody": "عند إضافة وحدة بنظام الإدارة لحساب مالك، يظهر ربح الإدارة هنا.",
+    "ownTitle": "شقتك الأولى",
+    "ownHeroNone": "لم تضف شقتك بعد",
+    "firstFree": "الأولى مجانية",
+    "examplesHeading": "أمثلة تجريبية",
+    "ownNetLabel": "الصافي بعد الإهلاك",
+    "ownOpen": "{name}، {model}: افتح الحاسبة",
+    "nightsBooked": "{booked, plural, one {ليلة واحدة محجوزة} two {ليلتان محجوزتان} few {# ليالٍ محجوزة} many {# ليلة محجوزة} other {# ليلة محجوزة}}",
+    "barBreakEven": "التعادل عند {nights} ليلة",
+    "barBeyond": "التعادل عند {nights} ليلة، أكثر من الليالي المتاحة",
+    "barNone": "لا تعادل بهذه الأرقام",
+    "barNoNights": "لا توجد ليالٍ متاحة هذا الشهر",
+    "barLabel": "الليالي المحجوزة مقارنةً بليالي التعادل",
+    "commissionTerms": "{basis, select, net_payout {{rate} من صافي المحوّل} gross_revenue {{rate} من الإيرادات} noi {{rate} من صافي الدخل التشغيلي} fixed_monthly {{fee} شهريًا} other {{mode, select, max {{rate} من {hybridBasis, select, gross_revenue {الإيرادات} net_payout {صافي المحوّل} other {صافي الدخل التشغيلي}}، بحد أدنى {fee} شهريًا} other {{fee} شهريًا + {rate} من {hybridBasis, select, gross_revenue {الإيرادات} net_payout {صافي المحوّل} other {صافي الدخل التشغيلي}}}}}}",
+    "addFirst": "أضف شقتك الأولى",
+    "addFirstSub": "أسئلة قليلة وتعرف مكسبها أو خسارتها",
+    "addAnother": "أضف شقة",
+    "addAnotherSub": "تملكها، تستأجرها، أو تديرها لمالك",
+    "gateTitle": "الشقة الثانية ضمن الاشتراك",
+    "gateBody": "شقتك الأولى تبقى مجانية.",
+    "gatePlans": "شاهد الباقات",
+    "gateLater": "ليس الآن"
   },
   "calculator": {
     "title": "حاسبة الجدوى",
-    "heroLabel": "الربح الشهري قبل الإهلاك",
-    "verdictNotProfitable": "بإشغال {occupancy}: {owner, select, yes {خسارة المالك} other {خسارة}}، والتعادل عند {breakEven}",
-    "verdictProfitable": "بإشغال {occupancy}: {owner, select, yes {مكسب المالك} other {مكسب}}، والتعادل عند {breakEven}",
-    "verdictProfitableNoBreakEven": "بإشغال {occupancy}: {owner, select, yes {مكسب المالك} other {مكسب}}",
-    "verdictAtBreakEven": "بإشغال {occupancy} الوحدة عند نقطة التعادل تمامًا",
-    "verdictNeverProfitable": "كل ليلة محجوزة تزيد الخسارة، فلا تعادل بهذه الأرقام.",
-    "verdictExceedsAvailable": "حتى مع حجز كل الليالي المتاحة، الوحدة لا تغطي تكاليفها بهذه الأرقام",
-    "verdictNoNights": "لا توجد ليالٍ متاحة هذا الشهر",
-    "tileBreakEvenOccupancy": "إشغال التعادل",
-    "tileBreakEvenNights": "ليالي التعادل",
-    "tileAdr": "متوسط الليلة",
-    "tileUnavailable": "—",
-    "breakEvenExcludingMaintenance": "بدون تخصيص الصيانة غير المنتظمة: {nights} ليلة ({occupancy})",
-    "breakEvenExcludingMaintenanceUnreachable": "بدون تخصيص الصيانة غير المنتظمة: التعادل غير ممكن خلال الشهر",
-    "introNote": "عدّل أي رقم وتتغير النتائج فورًا. ابدأ من أحد المثالين أو اكتب أرقامك.",
     "presetsLabel": "أمثلة جاهزة",
     "presets": {
       "arbitrage": "مثال: إعادة تأجير",
       "managed": "إدارة لمالك — وسط البلد"
-    },
-    "stepLabel": "الخطوة {step} من {total}",
-    "steps": {
-      "unit": "الوحدة",
-      "model": "نموذج التشغيل",
-      "revenue": "الإيرادات",
-      "costs": "التكاليف"
     },
     "unitDetails": {
       "city": "المدينة",
@@ -129,7 +216,6 @@
       "bathrooms": "الحمامات",
       "maxGuests": "أقصى عدد ضيوف"
     },
-    "operatingModelLabel": "النموذج",
     "fields": {
       "rent": "الإيجار الشهري",
       "deposit": "مبلغ التأمين",
@@ -188,20 +274,8 @@
       "life_required": "أدخل العمر الافتراضي لتكلفة التجهيز"
     },
     "invalidNotice": "صحّح الحقل المحدد لتحديث النتائج. الأرقام المعروضة من آخر إدخال صحيح.",
-    "resultsTitle": "النتيجة الشهرية",
-    "resultsStep": "الخطوة {step}",
-    "grossRevenueLabel": "إجمالي الإيرادات",
-    "platformFeesLabel": "عمولة المنصة",
     "netPayoutLabel": "المحوَّل من المنصة",
-    "opexLabel": "المصروفات التشغيلية",
-    "rentLabel": "الإيجار",
     "noiLabel": "صافي الدخل التشغيلي",
-    "commissionLabel": "عمولة الإدارة",
-    "profitBeforeDepreciationLabel": "الربح قبل الإهلاك",
-    "depreciationLabel": "إهلاك التجهيز (شهريًا)",
-    "netProfitLabel": "صافي الربح بعد الإهلاك",
-    "breakEvenWithDepreciation": "التعادل شاملًا الإهلاك: {nights} ليلة ({occupancy})",
-    "breakEvenWithDepreciationUnreachable": "التعادل شاملًا الإهلاك: غير ممكن خلال الشهر بهذه الأرقام",
     "contributionPerNightLabel": "ربح الليلة قبل المصاريف الثابتة",
     "investedLabel": "{deposit, select, yes {تكلفة التجهيز والتأمين} other {تكلفة التجهيز}}",
     "paybackLabel": "{deposit, select, yes {مدة الاسترداد على تكلفة التجهيز والتأمين فقط} other {مدة الاسترداد على تكلفة التجهيز فقط}}",
@@ -209,14 +283,78 @@
     "paybackNever": "لا يُسترد بهذه الأرقام",
     "paybackNoInvestment": "لا توجد تكلفة تجهيز",
     "cashOnCashLabel": "{deposit, select, yes {العائد على تكلفة التجهيز والتأمين فقط} other {العائد على تكلفة التجهيز فقط}}",
-    "basisNote": "الربح في الأعلى ونقطة التعادل بجانبه قبل إهلاك التجهيز، ويشملان الصيانة. صافي الربح بعد الإهلاك له نقطة تعادل خاصة به بجانبه.",
-    "breakEvenNightsLabel": "ليالي التعادل",
-    "breakEvenOccupancyLabel": "إشغال التعادل",
     "projectionTeaserTitle": "توقعات 12 شهرًا حسب المواسم",
     "contributionBeforeCommissionLabel": "ربح الليلة قبل عمولة الإدارة",
     "contributionAfterCommissionLabel": "ربح الليلة بعد عمولة الإدارة",
-    "breakEvenFixedCostsLabel": "التكاليف الشهرية الثابتة في حساب التعادل",
-    "returnNote": "لا يشمل ثمن الشقة"
+    "heroLabel": "{owner, select, yes {صافي ربح المالك بعد الإهلاك} other {صافي الربح الشهري بعد الإهلاك}}",
+    "tabsLabel": "عرض الحاسبة",
+    "tabSummary": "الملخص",
+    "tabAll": "كل الأرقام",
+    "sentence": {
+      "short": "ينقصك {short, plural, one {ليلة واحدة} two {ليلتان} few {# ليالٍ} many {# ليلة} other {# ليلة}} في الشهر لتغطي التكاليف.",
+      "above": "تجاوزت التعادل {above, plural, one {بليلة واحدة} two {بليلتين} few {بـ # ليالٍ} many {بـ # ليلة} other {بـ # ليلة}}.",
+      "atFirst": "أنت عند أول ليلة تحقق مكسبًا؛ بليلة أقل تصبح النتيجة خسارة.",
+      "beyond": "التعادل عند {breakEven} ليلة، أكثر من {available, plural, one {الليلة المتاحة} two {الليلتين المتاحتين} few {# ليالٍ متاحة} many {# ليلة متاحة} other {# ليلة متاحة}} في الشهر.",
+      "noBreakEven": "كل ليلة محجوزة تزيد الخسارة، فلا تعادل بهذه الأرقام.",
+      "noNights": "لا توجد ليالٍ متاحة هذا الشهر."
+    },
+    "nightsHeader": "{booked, plural, one {ليلة واحدة محجوزة} two {ليلتان محجوزتان} few {# ليالٍ محجوزة} many {# ليلة محجوزة} other {# ليلة محجوزة}} من {available}",
+    "occupancyShort": "الإشغال {occupancy}",
+    "breakEvenPill": "التعادل عند {nights} ليلة",
+    "breakEvenBeyondPill": "التعادل عند {nights} ليلة، خارج الشهر",
+    "breakEvenNonePill": "لا تعادل بهذه الأرقام",
+    "modelsLabel": "نموذج التشغيل",
+    "modelChip": {
+      "owner_operated": "يديرها المالك",
+      "rental_arbitrage": "إعادة تأجير",
+      "managed_for_owner": "إدارة لمالك"
+    },
+    "stepper": {
+      "adr": "سعر الليلة",
+      "rent": "الإيجار الشهري",
+      "commission": "عمولة الإدارة",
+      "platformFee": "عمولة المنصة",
+      "dec": "اخفض {label} {step}",
+      "inc": "ارفع {label} {step}",
+      "atMin": "{label} لا يقل عن {limit}",
+      "atMax": "{label} لا يزيد على {limit}"
+    },
+    "rows": {
+      "revenue": "الإيرادات",
+      "costs": "كل التكاليف مع الإهلاك",
+      "net": "{owner, select, yes {صافي المالك بعد الإهلاك} other {الصافي بعد الإهلاك}}"
+    },
+    "staleSummary": "في «كل الأرقام» خانة غير صحيحة؛ الأرقام هنا من آخر إدخال صحيح. اضغط للتصحيح.",
+    "exampleNote": "هذا مثال ولا يُحفظ.",
+    "exampleAdd": "أضف شقتك الأولى",
+    "ownNote": "أرقام «شقتك الأولى»: تعديلاتك تُحفظ على هذا الجهاز فقط.",
+    "replaceTitle": "استبدال أرقام شقتك؟",
+    "replaceBody": "سيحل المثال محل أرقام «شقتك الأولى» المحفوظة على هذا الجهاز.",
+    "replaceConfirm": "استبدل الأرقام",
+    "sections": {
+      "unitDetails": "بيانات الوحدة",
+      "revenue": "الإيراد",
+      "platformFee": "عمولة المنصة",
+      "opex": "مصاريف التشغيل",
+      "rent": "الإيجار",
+      "commission": "عمولة الإدارة",
+      "beforeDepreciation": "{owner, select, yes {ربح المالك قبل الإهلاك} other {الربح قبل الإهلاك}}",
+      "depreciation": "إهلاك التجهيز",
+      "other": "مؤشرات أخرى"
+    },
+    "depositHint": "لا يدخل في الربح الشهري؛ يُحسب في المبلغ المستثمر ومدة الاسترداد.",
+    "breakEvenAfterLabel": "التعادل بعد الإهلاك",
+    "breakEvenValue": "{nights} ليلة ({occupancy})",
+    "breakEvenBeyondValue": "{nights} ليلة، أكثر من الليالي المتاحة",
+    "breakEvenNoneValue": "لا تعادل بهذه الأرقام",
+    "breakEvenUnreachableValue": "غير ممكن خلال الشهر",
+    "firstProfitableNightLabel": "أول ليلة تحقق مكسبًا",
+    "firstProfitableNightValue": "الليلة {night}",
+    "breakEvenFixedCostsLabel": "التكاليف الثابتة في حساب التعادل، مع الإهلاك",
+    "breakEvenBeforeLabel": "التعادل قبل الإهلاك",
+    "breakEvenBeforeNoMaintenanceLabel": "التعادل قبل الإهلاك وبدون الصيانة غير المنتظمة",
+    "returnNote": "الاسترداد والعائد محسوبان من الربح قبل الإهلاك (التدفق النقدي)، ولا يشملان ثمن الشقة.",
+    "basisNote": "الرقم في الأعلى والتعادل بجانبه بعد إهلاك التجهيز ويشملان الصيانة. ما كُتب عليه «قبل الإهلاك» لا يشمل الإهلاك."
   },
   "guide": {
     "title": "دليل التجهيز",
@@ -284,8 +422,12 @@
     "language": "اللغة",
     "languageValue": "العربية",
     "about": "عن النسخة التجريبية",
-    "aboutBody": "هذه نسخة تجريبية من باك ديسك لعرض الفكرة. كل الأرقام أمثلة، ولا يُحفظ أي شيء تكتبه. الحسابات الحقيقية تبدأ مع النسخة الكاملة.",
-    "feedback": "أرسل رأيك على واتساب"
+    "aboutBody": "هذه نسخة تجريبية من باك ديسك. الوحدات تحت «أمثلة تجريبية» وأرقامها أمثلة. شقتك الأولى، إن أضفتها، تُحفظ على هذا الجهاز فقط ولا تُرسل إلى أي مكان. الحسابات الحقيقية تبدأ مع النسخة الكاملة.",
+    "feedback": "أرسل رأيك على واتساب",
+    "rerun": "أعد أسئلة البداية",
+    "rerunTitle": "إعادة أسئلة البداية؟",
+    "rerunBody": "عند الوصول إلى النتيجة تحل إجاباتك الجديدة محل أرقام «شقتك الأولى» المحفوظة. إن تخطّيت الأسئلة تبقى أرقامك كما هي.",
+    "rerunConfirm": "ابدأ الأسئلة"
   },
   "notFound": {
     "title": "الصفحة غير موجودة",

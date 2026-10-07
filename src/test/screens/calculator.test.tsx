@@ -1,250 +1,315 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
 import { CalculatorScreen } from "@/components/calculator/calculator-screen";
 import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import type { CalculatorForm } from "@/lib/calculator/form";
+import { GUEST_KEY, parseGuest, saveOwnUnit, type AssumedField } from "@/lib/guest/store";
+import { setQueryParam } from "@/lib/url-state";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 
-/**
- * The live calculator (BUILD_PLAN.md Phase 1 acceptance): fed the Example A
- * and B inputs, it shows the engine's results, and it recalculates as the
- * host types.
- */
-
-function renderCalculator(locale: "ar" | "en" = "ar") {
-  return renderWithIntl(<CalculatorScreen presets={CALCULATOR_PRESETS} />, { locale });
-}
-
+const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
+const renderCalculator = (locale: "ar" | "en" = "ar") => renderWithIntl(<CalculatorScreen presets={CALCULATOR_PRESETS} />, { locale });
+/** Text without the LRI/PDI isolates that wrap numbers inside sentences (src/lib/format/). */
+const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎]/g, "");
+const byTestId = (id: string) => plain(screen.getByTestId(id));
+const sentence = () => byTestId("hero-sentence");
 const field = (label: RegExp) => screen.getByRole("textbox", { name: label });
 const type = (label: RegExp, value: string) => fireEvent.change(field(label), { target: { value } });
-/** Text without the LRI/PDI isolates that wrap numbers inside sentences (src/lib/format/). */
-const plain = (el: Element) => (el.textContent ?? "").replace(/[\u2066-\u2069]/g, "");
-const verdict = () => plain(screen.getByTestId("verdict"));
-const paragraphWith = (text: string) => screen.getByText((_, el) => el?.tagName === "P" && plain(el).includes(text));
+const openTab = (name: string) => fireEvent.click(screen.getByRole("tab", { name }));
+const openSection = (title: string) => fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${title}`) }));
+const stored = () => parseGuest(window.localStorage.getItem(GUEST_KEY));
 
-describe("<CalculatorScreen /> — Example B (default)", () => {
-  it("leads with Example B's profit before depreciation (= NOI −2,847.00) and the engine's verdict", () => {
+function withOwnUnit(form: CalculatorForm = EXAMPLE, assumed: AssumedField[] = []) {
+  saveOwnUnit(form, assumed);
+}
+
+describe("<CalculatorScreen /> — Summary (rental-arbitrage example)", () => {
+  it("leads with the net after depreciation, -7,013.67, and the same-basis break-even, 21.41 nights", () => {
     renderCalculator();
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("-2,847.00");
-    expect(verdict()).toBe("بإشغال 60%: خسارة، والتعادل عند 64.6%");
+    expect(byTestId("hero-figure")).toContain("-7,013.67");
+    expect(screen.getByText("صافي الربح الشهري بعد الإهلاك")).toBeInTheDocument();
+    expect(byTestId("break-even-pill")).toBe("التعادل عند 21.41 ليلة");
+    expect(sentence()).toBe("ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.");
+    expect(byTestId("nights-header")).toBe("18 ليلة محجوزة من 30الإشغال 60%");
   });
 
-  it("shows break-even 19.38 nights (64.6%) with maintenance, and 18.99 (63.3%) without", () => {
+  it("the three rows add up as displayed: revenue − all costs with depreciation = net", () => {
     renderCalculator();
-    expect(screen.getByTestId("break-even-nights")).toHaveTextContent("19.38");
-    expect(screen.getByTestId("break-even-occupancy")).toHaveTextContent("64.6%");
-    expect(screen.getByTestId("break-even-excluding-maintenance")).toHaveTextContent("18.99");
-    expect(plain(screen.getByTestId("break-even-excluding-maintenance"))).toContain("(63.3%)");
+    expect(byTestId("summary-revenue")).toContain("47,400.00");
+    expect(byTestId("summary-costs")).toContain("-54,413.67");
+    expect(byTestId("summary-net")).toContain("الصافي بعد الإهلاك");
+    expect(byTestId("summary-net")).toContain("-7,013.67");
   });
 
-  it("gives net profit after depreciation its own break-even, on its own basis", () => {
+  it("the slider moves booked nights: whole nights short, the first profitable night, then nights above", () => {
     renderCalculator();
-    expect(screen.getByTestId("result-net-profit")).toHaveTextContent("-7,013.67");
-    expect(screen.getByTestId("break-even-with-depreciation")).toHaveTextContent("21.41");
-    expect(plain(screen.getByTestId("break-even-with-depreciation"))).toContain("(71.4%)");
+    const slider = screen.getByRole("slider", { name: "الليالي المحجوزة في الشهر" });
+    expect(slider).toHaveAttribute("max", "30");
+    fireEvent.change(slider, { target: { value: "21" } });
+    expect(sentence()).toBe("ينقصك ليلة واحدة في الشهر لتغطي التكاليف.");
+    fireEvent.change(slider, { target: { value: "22" } });
+    expect(byTestId("hero-figure")).toContain("1,220.33");
+    expect(sentence()).toBe("أنت عند أول ليلة تحقق مكسبًا؛ بليلة أقل تصبح النتيجة خسارة.");
+    fireEvent.change(slider, { target: { value: "24" } });
+    expect(sentence()).toBe("تجاوزت التعادل بليلتين.");
+    fireEvent.change(slider, { target: { value: "25" } });
+    expect(sentence()).toBe("تجاوزت التعادل بـ 3 ليالٍ.");
   });
 
-  it("shows the 4 input steps and the result as step 5 of 5", () => {
+  it("steppers: nightly rate by 100, rent by 1,000; a tap at a limit explains itself instead of doing nothing", () => {
     renderCalculator();
-    for (const title of ["الوحدة", "نموذج التشغيل", "الإيرادات", "التكاليف"]) {
-      expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
-    }
-    expect(screen.getByText("الخطوة 5 من 5")).toBeInTheDocument();
-  });
-});
+    fireEvent.click(screen.getByRole("button", { name: "ارفع سعر الليلة 100" }));
+    expect(within(screen.getByTestId("stepper-adr")).getByText("2,600")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "اخفض الإيجار الشهري 1,000" }));
+    expect(within(screen.getByTestId("stepper-rent")).getByText("34,000")).toBeInTheDocument();
 
-describe("<CalculatorScreen /> — Example A", () => {
-  it("shows the owner's net before depreciation 24,142.40 and the 8,010.60 commission", () => {
-    renderCalculator();
-    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
-    expect(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" })).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("24,142.40");
-    const results = screen.getByTestId("results");
-    expect(within(results).getByText("-8,010.60")).toBeInTheDocument();
-    expect(within(results).getByText("+32,153.00")).toBeInTheDocument();
+    for (let i = 0; i < 26; i++) fireEvent.click(screen.getByRole("button", { name: "اخفض سعر الليلة 100" }));
+    expect(within(screen.getByTestId("stepper-adr")).getByText("0")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "اخفض سعر الليلة 100" }));
+    expect(screen.getByTestId("toast")).toHaveTextContent("سعر الليلة لا يقل عن 0");
   });
 
-  it("words the managed-for-owner verdict as owner profit, not as a verb", () => {
+  it("the second stepper follows the model: commission (1 point) when managed, platform fee (0.5 point) when owner-run", () => {
     renderCalculator();
-    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
-    expect(verdict()).toMatch(/^بإشغال \d+%: مكسب المالك، والتعادل عند/);
-  });
-});
+    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك" }));
+    expect(screen.getByText("صافي ربح المالك بعد الإهلاك")).toBeInTheDocument();
+    expect(byTestId("hero-figure")).toContain("19,975.73");
+    expect(byTestId("summary-net")).toContain("صافي المالك بعد الإهلاك");
+    fireEvent.click(screen.getByRole("button", { name: "ارفع عمولة الإدارة 1%" }));
+    expect(within(screen.getByTestId("stepper-commissionPercent")).getByText("21%")).toBeInTheDocument();
 
-describe("<CalculatorScreen /> — live input", () => {
-  it("recalculates as the host types: 20 nights clears break-even", () => {
-    renderCalculator();
-    type(/الليالي المحجوزة/, "20");
-    // 2,058.50 × 20 − 39,900 = 1,270.00
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("1,270.00");
-    expect(verdict()).toBe("بإشغال 67%: مكسب، والتعادل عند 64.6%");
-    expect(paragraphWith("إشغال 66.7% من 30 ليلة متاحة")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "يديرها المالك" }));
+    fireEvent.click(screen.getByRole("button", { name: "ارفع عمولة المنصة 0.5%" }));
+    expect(within(screen.getByTestId("stepper-platformFeePercent")).getByText("16%")).toBeInTheDocument();
   });
 
-  it("accepts Arabic-Indic digits and separators through parseAmount", () => {
+  it("break-even beyond the month, or none at all, shows a text pill instead of a marker", () => {
     renderCalculator();
-    type(/الليالي المحجوزة/, "٢٠");
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("1,270.00");
-    type(/الإيجار الشهري/, "٣٥٬٠٠٠");
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("1,270.00");
+    act(() => setQueryParam("tab", "all"));
+    openSection("الإيجار");
+    type(/الإيجار الشهري/, "60000");
+    act(() => setQueryParam("tab", null));
+    expect(byTestId("break-even-pill")).toBe("التعادل عند 33.55 ليلة، خارج الشهر");
+    expect(sentence()).toBe("التعادل عند 33.55 ليلة، أكثر من 30 ليلة متاحة في الشهر.");
+
+    act(() => setQueryParam("tab", "all"));
+    openSection("الإيراد");
+    type(/^متوسط سعر الليلة/, "0");
+    type(/رسوم التنظيف على الضيف/, "0");
+    act(() => setQueryParam("tab", null));
+    expect(byTestId("break-even-pill")).toBe("لا تعادل بهذه الأرقام");
+    expect(sentence()).toBe("كل ليلة محجوزة تزيد الخسارة، فلا تعادل بهذه الأرقام.");
   });
 
-  it("accepts zero: no rent turns Example B into a 32,153.00 month", () => {
+  it("booked above the available nights: a data warning, the thumb pinned at the end, the number kept", () => {
     renderCalculator();
-    type(/الإيجار الشهري/, "0");
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("32,153.00");
-    expect(screen.queryByTestId("stale-notice")).toBeNull();
-  });
-
-  it("an invalid entry is flagged on its field and the results keep the last valid entry, dimmed", () => {
-    renderCalculator();
-    type(/الليالي المحجوزة/, "20");
-    type(/الليالي المحجوزة/, "20.5");
-    expect(field(/الليالي المحجوزة/)).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("أدخل عددًا صحيحًا")).toBeInTheDocument();
-    expect(screen.getByTestId("stale-notice")).toBeInTheDocument();
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("1,270.00");
-    type(/الليالي المحجوزة/, "");
-    expect(screen.getByText("أدخل رقمًا")).toBeInTheDocument();
-    type(/عمولة المنصة/, "120");
-    expect(screen.getByText("النسبة بين 0 و100")).toBeInTheDocument();
-  });
-
-  it("a setup cost needs a useful life; blocked nights can't exceed the month", () => {
-    renderCalculator();
-    type(/العمر الافتراضي/, "0");
-    expect(screen.getByText("أدخل العمر الافتراضي لتكلفة التجهيز")).toBeInTheDocument();
-    type(/العمر الافتراضي/, "60");
-    type(/الليالي المغلقة/, "31");
-    expect(screen.getByText("أكثر من عدد أيام الشهر")).toBeInTheDocument();
-  });
-
-  it("booked nights above available nights: a data warning, occupancy shown capped at 100%", () => {
-    renderCalculator();
+    act(() => setQueryParam("tab", "all"));
     type(/الليالي المغلقة/, "10");
-    type(/الليالي المحجوزة/, "25");
+    type(/الليالي المحجوزة في الشهر/, "25");
+    act(() => setQueryParam("tab", null));
     expect(screen.getByRole("alert")).toHaveTextContent("الليالي المحجوزة أكثر من الليالي المتاحة");
-    expect(paragraphWith("إشغال 100.0% من 20 ليلة متاحة")).toBeInTheDocument();
+    expect(screen.getByRole("slider")).toHaveAttribute("max", "20");
+    expect(byTestId("nights-header")).toContain("25 ليلة محجوزة من 20");
   });
 
-  it("an unreachable break-even says so instead of showing a number", () => {
+  it("with every night blocked there is no slider, only the sentence", () => {
     renderCalculator();
-    type(/الإيجار الشهري/, "100000");
-    expect(screen.getByTestId("break-even-nights")).toHaveTextContent("—");
-    expect(verdict()).toContain("حتى مع حجز كل الليالي المتاحة");
+    act(() => setQueryParam("tab", "all"));
+    type(/الليالي المغلقة/, "30");
+    act(() => setQueryParam("tab", null));
+    expect(screen.queryByRole("slider")).toBeNull();
+    expect(sentence()).toBe("لا توجد ليالٍ متاحة هذا الشهر.");
   });
 
-  it("SAMPLE marks the setup cost until the host types their own; editing deselects the example, which resets it", () => {
+  it("an invalid entry in كل الأرقام dims the summary and a tap takes the visitor to the field", () => {
     renderCalculator();
-    const setupRow = () => field(/تكلفة التجهيز/).closest("div.py-3")!;
-    expect(within(setupRow() as HTMLElement).getByText("تجريبي")).toBeInTheDocument();
-    type(/تكلفة التجهيز/, "300000");
-    expect(within(setupRow() as HTMLElement).queryByText("تجريبي")).toBeNull();
-    const example = screen.getByRole("radio", { name: "مثال: إعادة تأجير" });
-    expect(example).toHaveAttribute("aria-checked", "false");
-    fireEvent.click(example);
-    expect(field(/تكلفة التجهيز/)).toHaveValue("250,000");
-    expect(example).toHaveAttribute("aria-checked", "true");
-  });
-
-  it("switching to managed shows the commission terms; hybrid adds its mode and basis", () => {
-    renderCalculator();
-    fireEvent.click(screen.getByRole("radio", { name: "إدارة لحساب مالك" }));
-    expect(screen.queryByRole("textbox", { name: /الإيجار الشهري/ })).toBeNull();
-    fireEvent.change(screen.getByRole("combobox", { name: "أساس العمولة" }), { target: { value: "hybrid" } });
-    expect(screen.getByRole("combobox", { name: "طريقة الحساب" })).toBeInTheDocument();
-    type(/نسبة العمولة/, "10");
-    type(/الحد الأدنى الشهري للعمولة/, "3000");
-    expect(screen.getByTestId("results")).toHaveTextContent("-4,740.00");
-    fireEvent.click(screen.getByRole("switch", { name: /رسوم التنظيف ضمن أساس العمولة/ }));
-    expect(screen.getByTestId("results")).toHaveTextContent("-4,500.00");
-  });
-});
-
-/** The number in a displayed amount, e.g. "-8,010.60 ج.م." → -8010.60. */
-const amountIn = (testId: string) => Number(plain(screen.getByTestId(testId)).match(/-?[\d,]+(\.\d+)?/)![0].replace(/,/g, ""));
-
-describe("<CalculatorScreen /> — the break-even's own terms (review 2026-10-02)", () => {
-  const cases: { preset: string; basis?: string; fixedFee?: string; mode?: string }[] = [
-    { preset: "مثال: إعادة تأجير" },
-    { preset: "إدارة لمالك — وسط البلد" },
-    ...["net_payout", "gross_revenue", "noi"].map((basis) => ({ preset: "إدارة لمالك — وسط البلد", basis })),
-    { preset: "إدارة لمالك — وسط البلد", basis: "fixed_monthly", fixedFee: "3000" },
-    { preset: "إدارة لمالك — وسط البلد", basis: "hybrid", fixedFee: "3000", mode: "max" },
-    { preset: "إدارة لمالك — وسط البلد", basis: "hybrid", fixedFee: "3000", mode: "sum" },
-    { preset: "إدارة لمالك — وسط البلد", basis: "hybrid", fixedFee: "9000", mode: "max" },
-  ];
-
-  it.each(cases)("fixed costs ÷ contribution = break-even nights: %o", ({ preset, basis, fixedFee, mode }) => {
-    renderCalculator();
-    fireEvent.click(screen.getByRole("radio", { name: preset }));
-    if (basis) fireEvent.change(screen.getByRole("combobox", { name: "أساس العمولة" }), { target: { value: basis } });
-    if (mode) fireEvent.change(screen.getByRole("combobox", { name: "طريقة الحساب" }), { target: { value: mode } });
-    if (fixedFee) type(/الحد الأدنى الشهري للعمولة|المبلغ الشهري الثابت/, fixedFee);
-    const nights = Number(plain(screen.getByTestId("break-even-nights")));
-    const ratio = amountIn("result-break-even-fixed-costs") / amountIn("result-contribution");
-    expect(Math.abs(ratio - nights)).toBeLessThan(0.01);
-  });
-
-  it("Example A: 2,058.50 before the 20% commission, 1,613.47 after; 4,900.00 ÷ 1,613.47 = 3.04 nights", () => {
-    renderCalculator();
-    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
-    expect(amountIn("result-contribution-before-commission")).toBe(2058.5);
-    expect(amountIn("result-contribution")).toBe(1613.47);
-    expect(amountIn("result-break-even-fixed-costs")).toBe(4900);
-    expect(plain(screen.getByTestId("break-even-nights"))).toBe("3.04");
-  });
-});
-
-describe("<CalculatorScreen /> — return metrics and display", () => {
-  it("says the returns cover the setup cost only, not the apartment's price", () => {
-    renderCalculator();
-    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
-    expect(screen.getByText("العائد على تكلفة التجهيز فقط")).toBeInTheDocument();
-    expect(screen.getByText("مدة الاسترداد على تكلفة التجهيز فقط")).toBeInTheDocument();
-    expect(screen.getByTestId("return-note")).toHaveTextContent("لا يشمل ثمن الشقة");
-  });
-
-  it("on rental arbitrage, names the deposit it includes", () => {
-    renderCalculator();
-    expect(screen.getByText("مدة الاسترداد على تكلفة التجهيز والتأمين فقط")).toBeInTheDocument();
-  });
-
-  it("the arbitrage example is generic, not Sheikh Zayed (Home's unit has other figures)", () => {
-    renderCalculator();
-    expect(screen.getByRole("radio", { name: "مثال: إعادة تأجير" })).toBeInTheDocument();
-    expect(screen.queryByText(/الشيخ زايد/)).toBeNull();
-  });
-
-  it("shows thousands separators on blur and the raw digits while typing", () => {
-    renderCalculator();
-    const rent = field(/الإيجار الشهري/);
-    expect(rent).toHaveValue("35,000");
-    fireEvent.focus(rent);
-    expect(rent).toHaveValue("35000");
-    fireEvent.change(rent, { target: { value: "٤٢٥٠٠" } });
-    expect(rent).toHaveValue("٤٢٥٠٠");
-    fireEvent.blur(rent);
-    expect(rent).toHaveValue("42,500");
-  });
-});
-
-describe("<CalculatorScreen /> — rest of the screen", () => {
-  it("unit details explain, on tap, that they feed the area comparison later", () => {
-    renderCalculator();
-    fireEvent.click(screen.getByRole("button", { name: /المنطقة/ }));
-    expect(screen.getByTestId("toast")).toHaveTextContent("بيانات الوحدة تُستخدم لمقارنة المنطقة في النسخة الكاملة");
-  });
-
-  it("keeps the 12-month projection behind a locked teaser that links to plans", () => {
-    renderCalculator();
-    expect(screen.getByRole("link", { name: "عرض الباقات" })).toHaveAttribute("href", "/demo/pricing");
+    act(() => setQueryParam("tab", "all"));
+    openSection("مصاريف التشغيل");
+    type(/الإنترنت/, "abc");
+    act(() => setQueryParam("tab", null));
+    expect(byTestId("hero-figure")).toContain("-7,013.67");
+    fireEvent.click(screen.getByTestId("stale-summary"));
+    expect(screen.getByRole("tab", { name: "كل الأرقام" })).toHaveAttribute("aria-selected", "true");
+    expect(field(/الإنترنت/)).toHaveAttribute("aria-invalid", "true");
   });
 
   it("works in English", () => {
     renderCalculator("en");
-    expect(verdict()).toBe("At 60% occupancy: Loss; break-even is 64.6%");
-    expect(screen.getByText("Monthly profit before depreciation")).toBeInTheDocument();
+    expect(screen.getByText("Monthly net profit after depreciation")).toBeInTheDocument();
+    expect(sentence()).toBe("You need 4 more nights to cover the costs.");
+    expect(byTestId("break-even-pill")).toBe("Break-even at 21.41 nights");
+  });
+});
+
+describe("<CalculatorScreen /> — كل الأرقام", () => {
+  it("shares one state with the summary", () => {
+    renderCalculator();
+    fireEvent.click(screen.getByRole("button", { name: "ارفع سعر الليلة 100" }));
+    openTab("كل الأرقام");
+    expect(field(/^متوسط سعر الليلة/)).toHaveValue("2,600");
+    expect(screen.getByRole("tab", { name: "كل الأرقام" })).toHaveAttribute("aria-selected", "true");
+    expect(window.location.search).toBe("?tab=all");
+  });
+
+  it("section totals reconcile to the subtotal before depreciation and to the net", () => {
+    renderCalculator();
+    openTab("كل الأرقام");
+    const total = (id: string) => plain(screen.getByTestId(id).querySelector("button") ?? screen.getByTestId(id));
+    expect(total("section-revenue")).toContain("47,400.00");
+    expect(total("section-platformFee")).toContain("-7,347.00");
+    expect(total("section-opex")).toContain("-7,900.00");
+    expect(total("section-rent")).toContain("-35,000.00");
+    expect(byTestId("subtotal-before-depreciation")).toContain("الربح قبل الإهلاك");
+    expect(byTestId("subtotal-before-depreciation")).toContain("-2,847.00");
+    expect(total("section-depreciation")).toContain("-4,166.67");
+    expect(byTestId("total-net")).toContain("-7,013.67");
+  });
+
+  it("one section is open at a time", () => {
+    renderCalculator();
+    openTab("كل الأرقام");
+    expect(screen.getByRole("button", { name: /^الإيراد/ })).toHaveAttribute("aria-expanded", "true");
+    openSection("عمولة المنصة");
+    expect(screen.getByRole("button", { name: /^الإيراد/ })).toHaveAttribute("aria-expanded", "false");
+    expect(field(/عمولة المنصة/)).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /^متوسط سعر الليلة/ })).toBeNull();
+  });
+
+  it("every input of the old calculator is still editable", () => {
+    renderCalculator();
+    openTab("كل الأرقام");
+    for (const label of [/^متوسط سعر الليلة/, /الليالي المحجوزة/, /الليالي المغلقة/, /متوسط مدة الإقامة/, /رسوم التنظيف على الضيف/]) {
+      expect(field(label)).toBeInTheDocument();
+    }
+    openSection("مصاريف التشغيل");
+    for (const label of [/الكهرباء والمياه/, /الإنترنت/, /مصاريف الكمبوند/, /^التنظيف/, /مستلزمات الضيوف/, /الصيانة/]) expect(field(label)).toBeInTheDocument();
+    openSection("الإيجار");
+    expect(field(/الإيجار الشهري/)).toBeInTheDocument();
+    expect(field(/مبلغ التأمين/)).toBeInTheDocument();
+    openSection("إهلاك التجهيز");
+    expect(field(/تكلفة التجهيز/)).toBeInTheDocument();
+    expect(field(/العمر الافتراضي/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك" }));
+    openSection("عمولة الإدارة");
+    fireEvent.change(screen.getByRole("combobox", { name: "أساس العمولة" }), { target: { value: "hybrid" } });
+    expect(screen.getByRole("combobox", { name: "طريقة الحساب" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "النسبة محسوبة من" })).toBeInTheDocument();
+    expect(field(/نسبة العمولة/)).toBeInTheDocument();
+    expect(field(/الحد الأدنى الشهري للعمولة/)).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: "رسوم التنظيف ضمن أساس العمولة" })).toBeInTheDocument();
+  });
+
+  it("every figure of the old results is still shown, under مؤشرات أخرى; break-even terms explain 21.41", () => {
+    renderCalculator();
+    openTab("كل الأرقام");
+    openSection("مؤشرات أخرى");
+    const other = screen.getByTestId("section-other");
+    expect(plain(other)).toContain("المحوَّل من المنصة40,053.00");
+    expect(plain(other)).toContain("صافي الدخل التشغيلي-2,847.00");
+    expect(byTestId("result-break-even-after")).toContain("21.41 ليلة (71.4%)");
+    expect(byTestId("result-first-profitable-night")).toContain("الليلة 22");
+    expect(byTestId("result-contribution")).toContain("2,058.50");
+    expect(byTestId("result-break-even-fixed-costs")).toContain("44,066.67");
+    expect(byTestId("result-break-even-before")).toContain("19.38 ليلة (64.6%)");
+    expect(byTestId("result-break-even-before-no-maintenance")).toContain("18.99 ليلة (63.3%)");
+    expect(byTestId("result-payback")).toContain("لا يُسترد بهذه الأرقام");
+    expect(byTestId("result-cash-on-cash")).toContain("-10.7%");
+    expect(byTestId("return-note")).toContain("قبل الإهلاك");
+  });
+
+  it.each([
+    ["Example B", {}],
+    ["higher rent", { rent: "40000" }],
+    ["managed", { model: "managed_for_owner" }],
+    ["owner-run", { model: "owner_operated" }],
+  ] as const)("break-even terms divide to the break-even nights (%s)", (_, change) => {
+    const values = { ...EXAMPLE.values, ...("rent" in change ? { rent: change.rent } : {}) };
+    withOwnUnit({ ...EXAMPLE, operatingModel: "model" in change ? change.model : EXAMPLE.operatingModel, values });
+    renderCalculator();
+    openTab("كل الأرقام");
+    openSection("مؤشرات أخرى");
+    const num = (id: string) => Number(byTestId(id).match(/[\d,]+\.\d{2}/)![0].replace(/,/g, ""));
+    const nights = Number(byTestId("result-break-even-after").match(/([\d.]+) ليلة/)![1]);
+    expect(num("result-break-even-fixed-costs") / num("result-contribution")).toBeCloseTo(nights, 1);
+  });
+
+  it("managed: the manager-profit row equals the commission section", () => {
+    withOwnUnit({ ...EXAMPLE, operatingModel: "managed_for_owner" });
+    renderCalculator();
+    openTab("كل الأرقام");
+    expect(plain(screen.getByTestId("section-commission"))).toContain("-8,010.60");
+    openSection("مؤشرات أخرى");
+    expect(byTestId("result-manager-profit")).toContain("8,010.60");
+    expect(byTestId("result-contribution-before-commission")).toContain("2,058.50");
+  });
+
+  it("unit details appear only for the example, read-only with a تجريبي tag", () => {
+    renderCalculator();
+    openTab("كل الأرقام");
+    openSection("بيانات الوحدة");
+    fireEvent.click(screen.getByRole("button", { name: /المنطقة/ }));
+    expect(screen.getByTestId("toast")).toHaveTextContent("بيانات الوحدة تُستخدم لمقارنة المنطقة");
+  });
+
+  it("the example loaders load an example straight away when nothing is saved", () => {
+    renderCalculator();
+    openTab("كل الأرقام");
+    expect(screen.getByTestId("storage-note")).toHaveTextContent("هذا مثال ولا يُحفظ.");
+    fireEvent.click(screen.getByRole("radio", { name: "إدارة لمالك — وسط البلد" }));
+    expect(byTestId("hero-figure")).toContain("19,975.73");
+    expect(window.localStorage.getItem(GUEST_KEY)).toBeNull();
+  });
+});
+
+describe("<CalculatorScreen /> — the visitor's own unit", () => {
+  it("opens on the saved unit, hides unit details and saves every valid change", () => {
+    withOwnUnit({ ...EXAMPLE, values: { ...EXAMPLE.values, adr: "3000" } });
+    renderCalculator();
+    fireEvent.click(screen.getByRole("button", { name: "ارفع سعر الليلة 100" }));
+    expect(stored().units[0]!.form.values.adr).toBe("3100");
+    openTab("كل الأرقام");
+    expect(screen.getByTestId("storage-note")).toHaveTextContent("تعديلاتك تُحفظ على هذا الجهاز فقط");
+    expect(screen.queryByTestId("section-unitDetails")).toBeNull();
+    // An invalid entry is never saved; the last valid one stays.
+    type(/^متوسط سعر الليلة/, "abc");
+    expect(stored().units[0]!.form.values.adr).toBe("3100");
+  });
+
+  it("committing a field clears its تجريبي tag even when the value did not change (blur or Enter)", () => {
+    withOwnUnit(EXAMPLE, ["platformFeePercent", "cleaningFeePerStay"]);
+    renderCalculator();
+    openTab("كل الأرقام");
+    openSection("عمولة المنصة");
+    const fee = field(/عمولة المنصة/);
+    expect(within(fee.closest("div.py-3") as HTMLElement).getByText("تجريبي")).toBeInTheDocument();
+    fireEvent.focus(fee);
+    fireEvent.blur(fee);
+    expect(within(fee.closest("div.py-3") as HTMLElement).queryByText("تجريبي")).toBeNull();
+    expect(stored().units[0]!.assumed).toEqual(["cleaningFeePerStay"]);
+
+    openSection("الإيراد");
+    const cleaningFee = field(/رسوم التنظيف على الضيف/);
+    act(() => cleaningFee.focus());
+    fireEvent.keyDown(cleaningFee, { key: "Enter" });
+    expect(cleaningFee).not.toHaveFocus();
+    expect(stored().units[0]!.assumed).toEqual([]);
+  });
+
+  it("loading an example asks first, then replaces the unit's numbers", () => {
+    withOwnUnit({ ...EXAMPLE, values: { ...EXAMPLE.values, adr: "4000" } });
+    renderCalculator();
+    openTab("كل الأرقام");
+    fireEvent.click(screen.getByRole("radio", { name: "مثال: إعادة تأجير" }));
+    expect(screen.getByRole("dialog", { name: "استبدال أرقام شقتك؟" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "إلغاء" }));
+    expect(stored().units[0]!.form.values.adr).toBe("4000");
+
+    fireEvent.click(screen.getByRole("radio", { name: "مثال: إعادة تأجير" }));
+    fireEvent.click(screen.getByRole("button", { name: "استبدل الأرقام" }));
+    expect(stored().units[0]!.form.values.adr).toBe("2500");
+    expect(screen.getByRole("radio", { name: "مثال: إعادة تأجير" })).toHaveAttribute("aria-checked", "true");
   });
 });

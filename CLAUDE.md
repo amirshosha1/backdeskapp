@@ -76,6 +76,7 @@
 - Mobile-first PWA (360 px baseline), thumb-reachable primary actions, bottom navigation, numeric keypads (`inputMode="decimal"`).
 - Occupancy is never clamped silently: if booked nights exceed available nights, show a data warning and cap the displayed occupancy at 100%.
 - A break-even shown next to a profit figure covers the same costs as that profit; if it doesn't, its label says which costs it covers (`docs/BUILD_PLAN.md` §4.3). No static text sits next to live numbers.
+- The headline profit is after depreciation; before-depreciation figures appear only as labelled rows (decided 2026-10-06, `docs/BUILD_PLAN.md` §4.3).
 - For owner-operated and rental-arbitrage units, the UI calls the unit's agreement record **"unit settings"**, never "agreement".
 - Every `/demo` screen shows a clear "بيانات تجريبية" banner, and `/demo` is `noindex` until launch. Until Phase P.2, `/demo` sends nothing anywhere; from P.2 its data lives in the browser only (no account, nothing sent to a server).
 - **Add expense in at most 4 taps** from the home screen, not counting the digits of the amount. Real-user speed is measured by a PostHog timing event (target: median ≤ 10 s).

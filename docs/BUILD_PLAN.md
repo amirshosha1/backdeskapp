@@ -33,7 +33,7 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 1. For each phase, send the **Standard phase prompt** (§5.0) with the phase id, in this order: **P, P.1, 1, P.2, 0a, 0b, 2, 3 → Validation Gate → 5, 6, 7, 8, 4, 10 → LAUNCH → 9**.
 2. Approve the plan, let it build, review the diff, and test the Vercel preview on your phone.
 3. Clear the context between phases (`/clear`); `CLAUDE.md` and `docs/PROGRESS.md` carry the memory. A Claude Code on the web session can continue any phase the same way.
-4. The prototype stays for your review only until Phase 1 lands (live calculator, varied sample units); then show it to hosts and start selling founding-member pre-orders. Until Phase 5, track InstaPay pre-orders outside the app. Do not skip the **Validation Gate** before Phase 5.
+4. The prototype stays for your review only until **P.2 slice 1** lands (first-run flow, the visitor's own unit, the calculator's Summary / All numbers; built after Phase 1). Then run a **host review with 3–5 hosts** on their phones, before the rest of P.2 is built, and start selling founding-member pre-orders. Until Phase 5, track InstaPay pre-orders outside the app. Do not skip the **Validation Gate** before Phase 5.
 
 ---
 
@@ -230,6 +230,7 @@ commission(n):
 - **`irregular` costs (e.g. repairs) and any monthly maintenance/irregular allowance are included in `fixed_costs` by default** — a host who never budgets for the odd repair or replacement is not actually at break-even. A per-scenario toggle excludes them (decided 2026-09-28, after `docs/PROGRESS.md`'s Phase P.1 review found the excluded-by-default figure understated how many nights a unit needs: at 19 booked nights — one below the excluded-default figure of ~19 — Example B's unit still loses 788.50). The UI shows the included-by-default figure as the primary break-even result, with the excluded variant as a secondary line (Example B2).
 - **Whole-night display.** Because a night is not divisible, a host needs the *ceiling* of `break_even_nights`, not the nearest whole night, to actually reach break-even (Example B: 19.38 rounds up to 20, not 19 — at 19 nights the unit still runs a loss). Any UI showing "nights needed" rounds up. (Precisely: the first whole night whose displayed, piastre-rounded profit is ≥ 0 — the ceiling, except in a sub-half-piastre tie.)
 - **Same cost basis (decided 2026-10-01, Phase 1 review).** Any break-even shown next to a profit figure covers the same costs as that profit (maintenance/irregular costs, depreciation); if it doesn't, its label states which costs it covers. The engine evaluates both through one function with an explicit basis, and tests that at `ceil(break_even_nights)` the displayed profit is ≥ 0 and at `floor` it is < 0, on the same basis.
+- **The calculator's headline is net profit after depreciation (decided 2026-10-06, P.2 slice 1).** The break-even beside it is on that basis too (repairs and depreciation included), and is not capped at the month: `scenarioView` (`src/lib/finance/scenario-view.ts`) returns it with a status — within the month, beyond the available nights (with the nights it would need), or no break-even (per-night contribution after commission ≤ 0). Before-depreciation figures (profit before depreciation, the primary and without-maintenance break-evens, payback and return) stay visible as rows labelled "قبل الإهلاك". Rows shown together reconcile at displayed precision: total costs with depreciation = revenue − net, and the leftover piastre of a section total goes to a computed line (operating expenses, then platform fees, then commission), never to a typed amount such as rent. The owner statement's `owner_net` is unchanged (no depreciation by definition, §4.2).
 
 ### 4.4 Revenue recognition
 - **Accrual by night** (default for KPIs and P&L): stays crossing a month boundary are prorated by nights; cleaning fees are recognized on the check-in date; platform fees follow the component they were allocated to (the accommodation share is prorated by night, the cleaning share is recognized on check-in); refunds and adjustments on their own date.
@@ -308,7 +309,7 @@ Projections: 12-month model with monthly occupancy and ADR multipliers (seasonal
 ### 5.0 Execution order and prompts
 
 **Order:** P → P.1 → 1 → P.2 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 → 10 → 🚀 LAUNCH → 9.
-Phase numbers are kept stable and the sections below follow execution order. P.1 fixes and redesigns the prototype after Amir's phone review. Phase 1 runs right after it because the engine needs no database or auth. P.2 then makes the demo interactive on the real engine, with data kept in the browser only. Phase 4 (payments and legal) runs just before launch. Phase 9 is post-launch growth.
+Phase numbers are kept stable and the sections below follow execution order. P.1 fixes and redesigns the prototype after Amir's phone review. Phase 1 runs right after it because the engine needs no database or auth. P.2 then makes the demo interactive on the real engine, with data kept in the browser only; it is built in two parts: **slice 1** (UI batch 2), then a **host review with 3–5 hosts**, then the rest of P.2. Phase 4 (payments and legal) runs just before launch. Phase 9 is post-launch growth.
 
 **Kickoff prompt (sent once on 2026-09-26; kept for reference):**
 ```
@@ -407,9 +408,19 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 
 **Acceptance**
 - [ ] Adding a unit, an expense or income updates Home immediately, with every figure computed by `src/lib/finance/` (component or e2e test).
-- [ ] No network request carries demo data (e2e check on requests).
-- [ ] Reloading the page keeps the visitor's data; resetting restores the fixtures.
-- [ ] The e2e tap crawler still passes on every `/demo` screen.
+- [x] No network request carries demo data (e2e check on requests). *Slice 1: the first-run answers and the calculator.*
+- [ ] Reloading the page keeps the visitor's data; resetting restores the fixtures. *Slice 1: reload keeps the visitor's first unit; no reset-to-fixtures yet.*
+- [x] The e2e tap crawler still passes on every `/demo` screen. *Slice 1, including the screens that change with the visitor's own unit.*
+
+#### P.2 slice 1 — first-run flow, Units entry, calculator redesign ("UI batch 2", built 2026-10-07)
+The first part of P.2, not a separate phase. Approved boards: first-run flow, Units, calculator Summary, calculator All numbers.
+- **Delivered:**
+  - A first-run guided flow at `/demo/start` (model → price → nights → cost → verdict → apartment count; owner-operated skips the cost). The app entry opens it on a first visit; "تخطَّ" and "ادخل التطبيق" end it; More re-runs it (with a confirmation when a unit is saved).
+  - "A visitor can add a unit" for the **first** unit: the flow's answers become the visitor's own unit, kept in this browser only (one versioned localStorage key, `backdesk:guest`; the flow's answers in sessionStorage, never in the URL). Reloading keeps it.
+  - Units shows the visitor's own unit first ("شقتك الأولى"), the sample units below under "أمثلة تجريبية", and the add-unit states (first unit free; a second one opens the subscription card, with no real gating).
+  - The calculator becomes two tabs on one state: "الملخص" (one screen) and "كل الأرقام" (every input and figure). The headline is net profit **after** depreciation (see §4.3).
+- **Remaining in P.2:** adding expenses and recording income; Home updating live (Home does not show the visitor's unit yet); "تقرير الشهر" per unit; resetting to the fixtures; more than one own unit; turning the scenario-based own unit into a ledger unit; the sign-up migration (Phase 0b onward).
+- **Then:** the host review (3–5 hosts), before the remaining P.2 items are built.
 
 ### Phase 0a — Foundation: app shell (no database)
 **Scope**
@@ -445,13 +456,13 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 
 ### Phase 2 — Free feasibility and profit calculator
 **Scope**
-- `/calculator`: 5-step wizard reusing the calculator components and engine wiring from Phases P and 1. It runs entirely in the browser, works without login and autosaves the draft in the browser.
+- `/calculator`: reuses the calculator built in P.2 slice 1 — the first-run guided flow, then "الملخص" (summary) and "كل الأرقام" (every input, grouped as below) on one state, with the headline after depreciation. It runs entirely in the browser, works without login and autosaves the draft in the browser (P.2 slice 1 already does this for the visitor's first unit).
   1. **Unit:** city/area, bedrooms, bathrooms, max guests.
   2. **Model:** owner-operated / rental arbitrage (rent, deposit) / managed (commission basis and rate).
   3. **Revenue:** ADR, occupancy or nights per month, average length of stay, cleaning fee charged, platform fee rate.
   4. **Costs:** fixed monthly (utilities default here), per-stay (cleaning, consumables, laundry), per-night, setup CAPEX (quick total or itemized) and useful life.
   5. **Results.**
-- Results: monthly and annual net profit, margin, break-even occupancy and ADR, payback months, cash-on-cash, 3 × 3 sensitivity grid, and a plain-language verdict generated by rules, not AI (e.g. "Profitable above 63% occupancy").
+- Results: monthly and annual net profit, margin, break-even occupancy and ADR, payback months, cash-on-cash, 3 × 3 sensitivity grid, and a plain-language verdict generated by rules, not AI (e.g. "خسارة" with "ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.").
 - Paid teasers: 12-month projection and area benchmark as blurred **placeholder** visuals with an "Unlock with Pro" call to action. The real projection and benchmarks are computed only on the server, for paid orgs.
 - Defaults from `calculator_presets`, editable, each labelled SAMPLE until a source is supplied.
 - **Benchmarks: area medians from the AirROI API, with regional roll-up** (decided 2026-09-29, revised 2026-09-30; not yet implemented while Phase 1 is in progress). The calculator needs a reference average for any area in Egypt, not a listing-level dataset: `benchmarks` is a small lookup table of medians over `regions` (§3), refreshed quarterly. AirROI is self-serve and pay-per-call ($0.01/call, no monthly minimum).

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Info, Languages, MessageCircle, Tag } from "lucide-react";
+import { Info, Languages, MessageCircle, RotateCcw, Tag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ListRow } from "@/components/common/list-row";
 import { Sheet } from "@/components/common/sheet";
 import { HeroTitle, RoyalHero } from "@/components/layout/royal-hero";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
+import { writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
+import { ownUnit, useGuest } from "@/lib/guest/store";
 
 const ROW = "flex w-full items-center gap-3 py-4 text-start";
 
@@ -16,7 +18,15 @@ export function MoreScreen() {
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const pathname = usePathname();
+  const tCommon = useTranslations("common");
+  const guest = useGuest();
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [rerunOpen, setRerunOpen] = useState(false);
+
+  function startFirstRun() {
+    writeFirstRunAnswers(null);
+    router.push("/demo/start");
+  }
   const feedbackNumber = process.env.NEXT_PUBLIC_FEEDBACK_WHATSAPP;
 
   return (
@@ -48,6 +58,19 @@ export function MoreScreen() {
           <span className="text-sm text-brand">{t("languageValue")}</span>
         </button>
 
+        <button
+          type="button"
+          data-testid="more-rerun"
+          // With a saved unit, ask first: the new answers will replace its numbers.
+          onClick={() => (ownUnit(guest) ? setRerunOpen(true) : startFirstRun())}
+          className={`tap ${ROW}`}
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-ink-2">
+            <RotateCcw className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1 text-[0.9375rem] font-medium">{t("rerun")}</span>
+        </button>
+
         <button type="button" onClick={() => setAboutOpen(true)} className={`tap ${ROW}`}>
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-ink-2">
             <Info className="h-5 w-5" aria-hidden="true" />
@@ -66,6 +89,16 @@ export function MoreScreen() {
       </div>
 
       <Sheet open={aboutOpen} onOpenChange={setAboutOpen} title={t("about")} description={t("aboutBody")} />
+      <Sheet open={rerunOpen} onOpenChange={setRerunOpen} title={t("rerunTitle")} description={t("rerunBody")}>
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={startFirstRun} className="tap h-12 rounded-full bg-ink text-sm font-medium text-white">
+            {t("rerunConfirm")}
+          </button>
+          <button type="button" onClick={() => setRerunOpen(false)} className="tap h-12 rounded-full bg-fill text-sm font-medium">
+            {tCommon("cancel")}
+          </button>
+        </div>
+      </Sheet>
     </div>
   );
 }

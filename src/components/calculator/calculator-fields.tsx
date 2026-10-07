@@ -23,6 +23,7 @@ export function NumberFieldRow({
   label,
   value,
   onChange,
+  onCommit,
   left,
   right,
   hint,
@@ -33,6 +34,11 @@ export function NumberFieldRow({
   label: string;
   value: string;
   onChange: (value: string) => void;
+  /**
+   * The visitor committed the field — focused it, then left it or pressed
+   * Enter — even without changing the value. Clears its تجريبي tag.
+   */
+  onCommit?: () => void;
   left?: ReactNode;
   right?: ReactNode;
   hint?: ReactNode;
@@ -65,7 +71,13 @@ export function NumberFieldRow({
             autoComplete="off"
             value={focused ? value : formatTypedAmount(value, locale)}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={() => {
+              setFocused(false);
+              onCommit?.();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") event.currentTarget.blur();
+            }}
             aria-invalid={error ? true : undefined}
             aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
             // Permissive on purpose: `parseAmount` is the one place that
@@ -96,22 +108,29 @@ export function SelectRow<T extends string>({
   value,
   options,
   onChange,
+  onCommit,
+  sample,
 }: {
   id: string;
   label: string;
   value: T;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
+  /** Leaving the select counts as committing its value (see NumberFieldRow). */
+  onCommit?: () => void;
+  sample?: boolean;
 }) {
   return (
     <div className="flex items-center gap-2 py-3">
       <label htmlFor={id} className="min-w-0 flex-1 text-sm leading-snug text-ink-2">
         {label}
       </label>
+      {sample && <SampleBadge />}
       <select
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
+        onBlur={() => onCommit?.()}
         className="h-11 max-w-[60%] shrink-0 rounded-xl bg-page px-3 text-sm font-medium"
       >
         {options.map((option) => (
@@ -181,7 +200,7 @@ export function ChoiceGroup<T extends string>({
             aria-checked={checked}
             onClick={() => onChange(option.value)}
             className={cn(
-              "tap min-h-10 rounded-full px-4 py-2 text-sm font-medium",
+              "tap min-h-11 rounded-full px-4 py-2 text-sm font-medium",
               checked ? "bg-brand text-white" : onPage ? "bg-fill text-ink" : "bg-page text-ink",
             )}
           >

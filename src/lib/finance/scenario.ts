@@ -15,9 +15,11 @@ import { ENGINE_VERSION } from "./version";
  * §6.5); the 12-month projection is server-only and lives elsewhere.
  *
  * Cost bases, stated once here and labelled in the UI:
- * - The headline is profit **before depreciation** (NOI − commission;
- *   NOI includes the maintenance/irregular allowance). The primary
- *   break-even and the verdict use exactly that basis.
+ * - `profitBeforeDepreciation` is NOI − commission (NOI includes the
+ *   maintenance/irregular allowance). The primary break-even and
+ *   `verdict` use exactly that basis. Since P.2 slice 1 the calculator's
+ *   headline is the net profit after depreciation instead, presented
+ *   through `scenarioView` (scenario-view.ts).
  * - `excludingIrregular` is the per-scenario toggle (Example B2), labelled.
  * - `includingDepreciation` is the break-even of the net profit after
  *   depreciation, shown next to that net profit.
@@ -65,7 +67,7 @@ export interface ScenarioResult {
   rent: Decimal;
   /** Operating expenses other than rent. */
   opexExcludingRent: Decimal;
-  /** The headline: NOI − commission. */
+  /** NOI − commission (the calculator's headline until P.2 slice 1; see scenarioView). */
   profitBeforeDepreciation: Decimal;
   depreciation: Decimal;
   /** Profit before depreciation − depreciation. */

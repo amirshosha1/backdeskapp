@@ -22,6 +22,7 @@ export * from "./period";
 export * from "./pnl";
 export * from "./result";
 export * from "./scenario";
+export * from "./scenario-view";
 export * from "./sensitivity";
 export * from "./statement";
 export * from "./tax";
