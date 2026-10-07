@@ -328,9 +328,6 @@
     "exampleNote": "This is an example and isn't saved.",
     "exampleAdd": "Add your first apartment",
     "ownNote": "Your first apartment's numbers: your changes are saved on this device only.",
-    "replaceTitle": "Replace your apartment's numbers?",
-    "replaceBody": "The example will replace the numbers saved for “Your first apartment” on this device.",
-    "replaceConfirm": "Replace the numbers",
     "sections": {
       "unitDetails": "Unit details",
       "revenue": "Revenue",

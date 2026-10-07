@@ -298,18 +298,13 @@ describe("<CalculatorScreen /> — the visitor's own unit", () => {
     expect(stored().units[0]!.assumed).toEqual([]);
   });
 
-  it("loading an example asks first, then replaces the unit's numbers", () => {
-    withOwnUnit({ ...EXAMPLE, values: { ...EXAMPLE.values, adr: "4000" } });
+  it("shows no example loaders above the visitor's own numbers, only above the example", () => {
+    withOwnUnit(EXAMPLE);
     renderCalculator();
     openTab("كل الأرقام");
-    fireEvent.click(screen.getByRole("radio", { name: "مثال: إعادة تأجير" }));
-    expect(screen.getByRole("dialog", { name: "استبدال أرقام شقتك؟" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "إلغاء" }));
-    expect(stored().units[0]!.form.values.adr).toBe("4000");
-
-    fireEvent.click(screen.getByRole("radio", { name: "مثال: إعادة تأجير" }));
-    fireEvent.click(screen.getByRole("button", { name: "استبدل الأرقام" }));
-    expect(stored().units[0]!.form.values.adr).toBe("2500");
-    expect(screen.getByRole("radio", { name: "مثال: إعادة تأجير" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.queryByRole("radiogroup", { name: "أمثلة جاهزة" })).toBeNull();
+    expect(screen.queryByRole("radio", { name: "مثال: إعادة تأجير" })).toBeNull();
+    expect(screen.getByRole("radiogroup", { name: "نموذج التشغيل" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
