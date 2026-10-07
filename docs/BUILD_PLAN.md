@@ -1,6 +1,6 @@
 # BUILD_PLAN.md — Backdesk · باك ديسك (formerly Safi / صافي)
 
-Arabic-first financial OS for STR hosts: feasibility calculator, setup guide, and an accounting ERP (Free for one unit, paid plans for more).
+Arabic-first financial OS for STR hosts: feasibility calculator, setup guide, and an accounting ERP (data entry free for one apartment; outputs and more apartments on Pro).
 Read together with `CLAUDE.md` at the repo root and `docs/PROGRESS.md`. Section 0 is for Amir; Claude Code starts at Section 1.
 
 ---
@@ -27,7 +27,7 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 - [ ] `data/seed/inventory.csv` — your 81-item list with columns: `code, name_ar, name_en, category, tier (economy|mid|premium), qty_per_unit, unit_cost_min, unit_cost_max, useful_life_months, supplier_name, notes` (Phase 3)
 - [ ] `data/samples/airbnb_earnings.csv` — a real Airbnb earnings export with guest names deleted (Phase 6)
 - [ ] `data/seed/benchmarks.csv` — verified performance of your own portfolio (median ADR, occupancy and annual revenue per area and bedroom count, each with its period and source). Imported as `curated` benchmark rows, which take precedence over AirROI figures and act as a sanity check on them (Phase 2 scope in §5, revised 2026-09-30)
-- [ ] Prices in EGP for Solo, Pro and Business (monthly and annual), the Setup Kit, and the founding-member terms — needed before the pre-order campaign starts (after Phase P)
+- [ ] Confirm the Pro monthly price in EGP (249, tentative; extra apartments follow from it, §2), and set the Setup Kit price and the founding-member terms — needed before the pre-order campaign starts (after Phase P)
 
 ### How to run the build
 1. For each phase, send the **Standard phase prompt** (§5.0) with the phase id, in this order: **P, P.1, 1, P.2, 0a, 0b, 2, 3 → Validation Gate → 5, 6, 7, 8, 4, 10 → LAUNCH → 9**.
@@ -43,8 +43,8 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 Most Egyptian STR hosts do not know their true net profit. They track payouts in WhatsApp and notebooks, forget irregular costs, ignore depreciation and miscalculate commissions, so they misprice, overspend on setup, or keep a losing unit (or exit a profitable one). Co-hosts and small management companies also spend hours every month building owner statements in Excel, which causes disputes with owners.
 
 ### Personas (in order of monetization priority)
-1. **Co-host / small management company (3–30 units)** — manages units for owners; needs commissions and owner statements. **Primary paid buyer.**
-2. **Owner-operator (1–3 units)** — wants true profit and cost control. Free (1-unit ledger) or Solo.
+1. **Co-host / small management company (3–30 units)** — manages units for owners; needs commissions and owner statements. **Primary paid buyer** (Pro up to 5 apartments; a custom plan above that).
+2. **Owner-operator (1–3 units)** — wants true profit and cost control. Free (one apartment, this month's result) or Pro.
 3. **Aspiring investor** — deciding whether to buy, rent or furnish a unit for STR. Free calculator user and Setup Kit buyer.
 4. **Unit owner (managed)** — reads finalized statements through signed links (Phase 7) and, after launch, the owner portal (Phase 9). Never an org member.
 
@@ -65,33 +65,39 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 
 ## 2. Plans and gating
 
-**Principle: gate by scale and depth, never by hiding the answer.** A Free user gets a complete, correct result for one unit, in the calculator and in the ledger. Paid plans unlock more units, payout import, owner statements, AI entry, alerts, exports and comparison.
+**Principle: data entry is free, outputs are paid** (decided 2026-10-07; replaces "gate by scale and depth, never by hiding the answer"). The free figure is always the full, correct number, never a degraded one: the current month's result on Free is the same engine figure Pro shows, computed from everything the user entered. Gating removes outputs (breakdowns, past months, reports, imports); it never changes a number, and it never blocks the entry a correct result depends on.
 
-| Capability | Free | Paid (Solo / Pro / Business) | Setup Kit (one-time) |
+| Capability | Free (1 apartment) | Pro | Setup Kit (one-time) |
 |---|---|---|---|
-| Feasibility and profit calculator | Unlimited anonymous runs, 1 saved scenario | Unlimited scenarios, side-by-side compare | — |
-| Sensitivity grid (occupancy × ADR) | 3 × 3 | 7 × 7 + export | — |
+| Apartments | 1 | 1 in the plan price; each additional apartment at half the plan price, up to 5; more than 5 by a custom plan | — |
+| Entry: bookings, income, expenses, recurring rules, receipt photos, CAPEX | ✅ unlimited (receipt photos compressed in the browser and capped by `receipt_photos_max` in the plan entitlements) | ✅ | — |
+| Agreements ("unit settings" for owner-operated and arbitrage units) and commission calculation | ✅ | ✅ | — |
+| Feasibility and profit calculator, including the sensitivity grid | ✅ the full calculator; unlimited anonymous runs, 1 saved scenario | ✅ unlimited saved scenarios, side-by-side compare, export | — |
 | 12-month seasonal projection (server-only) | Blurred placeholder teaser | ✅ | — |
 | Area benchmark comparison (server-only; hidden entirely while no sourced figures exist) | Blurred placeholder teaser | ✅ | — |
-| Setup guide (7 stages) | Overview of every stage | Detailed playbooks | Detailed playbooks |
-| Checklists with progress | Basic | With actual costs → CAPEX | ✅ |
-| 81-item inventory by tier + budget planner | Preview (first 10 items) | ✅ | ✅ |
-| Units in the ledger | 1 | Solo 3 · Pro 10 · Business 30 | — |
-| Manual ledger: income, expenses, recurring rules, receipt photos, full history | ✅ (1 unit; receipt photos compressed in the browser and capped by `receipt_photos_max` in the plan entitlements) | ✅ | — |
-| Agreements ("unit settings" for owner-operated and arbitrage units) and commission calculation | ✅ (1 unit) | ✅ | — |
-| Monthly P&L, KPIs, break-even, payback from actuals | ✅ (1 unit) | ✅ + portfolio | — |
-| Payout CSV import | — | ✅ | — |
+| The current month's result (profit or loss, the full figure) | ✅ | ✅ | — |
+| The full month breakdown (P&L lines, KPIs, break-even, payback, portfolio) | — | ✅ | — |
+| Past months | — (entries are kept, never deleted) | ✅ all | — |
+| Monthly PDF report | — | ✅ | — |
 | Owner statements (finalize, PDF, signed links) | — | ✅ | — |
-| Smart entry (text, voice, receipt reading) | — | ✅ | — |
+| Airbnb report (payout CSV) import | — | ✅ | — |
+| Smart entry (text, voice, receipt reading) | — | ✅ (see §6 question 18) | — |
 | Alerts | — | ✅ | — |
 | Exports (CSV, XLSX, PDF) | — | ✅ | — |
 | Team seats: email invitations as admin, member or accountant | — | ✅ (Phase 5) | — |
 | Owner portal | — | ✅ (Phase 9, after launch) | — |
+| Setup guide (7 stages) | Overview of every stage | Detailed playbooks | Detailed playbooks |
+| Checklists with progress | ✅ (an actual cost entered on an item creates a CAPEX asset: entry is free) | ✅ | ✅ |
+| 81-item inventory by tier + budget planner | Preview (first 10 items) | ✅ | ✅ |
 
 **Plan structure.**
-- Plan codes: `free` (1 unit), `solo` (up to 3 units), `pro` (up to 10), `business` (up to 30), `setup_kit` (one-time), `founding` (pre-order). The three paid tiers have identical features and differ only by `unit_limit`. Paid plans include everything in the Setup Kit.
-- Prices live in `plan_prices` (plan × currency × interval), never in code. No price rows exist until Amir sets prices; until then the prototype pricing page shows prices labelled SAMPLE.
-- Entitlements are stored as JSON on each plan, can be overridden per subscription (`entitlements_override`, e.g. founding members or complimentary access), and are resolved on the server by `getEntitlements(orgId)`.
+- Plan codes: `free` (1 apartment), `pro` (the only paid plan; up to 5 apartments self-serve), `setup_kit` (one-time), `founding` (pre-order). Pro includes everything in the Setup Kit. More than 5 apartments is a **custom plan** agreed by contact and granted manually: a `pro` subscription whose `entitlements_override` raises the apartment limit.
+- **Price:** Pro costs one monthly price for one apartment (249 EGP, tentative, labelled SAMPLE until confirmed). Each additional apartment costs half the plan price, rounded up to a whole pound (125 EGP at 249), so 2–5 apartments cost 374 / 499 / 624 / 749. The plan price lives in `plan_prices`, never in code; the extra-apartment price and the totals are derived from it by one rule (`src/lib/pricing/apartment-price.ts`), shared by the prototype and `/pricing`. No annual prices.
+- **Trial:** the first month after an account is created, everything is open for every apartment the user declared.
+- **After the trial, or after a paid month, without a payment:** the account continues on Free, month by month. Its data is kept and never deleted. Apartments beyond the Free limit are **frozen** with their data and come back when the user pays for them.
+- **Payment:** monthly, no auto-renewal. Each payment buys one month of Pro for a stated number of apartments. Manual at first (InstaPay transfer, granted by an admin script); Paymob checkout of one month comes in Phase 4.
+- **Open (§6):** the sign-in method (question 16); when the trial clock and the gating get built, including which apartment stays active after the trial (question 17).
+- Entitlements are stored as JSON on each plan, can be overridden per subscription (`entitlements_override`, e.g. founding members, custom plans or complimentary access), and are resolved on the server by `getEntitlements(orgId)`.
 - Until the payments phase, paid access is granted manually: a subscription or purchase with `provider = 'manual'` (InstaPay), created by a server-only admin script (from Phase 5). Before Phase 5, Amir tracks InstaPay pre-orders outside the app.
 
 ---
@@ -104,9 +110,9 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 | `orgs` | `name`, `type` (individual/company), `country`, `default_currency`, `timezone` |
 | `org_members` | `org_id`, `user_id`, `role` (owner, admin, member, accountant). Unit owners are never members — see `owner_grants`. |
 | `org_invitations` | `org_id`, `email`, `role` (admin, member, accountant), `token_hash` (the raw token is never stored), `invited_by`, `expires_at`, `accepted_at`, `revoked_at` (Phase 5) |
-| `plans` | `code`, `name_ar`, `name_en`, `kind` (free, subscription, one_time), `unit_limit`, `entitlements` jsonb, `active`, `sort_order` |
-| `plan_prices` | `plan_id`, `currency`, `interval` (month, year, one_time), `amount`, `active` |
-| `subscriptions` | `org_id`, `plan_id`, `status`, `period_start`, `period_end`, `provider` (manual, paymob), `provider_ref`, `is_founding`, `entitlements_override` jsonb |
+| `plans` | `code` (free, pro, setup_kit, founding), `name_ar`, `name_en`, `kind` (free, subscription, one_time), `unit_limit` (free 1; pro 5, the self-serve maximum, raised per subscription for a custom plan), `entitlements` jsonb, `active`, `sort_order` |
+| `plan_prices` | `plan_id`, `currency`, `interval` (month, one_time; no annual prices), `amount` (for `pro`, the monthly price of one apartment; the extra-apartment price is derived from it, §2, never stored), `active` |
+| `subscriptions` | one row per paid month (no auto-renewal): `org_id`, `plan_id`, `status`, `period_start`, `period_end`, `apartments` (how many apartments the month covers), `amount` and `currency` (what was charged, as a snapshot), `provider` (manual, paymob), `provider_ref`, `is_founding`, `entitlements_override` jsonb |
 | `purchases` | one-time purchases (Setup Kit, founding pre-order): `plan_id`, `amount`, `currency`, `status`, `provider` (manual, paymob), `provider_ref` |
 | `units` | `name`, `city`, `area`, `bedrooms`, `bathrooms`, `max_guests`, `status` (planning, setup, live, paused, archived), `operating_model`, `currency` (the unit currency), `go_live_date`. Created with minimal columns in Phase 3; Phase 5 extends the same table (never a second units table). |
 | `unit_month_settings` | `unit_id`, `month`, `blocked_nights` (entered by hand; there is no calendar) |
@@ -349,7 +355,7 @@ RTL and translation issues, missing tests, performance. List issues by severity,
   3. Monthly profit home — owner view and co-host view (switchable)
   4. Add expense (≤ 4 taps)
   5. Owner statement
-  6. Pricing page: Solo, Pro, Business, Setup Kit and the founding-member offer, with SAMPLE prices and a pre-order call to action whose destination Amir supplies
+  6. Pricing page: Solo, Pro, Business, Setup Kit and the founding-member offer, with SAMPLE prices and a pre-order call to action whose destination Amir supplies *(since 2026-10-07: Free and Pro only, priced per apartment; see §2)*
 - Screens are built from real, reusable presentational components in `src/components/` that take data as props. Prototype pages live under `/demo` and pass them fixtures from `src/demo/fixtures/`; later phases pass the same components real data. `/demo` stays as a public sample-data demo.
 - Fixture numbers come from the worked examples in §4.6 and involve no formulas.
 - Every `/demo` screen shows a clear "بيانات تجريبية" banner; prices are also labelled SAMPLE. `/demo` is `noindex` (robots meta tag and `X-Robots-Tag` header) until launch.
@@ -440,8 +446,8 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 **Scope**
 - After Amir approves: create the dev Supabase project in Frankfurt (free plan) through the Supabase connector. Touch no other project.
 - Server and browser Supabase clients; session refresh and next-intl routing combined in one middleware.
-- Auth: 6-digit email code (the email also carries a sign-in link) and Google, off by config until the OAuth client exists. Resend as SMTP for dev Auth. Wildcard redirect URLs for Vercel previews (`https://*-<vercel-scope>.vercel.app/**`).
-- Migration 001: `profiles`, `orgs`, `org_members` (owner, admin, member, accountant), `plans` (seeded: free 1 unit, solo 3, pro 10, business 30, setup_kit, founding), `plan_prices` (no rows until prices are set), `subscriptions` (with `entitlements_override`), `audit_log` (append-only, with the redaction function in §3) — all with RLS.
+- Auth: the sign-in method is open (§6 question 16). Planned until decided: 6-digit email code (the email also carries a sign-in link) and Google, off by config until the OAuth client exists. Resend as SMTP for dev Auth. Wildcard redirect URLs for Vercel previews (`https://*-<vercel-scope>.vercel.app/**`).
+- Migration 001: `profiles`, `orgs`, `org_members` (owner, admin, member, accountant), `plans` (seeded: `free` with 1 apartment, `pro` with up to 5, `setup_kit`, `founding`; no other tiers), `plan_prices` (monthly and one-time only; no rows until prices are confirmed), `subscriptions` (one row per paid month, with `apartments`, the amount charged and `entitlements_override`), `audit_log` (append-only, with the redaction function in §3) — all with RLS.
 - Trigger: on sign-up, create a profile and a personal org (`individual`, EGP, `Africa/Cairo`) with the user as `owner`.
 - Entitlements service `getEntitlements(orgId)` (server-only) and a `useEntitlements` hook that reads flags only; an org with no subscription is Free.
 - PostHog provider: nothing is captured until the user opts in; it does nothing when the key is missing.
@@ -508,7 +514,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   7. Optimization
 - Frontmatter: `stage`, `order`, `tier` (free/pro), `est_cost_range`, `est_duration`. Claude Code writes skeleton drafts marked `DRAFT — Amir to review` and never states legal requirements as fact.
 - Create the `units` table with the minimal columns checklists need, with RLS and the plan's unit limit enforced on the server. This is the same table Phase 5 extends; there is never a second units table.
-- Per-unit checklist progress; optional actual cost on each item creates a CAPEX asset (paid).
+- Per-unit checklist progress; optional actual cost on each item creates a CAPEX asset (on Free too: it is data entry, and the month's result needs it, §2).
 - Import `data/seed/inventory.csv` into `inventory_templates`; budget planner totals by tier and bedroom count; Free preview shows the first 10 items.
 - Setup Kit entitlement flag. Before launch the Setup Kit is sold by InstaPay and granted with a `manual` purchase; payment wiring comes in Phase 4.
 
@@ -531,7 +537,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - Portfolio-level costs (no unit) are recorded as manager overhead.
 - Recurring rules (rent, internet, compound fees) materialized daily by pg_cron.
 - Period locks enforced at database level; anything dated in a locked month posts to the next open period; `audit_log` on every insert, update and delete of financial tables.
-- Unit limits enforced on the server: Free 1, Solo 3, Pro 10, Business 30.
+- Apartment limits enforced on the server (§2): Free 1; Pro the apartments paid for, up to 5 (more through a custom plan's `entitlements_override`). The trial clock, freezing extra apartments and the output gating are built when §6 question 17 decides.
 - **Team invitations (basic seats):** an org owner or admin invites by email with one of the existing roles (admin, member, accountant). The invitee signs in with the 6-digit email code and joins the org; invitations expire and can be revoked. The email is sent via Resend, and an org switcher appears when a user belongs to more than one org. Every person has their own login, so `audit_log` attributes each write to an individual; no shared logins.
 - A role matrix for owner, admin, member and accountant, presented in the phase plan for approval, then tested.
 - Founding members: a server-only admin script grants paid access (a `manual` subscription with `is_founding`).
@@ -565,6 +571,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - Owner statements: basis from the agreement (cash by default); opening balance (carried forward; entered by hand on an owner's first statement), revenue, fees, owner-borne expenses, commission, owner payouts and balance due; draft → review → finalize (locks the period and snapshots the commission transaction) → PDF in AR or EN → signed, expiring share link (`statement_links`). Render HTML and print with headless Chromium to guarantee correct Arabic shaping and bidi; avoid PDF libraries with weak Arabic support. Sequential statement numbering per org.
 - Commission payable summary for managers across all owners.
 - Exports: CSV and XLSX for transactions and P&L.
+- Gating (§2; built when §6 question 17 decides): Free sees the current month's result only, the same engine figure as Pro; the breakdown, past months, reports, statements and exports are Pro.
 
 **Acceptance**
 - [ ] Arabic text in PDFs shapes correctly (visual snapshot test).
@@ -590,10 +597,10 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 
 ### Phase 4 — Payments and legal (pre-launch; runs after Phase 8)
 **Scope**
-- `/pricing` rendered from `plans` and `plan_prices` (AR/EN), monthly/annual toggle, founding-member offer (the Phase P page, now on live data).
-- `PaymentProvider` interface (`createCheckout`, `handleWebhook`, `getStatus`, `cancel`) with a Paymob implementation: HMAC verification, idempotent webhook processing, sandbox mode.
-- One-time purchases (Setup Kit) and subscriptions for Solo, Pro and Business, with a manual-renewal fallback (invoice + reminder email) if recurring card billing is unavailable on the account.
-- Move manually granted (InstaPay) founding members onto normal subscriptions without losing their terms.
+- `/pricing` rendered from `plans` and `plan_prices` (AR/EN): Free and Pro, monthly prices only (no annual toggle), the 2–5 apartment totals derived by the shared rule (`src/lib/pricing/apartment-price.ts`), custom plans above 5 by contact, and the founding-member offer (the prototype page, now on live data).
+- `PaymentProvider` interface (`createCheckout`, `handleWebhook`, `getStatus`) with a Paymob implementation: HMAC verification, idempotent webhook processing, sandbox mode. Payments are one-time charges; there is no recurring billing to cancel.
+- One-time purchases (Setup Kit) and monthly Pro payments: each payment buys one month for a stated number of apartments (one `subscriptions` row), with **no auto-renewal**. A reminder email before the month ends; when it ends without a new payment, the org continues on Free with its data kept and its extra apartments frozen (§2). Manual payments (InstaPay, `provider = 'manual'`) stay available alongside Paymob.
+- Move manually granted (InstaPay) founding members onto normal monthly payments without losing their terms.
 - Confirmation emails via Resend.
 - `/admin` (role-gated): orders, revenue, funnel snapshot from PostHog.
 - Drafts for legal review: terms of service, privacy policy (written with Egypt's Personal Data Protection Law, Law 151 of 2020, in mind) and refund policy. **Drafts only, for legal review** — never presented as legal advice.
@@ -602,6 +609,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - [ ] A sandbox payment grants the entitlement within 10 s of the webhook.
 - [ ] A replayed or forged webhook is rejected and logged.
 - [ ] Changing a price in the database updates `/pricing` without a deploy.
+- [ ] A paid month that ends without a new payment leaves the org on Free: no data deleted, extra apartments frozen, and they return when paid for.
 - [ ] Legal drafts exist, clearly marked DRAFT — for legal review.
 
 ### Phase 10 — Hardening and launch
@@ -631,10 +639,10 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 |---|---|---|---|
 | 1 | Domain for Backdesk (Resend sending domain, production URLs) | Phase 0b | Dev sign-in emails reach only Amir's own address |
 | 2 | Where the prototype's pre-order button goes (e.g. a WhatsApp number or a form) | Phase P | Placeholder link, clearly marked |
-| 3 | Prices for Solo, Pro and Business (monthly, annual), the Setup Kit, and founding-member terms | Pre-order campaign (after Phase P) | SAMPLE prices in the prototype |
+| 3 | Confirm the Pro monthly price (249 EGP, tentative; extra apartments follow from it, §2); the Setup Kit price and founding-member terms | Pre-order campaign (after Phase P) | SAMPLE prices in the prototype |
 | 4 | Phase 2 benchmark pre-build gates: the AirROI coverage spike (Madinaty, New Cairo, North Coast, Hurghada) and confirmation that AirROI's terms allow storing and displaying derived medians (see Phase 2 scope in §5) | Phase 2 implementation | — (a gate, not a default: nothing is built until both results are recorded) |
 | 5 | Is `inventory.csv` ready in the specified columns? | Phase 3 | — |
-| 6 | Paymob account status; is recurring card billing enabled? | Phase 4 | Manual-renewal fallback |
+| 6 | Paymob account status (one-time payments only: there is no auto-renewal, §2) | Phase 4 | Manual payments (InstaPay) only |
 | 7 | Real Airbnb earnings CSV sample (guest names removed) | Phase 6 | — |
 | 8 | Speech-to-text provider | Phase 8 | — |
 | 9 | WhatsApp Business API number | Phase 9 (post-launch) | — |
@@ -644,10 +652,15 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 13 | Does AirROI offer market-level summaries? This determines the refresh design | Phase 2 (pre-build gate) | Compute medians in memory from listing-level data and persist only the aggregated rows |
 | 14 | Lookup rule: when the top-precedence row at a level has `sample_size` below `MIN_SAMPLE`, should the lookup try the next source at the same level before rolling up? (raised while reconciling, 2026-09-30) | Phase 2 | The rule as written (no fall-through). Recommended change: fall through, because a small `curated` own-portfolio row (likely fewer than 30 units) would otherwise always force a roll-up, even when the same area has a solid API figure |
 | 15 | Setup-cost benchmarks: the revised `benchmarks` table has no setup-cost column, but the earlier long format could hold one and §0's `benchmarks.csv` listed setup-cost figures (raised while reconciling, 2026-09-30) | Phase 2 | Setup-cost references come from Phase 3's inventory budget planner, not from `benchmarks` |
+| 16 | Sign-in method (open since the plan model was confirmed, 2026-10-07) | Phase 0b | 6-digit email code with a sign-in link, plus Google off by config (as written in Phase 0b) |
+| 17 | When the trial clock and the gating get built (§2): the one-month trial for every declared apartment, Free's current-month-only view, and freezing extra apartments — including how the declared apartment count is captured and which apartment stays active after the trial | The phase that builds them (0b, 5 or 7) | — (open; nothing is gated until decided) |
+| 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 
 Resolved on 2026-09-29, revised 2026-09-30: Phase 2's benchmarks are area medians from the AirROI API, with regional roll-up; `curated` own-portfolio rows take precedence (§3 and §5, Phase 2 scope). Still open: questions 4 and 10–15 above.
+
+Decided on 2026-10-07: the plan model (§2): Free and one paid plan, Pro, priced per apartment, with a one-month trial and monthly payment without auto-renewal. Open from it: questions 16–18.
 
 ---
 

@@ -5,7 +5,7 @@
 
 ## 1. Product in one paragraph
 
-**Backdesk · باك ديسك** (formerly Safi / صافي; working name) is an Arabic-first financial operating system for short-term-rental (STR) hosts, starting in Egypt and expanding to the GCC. It answers one question with precision: **"How much does this unit really make, and why?"** It covers three jobs: (1) feasibility and profit calculation before launch, (2) a step-by-step setup guide from empty apartment to first guest, and (3) a lightweight accounting ERP that records income and expenses, computes platform fees, management commissions, owner payouts and profitability, and produces owner statements. Free includes a manual ledger for one unit; the paid plans (Solo, Pro, Business) unlock more units, payout import, owner statements, AI entry, alerts and exports.
+**Backdesk · باك ديسك** (formerly Safi / صافي; working name) is an Arabic-first financial operating system for short-term-rental (STR) hosts, starting in Egypt and expanding to the GCC. It answers one question with precision: **"How much does this unit really make, and why?"** It covers three jobs: (1) feasibility and profit calculation before launch, (2) a step-by-step setup guide from empty apartment to first guest, and (3) a lightweight accounting ERP that records income and expenses, computes platform fees, management commissions, owner payouts and profitability, and produces owner statements. **Pricing principle: data entry is free, outputs are paid.** The free figure is always the full, correct number, never a degraded one. **Free** covers one apartment: unlimited entry of bookings and expenses, the full feasibility calculator, and the current month's result (profit or loss) only. **Pro**, the one paid plan, adds the full month breakdown, every past month, the monthly PDF report, owner statements and Airbnb report import; each additional apartment costs half the plan price, up to 5 apartments, and more than 5 is a custom plan by contact. The first month after creating an account is fully open for every apartment the user declared. Payment is monthly, with no auto-renewal (manual at first); without a payment the account continues on Free, its data is never deleted, and extra apartments are frozen with their data. Details: `docs/BUILD_PLAN.md` §2.
 
 ## 2. Hard non-goals — never build these
 
@@ -109,7 +109,9 @@
 - **NOI**: payout − operating expenses (before commission, depreciation and tax).
 - **Unit currency**: the currency a unit's books are kept in; every transaction stores its amount in this currency.
 - **Operating model**: `owner_operated` | `rental_arbitrage` | `managed_for_owner`.
-- **Paid plans**: Solo (up to 3 units), Pro (up to 10), Business (up to 30). Same features; they differ only by unit limit. "Pro features" in these docs means features of any paid plan.
+- **Plans**: **Free** (one apartment) and **Pro**, the only paid plan: 249 EGP a month for one apartment (tentative, labelled SAMPLE until confirmed); each additional apartment costs half the plan price, rounded up to a whole pound, up to 5 apartments; more than 5 is a **custom plan** agreed by contact. There are no annual prices. "Pro features" means the paid plan's features.
+- **Trial**: the first month after an account is created; everything is open for every apartment the user declared.
+- **Frozen apartment**: an apartment beyond the plan's limit once the trial or a paid month ends without a new payment. Its data is kept, never deleted; it comes back when the user pays for it.
 - **Manager profit** (per managed unit): commission − manager-borne costs.
 - **Org profit** (home hero number): Σ net profit of owner-operated and rental-arbitrage units + Σ manager profit of managed units − portfolio-level overhead (shown as its own line). One total per currency.
 - **Portfolio-level cost**: a transaction with no unit. It is manager overhead and is never charged to owners unless explicitly allocated to units.
