@@ -4,6 +4,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // `next dev` otherwise appends generated agent rules to CLAUDE.md and
+  // rewrites next-env.d.ts; CLAUDE.md is hand-maintained project memory.
+  agentRules: false,
   async headers() {
     // Phase P and its successors keep /demo out of search results until
     // BUILD_PLAN.md's launch checklist removes this (docs/LAUNCH.md).
