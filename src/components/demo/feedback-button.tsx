@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { feedbackWhatsAppUrl } from "@/lib/whatsapp";
 
 /**
  * "رأيك؟" — opens WhatsApp with the current screen prefilled. It sits in
@@ -12,12 +13,9 @@ import { cn } from "@/lib/utils";
 export function FeedbackLink({ onHero }: { onHero?: boolean }) {
   const t = useTranslations("common");
   const pathname = usePathname();
-  const number = process.env.NEXT_PUBLIC_FEEDBACK_WHATSAPP;
+  const href = feedbackWhatsAppUrl(t("feedbackPrefill", { path: pathname }));
 
-  if (!number) return null;
-
-  const text = t("feedbackPrefill", { path: pathname });
-  const href = `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
+  if (!href) return null;
 
   return (
     <a
