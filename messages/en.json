@@ -401,7 +401,6 @@
   "pricing": {
     "title": "Plans",
     "perMonth": "per month",
-    "mostPopular": "Most popular",
     "scope": {
       "free": "One apartment",
       "pro": "One apartment or more"

@@ -401,7 +401,6 @@
   "pricing": {
     "title": "الباقات",
     "perMonth": "شهريًا",
-    "mostPopular": "الأكثر اختيارًا",
     "scope": {
       "free": "شقة واحدة",
       "pro": "شقة أو أكثر"

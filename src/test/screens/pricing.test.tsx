@@ -51,9 +51,10 @@ describe("<PricingScreen />", () => {
     expect(screen.queryByText("حسابات كاملة لوحدة واحدة")).toBeNull();
   });
 
-  it("Pro: 249 a month, tagged تجريبي, with its five lines", () => {
+  it("Pro: 249 a month, tagged تجريبي, with its five lines and no popularity claim", () => {
     renderPricing();
     const pro = card("برو");
+    expect(screen.queryByText("الأكثر اختيارًا")).toBeNull();
     expect(pro).toHaveTextContent("249ج.م.شهريًاتجريبي");
     expect(bullets(pro)).toEqual([
       "كل ما في المجاني",
@@ -127,6 +128,7 @@ describe("<PricingScreen />", () => {
     vi.stubEnv("NEXT_PUBLIC_FEEDBACK_WHATSAPP", "201234567890");
     renderPricing("en");
     expect(screen.getByRole("heading", { name: "Pro", level: 2 })).toBeInTheDocument();
+    expect(screen.queryByText("Most popular")).toBeNull();
     expect(screen.getByText("One apartment or more")).toBeInTheDocument();
     expect(screen.getByText("Total per month")).toBeInTheDocument();
     expect(screen.getByText("2 apartments")).toBeInTheDocument();
