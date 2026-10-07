@@ -216,7 +216,6 @@
       "bathrooms": "الحمامات",
       "maxGuests": "أقصى عدد ضيوف"
     },
-    "operatingModelLabel": "النموذج",
     "fields": {
       "rent": "الإيجار الشهري",
       "deposit": "مبلغ التأمين",
@@ -275,16 +274,8 @@
       "life_required": "أدخل العمر الافتراضي لتكلفة التجهيز"
     },
     "invalidNotice": "صحّح الحقل المحدد لتحديث النتائج. الأرقام المعروضة من آخر إدخال صحيح.",
-    "grossRevenueLabel": "إجمالي الإيرادات",
-    "platformFeesLabel": "عمولة المنصة",
     "netPayoutLabel": "المحوَّل من المنصة",
-    "opexLabel": "المصروفات التشغيلية",
-    "rentLabel": "الإيجار",
     "noiLabel": "صافي الدخل التشغيلي",
-    "commissionLabel": "عمولة الإدارة",
-    "profitBeforeDepreciationLabel": "الربح قبل الإهلاك",
-    "depreciationLabel": "إهلاك التجهيز (شهريًا)",
-    "netProfitLabel": "صافي الربح بعد الإهلاك",
     "contributionPerNightLabel": "ربح الليلة قبل المصاريف الثابتة",
     "investedLabel": "{deposit, select, yes {تكلفة التجهيز والتأمين} other {تكلفة التجهيز}}",
     "paybackLabel": "{deposit, select, yes {مدة الاسترداد على تكلفة التجهيز والتأمين فقط} other {مدة الاسترداد على تكلفة التجهيز فقط}}",

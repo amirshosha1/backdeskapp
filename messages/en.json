@@ -216,7 +216,6 @@
       "bathrooms": "Bathrooms",
       "maxGuests": "Max guests"
     },
-    "operatingModelLabel": "Model",
     "fields": {
       "rent": "Monthly rent",
       "deposit": "Deposit",
@@ -275,16 +274,8 @@
       "life_required": "Enter a useful life for the setup cost"
     },
     "invalidNotice": "Fix the highlighted field to update the results. The figures shown are from your last valid entry.",
-    "grossRevenueLabel": "Gross revenue",
-    "platformFeesLabel": "Platform fees",
     "netPayoutLabel": "Net payout",
-    "opexLabel": "Operating expenses",
-    "rentLabel": "Rent",
     "noiLabel": "Net operating income",
-    "commissionLabel": "Management commission",
-    "profitBeforeDepreciationLabel": "Profit before depreciation",
-    "depreciationLabel": "Setup depreciation (monthly)",
-    "netProfitLabel": "Net profit after depreciation",
     "contributionPerNightLabel": "Profit per night before fixed costs",
     "investedLabel": "{deposit, select, yes {Setup cost and deposit} other {Setup cost}}",
     "paybackLabel": "{deposit, select, yes {Payback on the setup cost and deposit only} other {Payback on the setup cost only}}",
