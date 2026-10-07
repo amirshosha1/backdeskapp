@@ -75,7 +75,7 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
             {unit.hasStatement ? (
               <Link
                 href={`/demo/units/${unit.id}/statement`}
-                className="tap flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
+                className="tap flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
               >
                 <FileText className="h-4 w-4" aria-hidden="true" />
                 {t("viewStatementCta")}
@@ -83,7 +83,7 @@ export function UnitCard({ unit }: { unit: UnitFixture }) {
             ) : (
               <ToastButton
                 message={tToast("statementLater")}
-                className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
+                className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
               >
                 <FileText className="h-4 w-4" aria-hidden="true" />
                 {t("viewStatementCta")}

@@ -66,6 +66,13 @@ test.describe("deeper screens", () => {
 
   test("Units → owner statement", async ({ page }) => {
     await page.goto("/demo/units");
+    // Both statement actions on the managed sample cards (a link and a toast button) meet the 44 px touch target.
+    const statementActions = page.getByText("عرض كشف الحساب");
+    await expect(statementActions).toHaveCount(2);
+    for (const action of await statementActions.all()) {
+      const box = await action.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
     await page.getByRole("link", { name: "عرض كشف الحساب" }).click();
     await expect(page).toHaveURL(/\/demo\/units\/downtown-cairo\/statement$/);
   });
