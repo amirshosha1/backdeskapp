@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { resetGuestOnEveryLoad, SEEN, withOwnUnit, type GuestState } from "./guest";
 import { ALL_SCREENS } from "./screens";
 
 /**
@@ -7,9 +8,21 @@ import { ALL_SCREENS } from "./screens";
  * a toggled state) or opens an external link. Nothing is disabled.
  *
  * The screen is reloaded before each tap so every element is tested from
- * the same starting state. The current tab and an already-selected option
- * are exempt: tapping them is a no-op by design.
+ * the same starting state — including the visitor's browser storage, which
+ * is re-seeded before every load (a tap that saves something must not leak
+ * into the next reload). The current tab, an already-selected option and
+ * the selected calculator tab are exempt: tapping them is a no-op by design.
+ *
+ * Screens that change with the visitor's own unit are crawled in both states.
  */
+const CRAWLS: { path: string; state: GuestState; label: string }[] = [
+  ...ALL_SCREENS.map((path) => ({ path, state: SEEN, label: path })),
+  ...["/demo/units", "/demo/calculator", "/demo/calculator?tab=all", "/demo/more"].map((path) => ({
+    path,
+    state: withOwnUnit(),
+    label: `${path} (with the visitor's own unit)`,
+  })),
+];
 const TAPPABLE = 'a[href], button, [role="button"], [role="radio"], [role="link"]';
 
 async function settle(page: Page) {
@@ -35,16 +48,20 @@ async function visibleTappables(page: Page) {
       .map(({ el, index }) => ({
         index,
         label: (el.getAttribute("aria-label") || el.textContent || "").trim().slice(0, 40),
-        exempt: el.getAttribute("aria-current") === "page" || el.getAttribute("aria-checked") === "true",
+        exempt:
+          el.getAttribute("aria-current") === "page" ||
+          el.getAttribute("aria-checked") === "true" ||
+          el.getAttribute("aria-selected") === "true",
         external: el instanceof HTMLAnchorElement && /^https?:/.test(el.getAttribute("href") ?? ""),
         disabled: (el as HTMLButtonElement).disabled === true || el.getAttribute("aria-disabled") === "true",
       })),
   );
 }
 
-for (const path of ALL_SCREENS) {
-  test(`${path}: every tap does something`, async ({ page }) => {
-    test.setTimeout(180_000);
+for (const { path, state, label } of CRAWLS) {
+  test(`${label}: every tap does something`, async ({ page }) => {
+    test.setTimeout(240_000);
+    await resetGuestOnEveryLoad(page, state);
     await page.goto(path);
     await settle(page);
     const elements = await visibleTappables(page);
