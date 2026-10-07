@@ -47,6 +47,10 @@ describe("calculator form", () => {
   it("compares forms by value", () => {
     expect(sameForm(base, structuredClone(base))).toBe(true);
     expect(sameForm(base, withValue("adr", "2501"))).toBe(false);
+    // A form read back from the browser has its values in another key order.
+    const reordered = { ...base, values: Object.fromEntries(Object.entries(base.values).reverse()) as CalculatorForm["values"] };
+    expect(sameForm(base, reordered)).toBe(true);
+    expect(sameForm(base, { ...base, commission: { ...base.commission, includeCleaningFees: false } })).toBe(false);
   });
 });
 

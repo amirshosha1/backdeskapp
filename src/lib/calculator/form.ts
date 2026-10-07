@@ -199,7 +199,15 @@ export function parseCalculatorForm(form: CalculatorForm): ParsedForm {
   return { ok: true, input };
 }
 
-/** Whether the form still holds exactly a preset's values (its chip shows as selected). */
+/** Whether the form still holds exactly a preset's values (its chip shows as selected); key order doesn't matter. */
 export function sameForm(a: CalculatorForm, b: CalculatorForm): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  const fields = Object.keys(FIELD_KIND) as NumberField[];
+  return (
+    a.operatingModel === b.operatingModel &&
+    fields.every((f) => a.values[f] === b.values[f]) &&
+    a.commission.basis === b.commission.basis &&
+    a.commission.hybridMode === b.commission.hybridMode &&
+    a.commission.hybridBasis === b.commission.hybridBasis &&
+    a.commission.includeCleaningFees === b.commission.includeCleaningFees
+  );
 }
