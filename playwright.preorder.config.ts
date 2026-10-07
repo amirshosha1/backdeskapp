@@ -5,11 +5,14 @@ import { defineConfig, devices } from "@playwright/test";
  * inlined into the client bundle at build time, so verifying the pre-order
  * button's real `href`/`target`/`rel` needs a build with them set — the
  * main suite's build (playwright.config.ts) has neither, so every pre-order
- * button there shows the "opens soon" toast instead. This config builds and
- * serves on a separate port with the vars set, running only
- * `e2e/preorder-env.spec.ts` (BUILD_PLAN.md Phase P.1.1, item 13).
+ * button there shows the "opens soon" toast instead, and the WhatsApp
+ * actions (the "رأيك؟" link, the pricing page's custom-plans contact) are
+ * not rendered. This config builds and serves on a separate port with the
+ * vars set, running only `e2e/preorder-env.spec.ts` (BUILD_PLAN.md Phase
+ * P.1.1, item 13).
  */
 const PREORDER_URL = "https://wa.me/201234567890";
+const FEEDBACK_WHATSAPP = "201098765432";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -35,11 +38,11 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm build && pnpm start",
-    env: { PORT: "3010", NEXT_PUBLIC_PREORDER_URL: PREORDER_URL },
+    env: { PORT: "3010", NEXT_PUBLIC_PREORDER_URL: PREORDER_URL, NEXT_PUBLIC_FEEDBACK_WHATSAPP: FEEDBACK_WHATSAPP },
     url: "http://127.0.0.1:3010",
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },
 });
 
-export { PREORDER_URL };
+export { FEEDBACK_WHATSAPP, PREORDER_URL };
