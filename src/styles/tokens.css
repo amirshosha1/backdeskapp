@@ -41,6 +41,15 @@
   --color-amber: #9c5c0a;
   --color-amber-track: #f5ddb5;
   --color-amber-soft: #fcefd9;
+  /* Data warnings (e.g. booked nights above available nights): amber, never alarm red */
+  --color-warning: #9c5c0a;
+  --color-warning-foreground: #fcefd9;
+
+  /* On the royal hero only (white text's companions on the blue) */
+  --color-mint: #7fe3b3; /* the surplus past break-even; also the tallest bar of the key mark */
+  --color-amber-bright: #f5c77a; /* the gap still to cover before break-even */
+  --color-hero-profit: #c4f3da;
+  --color-hero-loss: #ffd0c7;
 
   /* Owner statement: keeps the ledger look of direction B */
   --color-paper: #fbf8f1;

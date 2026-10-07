@@ -84,6 +84,56 @@
     opacity: 0.85;
   }
 
+  /* A native range input drawn by its parent: the input itself is a
+     transparent 44px-tall touch target with a white 30px thumb; the track,
+     fill and markers are separate elements positioned with logical
+     insets, so they follow the input's own direction (in RTL the minimum
+     sits at the reading start, on the right). */
+  .range-input {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 2.75rem;
+    margin: 0;
+    background: transparent;
+    cursor: ew-resize;
+    touch-action: pan-y;
+  }
+  .range-input::-webkit-slider-runnable-track {
+    height: 2.75rem;
+    background: transparent;
+  }
+  .range-input::-moz-range-track {
+    height: 2.75rem;
+    background: transparent;
+  }
+  .range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px;
+    height: 30px;
+    margin-top: 7px;
+    border: 0;
+    border-radius: 9999px;
+    background: #ffffff;
+    box-shadow: 0 6px 14px rgb(1 8 36 / 0.45);
+  }
+  .range-input::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 9999px;
+    background: #ffffff;
+    box-shadow: 0 6px 14px rgb(1 8 36 / 0.45);
+  }
+  .range-input:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+    border-radius: 1.375rem;
+  }
+
   /* Horizontal swipe with snap points; the scrollbar stays hidden. */
   .snap-row {
     scroll-snap-type: x mandatory;
