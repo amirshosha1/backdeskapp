@@ -1,7 +1,7 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-07 (P.2 slice 1 — first-run flow, Units entry, calculator redesign — built on branch `ui-first-run-calculator`, in review).
+> Last updated: 2026-10-07 (P.2 slice 1 — first-run flow, Units entry, calculator redesign — built on branch `ui-first-run-calculator`, in review as amirshosha1/str-money-finder#9).
 
 ## Current status
 
