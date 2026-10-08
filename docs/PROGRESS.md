@@ -1,7 +1,7 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-08 (cleanup after P.2 slice 1, the two-plan pricing page, the confirmed plan model and Amir's final answers on sign-in and gating, on branch `post-slice1-pricing`, in review as amirshosha1/str-money-finder#10; slice 1 itself is merged as amirshosha1/str-money-finder#9).
+> Last updated: 2026-10-08 (Batch 3, Phase 0a/0b slice 1: PR A, the schema, on branch `claude/gallant-dijkstra-t3u0ka`. Before it: #10, the cleanup after P.2 slice 1 and the plan model; slice 1 itself is merged as amirshosha1/str-money-finder#9).
 
 ## Current status
 
@@ -11,8 +11,19 @@
 - **Phase 1 (finance engine) is merged** (amirshosha1/str-money-finder#6, review fixes #7): every module of BUILD_PLAN §4 in `src/lib/finance/` (pure, `Decimal`, typed `Result` errors, Zod schemas for every input and output, `ENGINE_VERSION`), all worked examples A–K as tests (B: 19.38 nights with maintenance, B2: 18.99 without), the §4.7 invariants as fast-check properties, and 99.8% line / 98.6% branch coverage. Every `/demo` figure is now computed by the engine from raw sample inputs (`src/demo/sample-data/`), the four sample units differ, the month-over-month chips are computed from a sample August, and `/demo/calculator` is live. See "Phase 1 decisions" and "Phase 1 build notes" below.
 - **The rename to Backdesk · باك ديسك is merged** (amirshosha1/str-money-finder#8).
 - **P.2 slice 1 ("UI batch 2") is merged** (amirshosha1/str-money-finder#9): the first-run guided flow (`/demo/start`), the visitor's own first unit kept in this browser only, Units with the own unit first and the samples under "أمثلة تجريبية", and the calculator as "الملخص" / "كل الأرقام" with the headline **after depreciation**. It is the first part of P.2, not a separate phase. See "P.2 slice 1 decisions" and "P.2 slice 1 build notes" below.
-- **Cleanup after slice 1, the pricing page and the plan model** are built on branch `post-slice1-pricing`, in review (amirshosha1/str-money-finder#10): `agentRules: false`, `next-env.d.ts` no longer tracked, no example loaders above the visitor's own numbers, 44 px statement buttons on the sample cards, `/demo/pricing` with two plans (Free and Pro, extra apartments at half price), and the confirmed plan model written into `CLAUDE.md` and `docs/BUILD_PLAN.md`. Final edits (2026-10-08): sign-in is Google only, the trial clock and all gating come in Phase 7 with the month report, Free also shows occupancy and the average nightly rate, and the two "paid plans" strings are singular. See "Post-slice-1 cleanup and pricing (2026-10-07)", "Plan model (2026-10-07)" and "Final review of #10 (2026-10-08)" below.
-- **Next step:** Amir merges amirshosha1/str-money-finder#10. After merge: the **host review with 3–5 hosts** (BUILD_PLAN §0 and P.2), then the rest of P.2 — send the standard phase prompt with `{N} = P.2` and say "remaining items". Phase P.1.1 was merged into `main` on 2026-10-02 (amirshosha1/str-money-finder#3).
+- **Cleanup after slice 1, the pricing page and the plan model** are merged (amirshosha1/str-money-finder#10): `agentRules: false`, `next-env.d.ts` no longer tracked, no example loaders above the visitor's own numbers, 44 px statement buttons on the sample cards, `/demo/pricing` with two plans (Free and Pro, extra apartments at half price), and the confirmed plan model written into `CLAUDE.md` and `docs/BUILD_PLAN.md`. Final edits (2026-10-08): sign-in is Google only, the trial clock and all gating come in Phase 7 with the month report, Free also shows occupancy and the average nightly rate, and the two "paid plans" strings are singular. See "Post-slice-1 cleanup and pricing (2026-10-07)", "Plan model (2026-10-07)" and "Final review of #10 (2026-10-08)" below.
+- **Batch 3 — Phase 0a/0b slice 1 (accounts with Google sign-in, apartments saved to the account) is in progress**, in two pull requests. **PR A (schema only) is built:**
+  - the migration `supabase/migrations/20261008180000_accounts_and_units.sql`;
+  - the proof, `pnpm test:db`: 83 tests on a throwaway local Postgres that mirrors Supabase's roles. They run in GitHub Actions too (`.github/workflows/db-tests.yml`);
+  - `docs/verify_after_migration.sql`, the read-only check Amir runs in the Supabase SQL editor;
+  - `docs/SETUP_AUTH.md`.
+  **PR B (the app)** starts after PR A is merged and Supabase has applied it. See "Batch 3 decisions — Phase 0a/0b slice 1 (2026-10-08)" below.
+- **Next step (Batch 3):**
+  1. Amir reviews and merges PR A; the Supabase GitHub integration applies the migration.
+  2. Amir runs `docs/verify_after_migration.sql` in the SQL editor and pastes the result into chat.
+  3. Amir does `docs/SETUP_AUTH.md` steps 1–5.
+  4. Claude restarts the branch from `main` and builds PR B. If the row "postgres holds DELETE on auth.users" fails, Claude first proposes another deletion method.
+- **Still ahead, unchanged:** the **host review with 3–5 hosts** (BUILD_PLAN §0 and P.2), then the rest of P.2 — send the standard phase prompt with `{N} = P.2` and say "remaining items". Phase P.1.1 was merged into `main` on 2026-10-02 (amirshosha1/str-money-finder#3).
 - **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link and the pricing page's "تواصل معنا" for more than 5 apartments stay hidden until then). Per §0, the prototype now goes to 3–5 hosts (P.2 slice 1 is merged).
 - **Deferred to Phase P.2:** live Home updates after saving an expense or income (data stays browser-only). The editable calculator and the varied sample data, deferred from P.1.1, are done in Phase 1.
 - **Docs-only, 2026-09-29 and 2026-09-30:** Phase 2's benchmark design is decided. Benchmarks are area medians from the AirROI API, refreshed quarterly and rolled up through a `regions` hierarchy, with `curated` own-portfolio rows taking precedence. It is recorded in `docs/BUILD_PLAN.md` §3, §5 and §6, and in "Phase 2 decision revision (2026-09-30)" below, which supersedes the AirROI parts of the 2026-09-29 pre-decisions. Nothing is implemented yet: Phase 1 is still in progress, and two pre-build gates (coverage spike, licensing) come first.
@@ -26,8 +37,8 @@
 | P.1 — Prototype fixes and redesign | ✅ Merged (2026-10-02, #3): built 2026-09-27, fix pass "P.1.1" built 2026-09-28 |
 | 1 — Finance engine (+ wire the `/demo` calculator to it) | ✅ Merged (#6, review fixes #7) |
 | P.2 — Interactive demo, data in the browser only | 🔨 Slice 1 merged (2026-10-07, amirshosha1/str-money-finder#9); then the host review (3–5 hosts); then ⏭ the remaining P.2 items |
-| 0a — App shell, i18n, PWA, CI | Not started |
-| 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project, and a Google OAuth client (Google is the only sign-in) |
+| 0a — App shell, i18n, PWA, CI | 🔨 Slice 1 (Batch 3): the database CI job only. The rest of 0a (Prettier, themes, PWA, error boundary, lint/typecheck/unit-test CI) is not started |
+| 0b — Supabase project, auth, migration 001, DB tests in CI | 🔨 Slice 1 (Batch 3): PR A (schema, RLS, proof) built, in review; then PR B (Google sign-in and apartments in the app). The Supabase project exists (Amir, Ireland, Free plan, production) |
 | 2 — Free calculator | Not started. Benchmark design decided (AirROI area medians with regional roll-up, revised 2026-09-30); pre-build gates pending |
 | 3 — Setup guide, checklists, Setup Kit, minimal `units` table | Not started |
 | ⛔ Validation Gate | Waiting for 20 pre-orders paid by InstaPay (tracked by Amir outside the app) and the exact line `Gate passed: {number} paid pre-orders.` |
@@ -45,8 +56,13 @@
 - Local machine: Windows 11, Node 24.15, pnpm 9.15, Git 2.54. **No Docker, WSL, Supabase CLI or `gh`, by design.** Do not ask Amir to install anything.
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
 - Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
-- Supabase: no Backdesk project exists yet. The dev project (Frankfurt, free plan, Amir's last free slot) is created in Phase 0b only after approval. **Amir's other Supabase projects are off-limits.**
-- Vercel is connected to the repo (Amir reviewed the Phase P preview on his phone). Not set up yet: Resend sending domain, PostHog, Google OAuth client, Paymob, Anthropic key, prod Supabase project.
+- Supabase: the **Backdesk project exists** (created by Amir).
+  - Ref `kmmfhaypqgzhoptmljki`, West EU / Ireland (`eu-west-1`), Free plan.
+  - **It is production; there is no separate dev or prod project** (2026-10-08).
+  - The **Supabase GitHub integration is connected**: "Deploy to production" on `main`, working directory `.`. It applies new files in `supabase/migrations/` when they merge.
+  - Claude's Supabase connector is linked to a different Supabase account and cannot see this project. Database checks go through `docs/verify_after_migration.sql`, which Amir runs, and through `pnpm test:db` on a local Postgres.
+  - **Amir's other Supabase projects are off-limits.**
+- Vercel is connected to the repo (Amir reviewed the Phase P preview on his phone). Not set up yet: Resend sending domain, PostHog, Google OAuth client (steps in `docs/SETUP_AUTH.md`), the two Supabase variables on Vercel, Paymob, Anthropic key.
 - Phase P was built from a Claude Code on the web session (cloud container, Node 22.22, pnpm 10.33 available there — `package.json` still pins `packageManager: pnpm@9.15.0` to match Amir's machine; both installed the same lockfile cleanly). `pnpm dev`, `build`, `lint`, `typecheck`, `test` and `test:e2e` all exist now.
 
 ## Decisions (2026-09-26)
@@ -129,6 +145,64 @@
 - **Language switch moved from Phase 0a to P.1.** The locale comes from the URL only (no `Accept-Language` detection, no cookie); switching keeps the current screen.
 - **Copy register:** simple MSA with Egyptian terms (confirmed by Amir). "شقة المدينتي" → "شقة مدينتي". In English, the utilities category is "Utilities" (the Arabic stays "الكهرباء والمياه").
 - **Month-over-month change chip** on Home: a SAMPLE value (+8.4% owner, +5.2% co-host), requested for the design review and not in §4.6. From Phase 1 it comes from real data or is hidden. *(Done in Phase 1: computed from a sample August, see "Phase 1 decisions".)*
+
+### Batch 3 decisions — Phase 0a/0b slice 1 (2026-10-08)
+
+Accounts with Google sign-in, apartments saved to the account. Plan approved by Amir with every default. Recorded in `docs/BUILD_PLAN.md` (§0, §3, Phase 0b "0a/0b slice 1", Phase 3, Phase 10, §6 question 19) and `CLAUDE.md` §4 and §5.
+
+**Decided before the plan (Amir)**
+- Sign-in is Google only, through Supabase Auth.
+- Everything stays open: no trial clock, no gating, no payments.
+- Guest mode keeps working exactly as today, without an account.
+- At most 5 apartments per account. A 6th shows the "باقات خاصة" contact, not an error. The database enforces the limit too.
+- The Supabase GitHub integration applies `supabase/migrations/` when they merge to `main`.
+- Two PRs: A (schema only), then B (the app, built on the applied schema).
+
+**Decided in the plan (Amir took every default)**
+- **Signed-in mode lives on the existing `/demo` screens** (option 1A). PR B amends `CLAUDE.md` §7: a guest's data stays in the browser and nothing about a guest is sent anywhere; a signed-in user's apartments live in their account. The banner stays, because Home, expenses, the guide and the statement are still sample data.
+- **`org_id` plus membership resolved from `auth.uid()`** (option 2). There is one personal org per user, created at sign-up, so Phase 5 teams need no retrofit.
+- **The smaller migration** (option 3).
+  - It creates `profiles`, `orgs`, `org_members`, `org_entitlements` and `units`.
+  - `plans`, `plan_prices` and `subscriptions` come with manual grants (Phase 5) and payments (Phase 4). They will update `org_entitlements`, the resolved state the app reads.
+  - `audit_log` comes with `transactions` in Phase 5: slice 1 has no financial records.
+- **Moving a guest's apartment at sign-in** (option 4).
+  - An account with no apartments takes the browser's apartment automatically, and the browser copy is cleared.
+  - A browser apartment identical to one already in the account is cleared without asking.
+  - Otherwise one sheet asks "أضفها إلى حسابي" or "احذفها من هذا الجهاز". At the limit, the "باقات خاصة" contact replaces the add button. The browser copy stays untouched and hidden until the person taps.
+  - Server data is never overwritten by browser data.
+- **Writes go through Next.js server actions with Zod; reads go from the browser.** Both use the publishable key and the user's session, so RLS applies. Security does not rest on the server actions, because anyone can call the Data API directly with their own session: the database is the enforcement.
+- **No service-role key anywhere.** Account deletion is `public.delete_my_account()`:
+  - a SECURITY DEFINER function owned by `postgres`, with no arguments, acting on `auth.uid()` only;
+  - runnable by `authenticated` only;
+  - it deletes the caller's sole-member orgs (apartments and entitlements cascade), then the `auth.users` row (profile, memberships, Google identity and sessions cascade).
+
+**Decided after the plan (Amir, 2026-10-08)**
+- **Environment facts:**
+  - The production URL is `https://str-money-finder.vercel.app`.
+  - Previews are `str-money-finder-git-<branch>-amirshosha-2230s-projects.vercel.app` and `str-money-finder-<hash>-amirshosha-2230s-projects.vercel.app`.
+  - The Supabase project is `kmmfhaypqgzhoptmljki`, in Ireland, on the Free plan.
+  - **This project is production;** there is no separate prod project.
+- **The preview wildcard redirect is accepted for now.** The launch checklist (BUILD_PLAN Phase 10) removes it or moves previews to a separate Supabase project.
+- **Claude's Supabase connector cannot see this project** (it is linked to another account). So:
+  - `src/types/database.ts` will be generated from the local test database (PR B);
+  - the post-merge checks are one read-only file, `docs/verify_after_migration.sql`, which Amir runs in the SQL editor and pastes back;
+  - if "postgres holds DELETE on auth.users" fails there, Claude stops and proposes another deletion method before PR B.
+- **Privacy contact: `info@backdeskapp.com`.** The domain is not live yet. PR B does not merge until Amir confirms the mailbox receives mail.
+- **Google consent screen:** the support and developer contact emails are Amir's own Google account email, not `info@` (`docs/SETUP_AUTH.md` step 1).
+- Claude works inline, with no parallel agents.
+
+**PR A build notes**
+- **The local Postgres mirrors Supabase's role layout** (`scripts/test-db.sh`, `tests/db/shim.sql`):
+  - the cluster's superuser is `supabase_admin`, and `postgres`, which runs the migrations and owns everything, is **not** a superuser, as on Supabase;
+  - `authenticator` switches to `anon` or `authenticated` per request with `request.jwt.claims`, as PostgREST does;
+  - users are signed up as `supabase_auth_admin`, as Supabase Auth does.
+  The shim deliberately grants the old permissive Supabase defaults on `public` (everything to anon and authenticated), so the tests prove the migration's revokes. What it does not mirror: PostgREST itself, Postgres 17 (it runs the local major version, 16), and Supabase's other schemas.
+- **The tests assert both kinds of "no".** A missing grant fails with 42501. A row hidden by RLS returns 0 rows on update or delete, so the tests also check the other user's row is unchanged.
+- **The tests can fail.** I weakened the migration five ways (an update grant and policy on `org_entitlements`; no org-row lock in the limit trigger; RLS off on `units`; `created_by` insertable; the default-privilege revoke removed), and the matching tests failed each time. The first concurrency test passed even without the lock, because pooled inserts happened to run one after another. It now holds request 1's transaction open and shows request 2 waiting on the lock, then rejected.
+- **`docs/verify_after_migration.sql` is one statement.** The tests run it through the extended query protocol, which rejects a second statement, inside a `read only` transaction. They also break the schema 15 ways and check that the matching row says FAIL.
+- **A new table is not reachable by default.** The migration revokes Supabase's per-schema default grants for tables, sequences and functions in `public`, so any later table is unreachable until a migration grants it; a test proves it. Functions keep Postgres's global `EXECUTE` to PUBLIC, so every function revokes it explicitly; a guard test fails if any function in `public` or `private` is runnable by PUBLIC or `anon`.
+- **The limit trigger checks membership before it takes the per-org lock.** So a user cannot lock someone else's org, and a non-member gets the RLS error, never `unit_limit_reached`, which would reveal another org's apartment count.
+- `units.created_by` has an index, so the "set null" step on user deletion does not scan the table.
 
 ### P.2 slice 1 decisions (2026-10-07)
 
@@ -395,6 +469,13 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## Open issues
 
+- **Batch 3, before PR B (blocking):**
+  - Amir runs `docs/verify_after_migration.sql` after PR A merges and pastes the result into chat.
+  - `info@backdeskapp.com` must receive mail before PR B merges; the privacy page names it.
+  - The Google OAuth client, the Supabase settings and the Vercel variables (`docs/SETUP_AUTH.md` steps 1–5) are needed for PR B's preview.
+- **Google's consent screen will say "continue to kmmfhaypqgzhoptmljki.supabase.co"** until the brand is verified. That realistically needs `backdeskapp.com`. The alternative, a Supabase custom domain, is a paid add-on and needs Amir's approval.
+- **Region (open, BUILD_PLAN §6 question 19):** Supabase is in Ireland and Vercel functions in Frankfurt. Default: keep `fra1`.
+- **Required check:** mark "Database tests / rls" as required on `main`, so no migration merges, and gets applied, without passing it (`docs/SETUP_AUTH.md` step 7).
 - **Questions for Amir:** see `docs/BUILD_PLAN.md` §6. The most urgent are the pre-order button destination (`NEXT_PUBLIC_PREORDER_URL`, still unset) and the Vercel connection, both blocking Amir's phone review; prices/founding terms (before the pre-order campaign), the Google OAuth client (Phase 0b) and the domain (email sign-in and every email, from Phase 5) come next.
 - **Technical checks:**
   - Does Serwist work with the current Next.js bundler? (Phase 0a — not yet checked)
