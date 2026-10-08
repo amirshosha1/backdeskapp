@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
+import { AccountSync } from "@/components/account/account-sync";
 import { ToastProvider } from "@/components/common/toast";
 
 // BUILD_PLAN.md Phase P: every /demo screen stays out of search results
@@ -34,6 +35,7 @@ export default async function DemoLayout({
           className="relative min-h-dvh w-full max-w-[30rem] bg-page [transform:translateZ(0)]"
         >
           {children}
+          <AccountSync />
         </div>
       </div>
     </ToastProvider>
