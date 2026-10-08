@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { parseCalculatorForm, sameForm, type CalculatorForm, type FieldError, type NumberField } from "@/lib/calculator/form";
 import { computeScenario, scenarioView, type ScenarioInput, type ScenarioResult, type ScenarioView } from "@/lib/finance";
 import { FIELD_KIND } from "@/lib/calculator/form";
-import { saveOwnUnit, type AssumedField, type OwnUnit } from "@/lib/guest/store";
+import type { AssumedField, StoredInputs } from "@/lib/calculator/stored-inputs";
 import type { CalculatorPreset } from "@/demo/sample-data/calculator-presets";
 
 /** Every input that can hold an example value. */
@@ -18,7 +18,7 @@ function parseOrThrow(form: CalculatorForm): ScenarioInput {
 }
 
 export interface CalculatorState {
-  /** "own": the visitor's first unit, saved on every valid change. "example": an example, never saved. */
+  /** "own": the visitor's first unit or an account apartment, saved on every valid change. "example": an example, never saved. */
   mode: "own" | "example";
   form: CalculatorForm;
   errors: Partial<Record<NumberField, FieldError>>;
@@ -40,11 +40,12 @@ export interface CalculatorState {
 }
 
 /**
- * One state for both calculator tabs. In "own" mode every valid change is
- * written to the browser (store.ts); an invalid entry stays on screen only,
- * and the last valid one is what is kept.
+ * One state for both calculator tabs. In "own" mode every valid change goes
+ * to `onSave` (the browser for a visitor, the account's autosave when signed
+ * in); an invalid entry stays on screen only, and the last valid one is
+ * what is kept.
  */
-export function useCalculator(presets: CalculatorPreset[], own: OwnUnit | null): CalculatorState {
+export function useCalculator(presets: CalculatorPreset[], own: StoredInputs | null, onSave?: (form: CalculatorForm, assumed: AssumedField[]) => void): CalculatorState {
   const first = presets[0]!;
   const mode = own ? "own" : "example";
   const [form, setForm] = useState<CalculatorForm>(own?.form ?? first.form);
@@ -60,7 +61,7 @@ export function useCalculator(presets: CalculatorPreset[], own: OwnUnit | null):
   const view = useMemo(() => scenarioView(valid.input, result), [valid.input, result]);
 
   function persist(nextValidForm: CalculatorForm, nextAssumed: ReadonlySet<AssumedField>) {
-    if (mode === "own") saveOwnUnit(nextValidForm, [...nextAssumed]);
+    if (mode === "own") onSave?.(nextValidForm, [...nextAssumed]);
   }
 
   function update(next: CalculatorForm, touched: AssumedField[] = []) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Decimal from "decimal.js";
 import { useLocale, useTranslations } from "next-intl";
 import { DataWarning } from "@/components/common/data-warning";
@@ -20,6 +20,7 @@ import {
   commissionUsesFixedFee,
   commissionUsesRate,
   parseField,
+  type CalculatorForm,
   type ManagedBasis,
   type NumberField,
 } from "@/lib/calculator/form";
@@ -28,7 +29,12 @@ import { formatTypedAmount } from "@/lib/format/amount";
 import { currencyLabel, formatNumber } from "@/lib/format/money";
 import { formatNights } from "@/lib/format/nights";
 import { formatPercent } from "@/lib/format/percent";
-import { ownUnit, useGuest, type OwnUnit } from "@/lib/guest/store";
+import type { BannerMode } from "@/components/demo/demo-banner";
+import { createAutosave, type SaveStatus } from "@/lib/account/autosave";
+import { saveUnitInputs, useAccount } from "@/lib/account/store";
+import type { AccountUnit } from "@/lib/account/units";
+import type { AssumedField, StoredInputs } from "@/lib/calculator/stored-inputs";
+import { ownUnit, saveOwnUnit, useGuest } from "@/lib/guest/store";
 import { setQueryParam, useQueryParam } from "@/lib/url-state";
 import type { AppLocale } from "@/i18n/routing";
 import type { CalculatorPreset } from "@/demo/sample-data/calculator-presets";
@@ -74,33 +80,132 @@ const SECTION_OF: Record<NumberField, SectionId> = {
  * break-even beside it is on the same basis. Every figure comes from the
  * engine (`computeScenario`, `scenarioView`); this file only lays them out.
  *
- * With the visitor's own unit saved in this browser, the calculator edits
- * it and saves every valid change there; without one it shows the
- * rental-arbitrage example and saves nothing.
+ * A visitor with an apartment saved in this browser edits it and every
+ * valid change is saved there. A signed-in person edits one of their
+ * account's apartments (`?unit=<id>`, else the first), saved to the account
+ * about a second after the last change, with the status in the top line.
+ * Without either, the calculator shows the rental-arbitrage example and
+ * saves nothing.
  */
 export function CalculatorScreen({ presets }: CalculatorScreenProps) {
   const guest = useGuest();
+  const account = useAccount();
+  const unitId = useQueryParam("unit");
   // The page is static: until the browser's state is read, show the frame
   // without numbers rather than the example's figures for a moment.
-  if (guest === null) return <CalculatorFrame />;
+  if (guest === null || account === null || account.status === "loading") return <CalculatorFrame />;
+  if (account.status === "signed_in") {
+    const unit = account.units.find((u) => u.id === unitId) ?? account.units[0] ?? null;
+    if (!unit) return <CalculatorBody key="example" presets={presets} own={null} />;
+    if (!unit.inputs) return <UnreadableUnit name={unit.name} />;
+    return <AccountCalculator key={unit.id} presets={presets} unit={unit} inputs={unit.inputs} />;
+  }
   const own = ownUnit(guest);
-  return <CalculatorBody key={own ? "own" : "example"} presets={presets} own={own} />;
+  return <CalculatorBody key={own ? "own" : "example"} presets={presets} own={own} onSave={own ? saveOwnUnit : undefined} />;
 }
 
-function CalculatorFrame() {
+function CalculatorFrame({ banner = "pending" }: { banner?: BannerMode }) {
   const t = useTranslations("calculator");
   return (
     <div aria-busy="true">
-      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>}>
+      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} banner={banner}>
         <div className="mt-4 h-[18rem]" />
       </RoyalHero>
     </div>
   );
 }
 
-function CalculatorBody({ presets, own }: { presets: CalculatorPreset[]; own: OwnUnit | null }) {
+function UnreadableUnit({ name }: { name: string }) {
+  const t = useTranslations("account");
+  const tUnits = useTranslations("units");
+  return (
+    <div>
+      <RoyalHero center={<HeroTitle>{name}</HeroTitle>} banner="account" />
+      <div className="flex flex-col gap-3 px-4 pt-6">
+        <p role="alert" className="rounded-card bg-loss-soft p-4 text-[0.8125rem] leading-relaxed text-loss">
+          {t("unreadable")}
+        </p>
+        <Link href="/demo/units" className="tap flex h-12 items-center justify-center rounded-full bg-ink text-sm font-medium text-white">
+          {tUnits("title")}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * One account apartment: every valid change is saved about a second after
+ * the last one (src/lib/account/autosave.ts). A save still waiting is sent
+ * when the screen closes or the tab is hidden.
+ */
+function AccountCalculator({ presets, unit, inputs }: { presets: CalculatorPreset[]; unit: AccountUnit; inputs: StoredInputs }) {
+  const t = useTranslations("account");
+  const { show } = useToast();
+  const [status, setStatus] = useState<SaveStatus>("idle");
+  const autosave = useMemo(
+    () =>
+      createAutosave<StoredInputs>(async (value) => {
+        const result = await saveUnitInputs(unit.id, value);
+        if (!result.ok && (result.error === "not_signed_in" || result.error === "session_expired")) show(t(`errors.${result.error}`));
+        return result.ok;
+      }, setStatus),
+    [unit.id, show, t],
+  );
+
+  useEffect(() => {
+    const onHide = () => {
+      if (document.visibilityState === "hidden") void autosave.flush();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onHide);
+      void autosave.dispose();
+    };
+  }, [autosave]);
+
+  return (
+    <CalculatorBody
+      presets={presets}
+      own={inputs}
+      onSave={(form, assumed: AssumedField[]) => autosave.schedule({ form, assumed })}
+      title={unit.name}
+      banner="account"
+      bannerTrailing={<SaveStatusLine status={status} onRetry={() => void autosave.flush()} />}
+    />
+  );
+}
+
+/** "· محفوظ" / "· جارٍ الحفظ…" beside the top line; a failure is a retry button, never silent. */
+function SaveStatusLine({ status, onRetry }: { status: SaveStatus; onRetry: () => void }) {
+  const t = useTranslations("account.save");
+  if (status === "failed") {
+    return (
+      <button type="button" onClick={onRetry} className="tap ms-1 min-h-11 rounded-full bg-loss px-3 font-semibold text-white" data-testid="save-status">
+        {t("failed")}
+      </button>
+    );
+  }
+  return (
+    <span aria-live="polite" data-testid="save-status" data-status={status}>
+      {status === "pending" || status === "saving" ? ` · ${t("saving")}` : status === "saved" ? ` · ${t("saved")}` : ""}
+    </span>
+  );
+}
+
+interface CalculatorBodyProps {
+  presets: CalculatorPreset[];
+  own: StoredInputs | null;
+  onSave?: (form: CalculatorForm, assumed: AssumedField[]) => void;
+  title?: string;
+  banner?: BannerMode;
+  bannerTrailing?: ReactNode;
+}
+
+function CalculatorBody({ presets, own, onSave, title, banner = "sample", bannerTrailing }: CalculatorBodyProps) {
   const t = useTranslations("calculator");
-  const s = useCalculator(presets, own);
+  const s = useCalculator(presets, own, onSave);
   const tab: Tab = useQueryParam("tab") === "all" ? "all" : "summary";
   const [openSection, setOpenSection] = useState<SectionId | null>("revenue");
 
@@ -115,7 +220,7 @@ function CalculatorBody({ presets, own }: { presets: CalculatorPreset[]; own: Ow
 
   return (
     <div>
-      <CalculatorHero s={s} tab={tab} onTab={showTab} />
+      <CalculatorHero s={s} tab={tab} onTab={showTab} title={title} banner={banner} bannerTrailing={bannerTrailing} />
       <div role="tabpanel" id={`calc-panel-${tab}`} aria-labelledby={`calc-tab-${tab}`} className="flex flex-col gap-2.5 px-4 pt-2">
         {tab === "summary" ? (
           <SummaryTab s={s} onFixStale={openFirstInvalid} />
@@ -150,7 +255,21 @@ function useSentence() {
   };
 }
 
-function CalculatorHero({ s, tab, onTab }: { s: CalculatorState; tab: Tab; onTab: (tab: Tab) => void }) {
+function CalculatorHero({
+  s,
+  tab,
+  onTab,
+  title,
+  banner,
+  bannerTrailing,
+}: {
+  s: CalculatorState;
+  tab: Tab;
+  onTab: (tab: Tab) => void;
+  title?: string;
+  banner: BannerMode;
+  bannerTrailing?: ReactNode;
+}) {
   const t = useTranslations("calculator");
   const tCommon = useTranslations("common");
   const locale = useLocale() as AppLocale;
@@ -162,7 +281,7 @@ function CalculatorHero({ s, tab, onTab }: { s: CalculatorState; tab: Tab; onTab
   const be = s.view.breakEven;
 
   return (
-    <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} className="pb-3">
+    <RoyalHero center={<HeroTitle>{title ?? t("title")}</HeroTitle>} className="pb-3" banner={banner} bannerTrailing={bannerTrailing}>
       <div role="tablist" aria-label={t("tabsLabel")} className="mt-2 grid grid-cols-2 gap-1 rounded-full border border-white/18 bg-navy-950/35 p-1">
         {(["summary", "all"] as const).map((id) => (
           <button
