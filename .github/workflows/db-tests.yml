@@ -1,0 +1,33 @@
+# Database tests: RLS, grants, triggers and functions of supabase/migrations/,
+# plus docs/verify_after_migration.sql, on a throwaway Postgres cluster built
+# from the server binaries already installed on GitHub's Ubuntu runner
+# (scripts/test-db.sh). No Supabase project, no secrets.
+#
+# Mark "Database tests / rls" as a required check on main so a migration
+# cannot merge (and be applied by the Supabase GitHub integration) unless it
+# passes.
+name: Database tests
+
+# No path filter: a required check that is skipped by a path filter would
+# block every pull request that doesn't touch these files.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  rls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:db
