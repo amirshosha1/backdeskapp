@@ -42,7 +42,9 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const response = NextResponse.redirect(new URL(next, request.url), 303);
-  response.headers.set("Cache-Control", "no-store");
-  return response;
+  // A relative Location: the browser resolves it against the callback's own
+  // origin. request.url is not trusted for the host (under `next start` it
+  // reports the configured hostname, not the one the browser used), and a
+  // jump to another host would lose the session cookies just set.
+  return new NextResponse(null, { status: 303, headers: { Location: next, "Cache-Control": "no-store" } });
 }

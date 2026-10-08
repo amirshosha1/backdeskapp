@@ -47,7 +47,7 @@ describe("GET /auth/callback", () => {
     const res = await GET(request("?code=abc"));
     expect(exchange).toHaveBeenCalledWith("abc");
     expect(res.status).toBe(303);
-    expect(res.headers.get("location")).toBe("https://backdeskapp.com/en/demo/more");
+    expect(res.headers.get("location")).toBe("/en/demo/more");
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(deleted).toContain("bd_next");
     expect(setCalls.find((c) => c.name === "bd_flash")).toBeUndefined();
@@ -58,7 +58,7 @@ describe("GET /auth/callback", () => {
       jar.clear();
       if (value) jar.set("bd_next", value);
       const res = await GET(request("?code=abc"));
-      expect(res.headers.get("location")).toBe("https://backdeskapp.com/demo/units");
+      expect(res.headers.get("location")).toBe("/demo/units");
     }
   });
 
@@ -66,7 +66,7 @@ describe("GET /auth/callback", () => {
     jar.set("bd_next", "/demo/more");
     exchange.mockImplementation(async () => ({ error: { message: "invalid flow state" } }));
     const res = await GET(request("?code=abc"));
-    expect(res.headers.get("location")).toBe("https://backdeskapp.com/demo/more");
+    expect(res.headers.get("location")).toBe("/demo/more");
     const flash = setCalls.find((c) => c.name === "bd_flash");
     expect(flash).toMatchObject({ value: "signin_failed", options: { path: "/", maxAge: 60, sameSite: "lax", secure: true } });
   });
