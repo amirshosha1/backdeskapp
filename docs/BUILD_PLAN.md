@@ -532,6 +532,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - Migrations: extend `units` (created in Phase 3), add `unit_month_settings`, `parties`, `agreements`, `categories` (seeded Egyptian STR chart of accounts in AR/EN; utilities `fixed`), `transactions`, `recurring_rules`, `capex_assets`, `period_locks`, `stays`, `stay_month_allocations`.
 - Units CRUD with operating model; one effective agreement per unit; agreement editor (commission basis including the hybrid basis, statement basis, tax rate and base, expense bearers) with a live preview of the commission on a sample month. For owner-operated and rental-arbitrage units the same editor is labelled "unit settings" and shows only what applies (tax, statement basis).
 - Blocked nights per unit per month, entered by hand.
+- **Manual entry of a booking** (a stay's dates, nights and amounts; no guest data) **and of other income**, free on every plan (§2: Free's month result depends on it, and the payout import is Pro). The form and its mapping to `stays` and `transactions` are set in the Phase 5 plan.
 - **Add expense in ≤ 4 taps:** amount keypad first, then category chips (most recent first), unit (preselected when there is one unit, otherwise the last used), date defaulting to today, save. Optional receipt photo to a private Storage bucket served by signed URLs; on Free, photos are compressed in the browser before upload and capped by `receipt_photos_max` in the plan entitlements. PostHog `expense_added` event with `duration_ms`.
 - FX: a transaction in a currency other than the unit's requires an explicit rate; the unit-currency amount is shown before saving.
 - Portfolio-level costs (no unit) are recorded as manager overhead.
@@ -549,6 +550,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - [ ] Role-matrix tests for owner, admin, member and accountant.
 - [ ] An invited user joins with exactly the invited role; expired or revoked invitations fail; `audit_log` records the invited user, not the inviter, as the actor of their writes.
 - [ ] A Free org cannot create a second unit or exceed its receipt-photo limit.
+- [ ] A Free org can enter a booking and income by hand, and the current month's result includes them.
 
 ### Phase 6 — Payout import
 **Scope**

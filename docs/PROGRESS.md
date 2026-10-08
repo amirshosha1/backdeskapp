@@ -25,7 +25,7 @@
 | P — Clickable prototype | ✅ Merged (2026-09-26) |
 | P.1 — Prototype fixes and redesign | ✅ Merged (2026-10-02, #3): built 2026-09-27, fix pass "P.1.1" built 2026-09-28 |
 | 1 — Finance engine (+ wire the `/demo` calculator to it) | ✅ Merged (#6, review fixes #7) |
-| P.2 — Interactive demo, data in the browser only | 🔨 Slice 1 built (2026-10-07), in review; then the host review (3–5 hosts); then ⏭ the remaining P.2 items |
+| P.2 — Interactive demo, data in the browser only | 🔨 Slice 1 merged (2026-10-07, amirshosha1/str-money-finder#9); then the host review (3–5 hosts); then ⏭ the remaining P.2 items |
 | 0a — App shell, i18n, PWA, CI | Not started |
 | 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project |
 | 2 — Free calculator | Not started. Benchmark design decided (AirROI area medians with regional roll-up, revised 2026-09-30); pre-build gates pending |
@@ -91,7 +91,7 @@
 - Vercel functions run in `fra1`.
 
 ### Auth and migration 001
-- Sign-in: 6-digit email code plus Google, with Google off by config until it is set up.
+- *Reopened on 2026-10-07 (BUILD_PLAN §6 question 16; this stays the default until decided):* Sign-in: 6-digit email code plus Google, with Google off by config until it is set up.
 - Roles: owner, admin, member, accountant. Owners of managed units get access through a separate grant, never as org members.
 - Tables: `plan_prices` replaces the price columns. Entitlements are JSON on each plan, with an optional override per subscription.
 - `audit_log` is append-only and written by triggers. The only permitted change is personal-data redaction on deletion.
@@ -197,6 +197,7 @@ Confirmed by Amir in the review of #10, written into `CLAUDE.md` §1 and §9 and
   - KPIs, break-even and payback from actuals are part of the month breakdown, so they move to Pro (previously Free for 1 unit).
   - Smart entry (AI) stays Pro for now: it is entry, but every call costs money (open: BUILD_PLAN §6 question 18).
   - Alerts, exports, team seats and the owner portal stay Pro; the setup guide, checklists, inventory and Setup Kit are unchanged.
+  - **Manual entry of a booking and of other income** is added to Phase 5, free on every plan. Free promises "unlimited entry of bookings", but no phase built a way to enter one by hand: `stays` came only from the Pro payout import (Phase 6), so a Free month result had no revenue path. The form itself is set in the Phase 5 plan.
   - Data model: `plans` seeds `free` and `pro` (no other tiers); `plan_prices` has monthly and one-time prices only, and the extra-apartment price is derived by `src/lib/pricing/apartment-price.ts`, never stored; `subscriptions` is one row per paid month with the number of apartments and the amount charged. Phase 4's Paymob checkout charges one month at a time (no `cancel`, no recurring billing) next to manual InstaPay payments.
 - **Open** (recorded in "Open issues" and BUILD_PLAN §6): the sign-in method (question 16); when the trial clock and the gating get built (question 17); smart entry on Free (question 18).
 
