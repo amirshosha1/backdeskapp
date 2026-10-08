@@ -14,7 +14,10 @@ export default defineConfig({
   // NEXT_PUBLIC_PREORDER_URL is inlined at build time, so exercising it for
   // real needs its own build (playwright.preorder.config.ts) with the
   // env var set — this default build has none.
-  testIgnore: ["**/preorder-env.spec.ts"],
+  // The same goes for accounts: the Supabase values are inlined at build
+  // time, so e2e/accounts-env.spec.ts has its own build
+  // (playwright.accounts.config.ts). This build has none: accounts are off.
+  testIgnore: ["**/preorder-env.spec.ts", "**/accounts-env.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
