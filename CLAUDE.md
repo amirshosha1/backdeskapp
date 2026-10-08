@@ -25,7 +25,7 @@
 - Anthropic API, server-side only, for smart entry and receipt reading
 - Payments behind a `PaymentProvider` interface; Paymob implemented first, **only in the pre-launch payments phase (Phase 4)**. Until then, pre-orders are manual InstaPay transfers and access is granted manually.
 - PostHog (product analytics, EU cloud), Resend (email; also the SMTP sender for Supabase Auth once email sign-in is added, see §5)
-- Package manager: pnpm. Deployment: Vercel, functions pinned to `fra1`.
+- Package manager: pnpm. Deployment: Vercel, functions pinned to `dub1` (Dublin, next to Supabase in Ireland; decided 2026-10-08). Production URL: `https://backdeskapp.com`.
 
 ## 4. Commands (created in Phases P, 0a and 0b)
 
@@ -35,7 +35,8 @@
 - `pnpm test` — Vitest unit and property tests (no network)
 - `pnpm test:coverage` — the same, enforcing ≥ 95% line and branch coverage on `src/lib/finance/`
 - `pnpm test:db` — RLS and database tests on a throwaway local Postgres that mirrors Supabase's roles (`scripts/test-db.sh`; needs Linux with the Postgres server binaries: cloud sessions and GitHub Actions). Never against the hosted project; no secrets
-- `pnpm test:e2e` — Playwright
+- `pnpm test:e2e` — Playwright (a build with no Supabase values: accounts off). Builds with values inlined have their own configs: `pnpm exec playwright test --config=playwright.accounts.config.ts` (accounts on, Supabase intercepted) and `--config=playwright.preorder.config.ts`; run builds one at a time
+- CI (`.github/workflows/ci.yml`, check "CI / checks"): lint, typecheck, test and build on every pull request, no secrets. "Database tests / rls" runs `pnpm test:db`. Both must be green before a merge (a manual rule: GitHub Free cannot enforce required checks on a private repo)
 - Migrations: no script. The Supabase GitHub integration applies new files in `supabase/migrations/` when they merge to `main`
 - `pnpm db:types` — regenerate `src/types/database.ts` from the local test database (Claude's Supabase connector cannot see the Backdesk project)
 
@@ -49,7 +50,9 @@
 - **Database tests** (`pnpm test:db`) run on a throwaway local Postgres, in GitHub Actions and in cloud sessions, never against the hosted project. They create their own users and data with unique ids.
 - **Manual testing** happens on Vercel preview links on Amir's phone. Supabase Auth allows a wildcard redirect URL for Vercel previews until launch.
 - **Sign-in and email:** sign-in is **Google only** for now (decided 2026-10-08). Email codes come later, once there is a domain and a custom SMTP sender (Resend), because Supabase's built-in mailer delivers only to the project's team members. There is no local test inbox.
-- **Regions:** Supabase in Ireland (`eu-west-1`); Vercel functions in `fra1` (`docs/BUILD_PLAN.md` §6 question 19 asks whether to move them to `dub1`).
+- **Regions:** Supabase in Ireland (`eu-west-1`); Vercel functions in Dublin (`dub1`, decided 2026-10-08, `docs/BUILD_PLAN.md` §6 question 19).
+- **Data API:** exposed schemas are `public` and `graphql_public` only (`private` never); "Automatically expose new tables" is off. Every migration grants exactly what it needs, explicitly.
+- **Public contact:** `support@backdeskapp.com` (privacy page, custom plans), defined once in `src/lib/contact.ts`.
 - **Never create cloud resources** (Supabase projects, Vercel projects, paid services) or anything that costs money without Amir's explicit approval.
 - A fresh session, including Claude Code on the web, continues from the repo alone: this file, `docs/BUILD_PLAN.md` and `docs/PROGRESS.md` are the memory.
 
@@ -79,7 +82,9 @@
 - A break-even shown next to a profit figure covers the same costs as that profit; if it doesn't, its label says which costs it covers (`docs/BUILD_PLAN.md` §4.3). No static text sits next to live numbers.
 - The headline profit is after depreciation; before-depreciation figures appear only as labelled rows (decided 2026-10-06, `docs/BUILD_PLAN.md` §4.3).
 - For owner-operated and rental-arbitrage units, the UI calls the unit's agreement record **"unit settings"**, never "agreement".
-- Every `/demo` screen shows a clear "بيانات تجريبية" banner, and `/demo` is `noindex` until launch. Until Phase P.2, `/demo` sends nothing anywhere; from P.2 its data lives in the browser only (no account, nothing sent to a server).
+- `/demo` is `noindex` until launch. A visitor's data stays in the browser and nothing about a visitor is sent anywhere; a signed-in user's apartments live in their account (amended 2026-10-08, Batch 3). The signed-in app lives under `/demo` for now (moving it out, e.g. to `/app`, is an open issue in `docs/PROGRESS.md`).
+- **Real data is never labelled as sample.** The top line of every `/demo` screen says "بيانات تجريبية" for visitors and on every screen that shows sample data (Home, expenses, the guide, statements, pricing, the calculator's example, the sample apartments under "أمثلة تجريبية"). On a screen showing a signed-in user's own apartments (Units, the calculator on one of them, More) it says "شققك محفوظة في حسابك" instead; until it is known whether someone is signed in, it shows neither. The per-field تجريبي tags stay.
+- **In-app browsers:** Google refuses sign-in inside Facebook's, Messenger's and Instagram's browsers, so there every sign-in button opens an "open in your browser" sheet (`src/lib/browser/in-app.ts`); everything else keeps working there without an account.
 - **Add expense in at most 4 taps** from the home screen, not counting the digits of the amount. Real-user speed is measured by a PostHog timing event (target: median ≤ 10 s).
 - Performance budget: LCP under 2.5 s on a mid-range Android device over 4G.
 - Design tone: calm, trustworthy, fintech-grade. Design tokens (colors, radii, spacing, type) live in one file (`src/styles/tokens.css`). The approved direction (Phase P.1, "A2"): a royal-blue hero gradient (deep navy at the top to bright blue lower down, no teal); frosted-glass tiles **only** on the hero and the floating bottom nav, always with a solid fallback where `backdrop-filter` is unsupported; soft solid grey cards without outline borders on light surfaces, with shadows only where elevation matters; radii 24–32 px on an 8 pt grid; one icon stroke weight (1.75); tabular numbers. Owner statements keep a paper-ledger style. Section links ("عرض الكل", "التفاصيل") are brand blue.

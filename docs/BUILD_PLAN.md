@@ -351,7 +351,7 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 **Goal:** a prototype real hosts can tap through on their phones, used to sell founding-member pre-orders.
 
 **Scope**
-- Scaffold only what the prototype needs and later phases keep: Next.js + TypeScript strict, Tailwind, shadcn/ui, next-intl (`ar` default with `dir="rtl"`; every string in `messages/`), IBM Plex Sans Arabic, design tokens in one file, bottom navigation (Home, Calculator, Guide, Units, More), ESLint and Vitest with the `lint`, `typecheck` and `test` scripts, `vercel.json` with functions in `fra1`.
+- Scaffold only what the prototype needs and later phases keep: Next.js + TypeScript strict, Tailwind, shadcn/ui, next-intl (`ar` default with `dir="rtl"`; every string in `messages/`), IBM Plex Sans Arabic, design tokens in one file, bottom navigation (Home, Calculator, Guide, Units, More), ESLint and Vitest with the `lint`, `typecheck` and `test` scripts, `vercel.json` with functions in `fra1` (moved to `dub1` on 2026-10-08, §6 question 19).
 - Screens with sample data:
   1. Calculator: a **read-only** walkthrough of one sample scenario (no inputs) and its results, until Phase 1 wires it to the engine
   2. Setup guide: stage list and one stage page
@@ -438,7 +438,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - Light and dark themes from the design tokens; empty states for every tab.
 - PWA: manifest with the Arabic name "باك ديسك", placeholder icons, Serwist service worker, offline fallback page. Check that Serwist works with the current Next.js bundler; if it needs webpack, build production with webpack.
 - Global error boundary, `.env.example`.
-- GitHub Actions CI: lint, typecheck, unit tests.
+- GitHub Actions CI: lint, typecheck, unit tests. *Done in Batch 3 PR B:* `.github/workflows/ci.yml` ("CI / checks": lint, typecheck, test and a production build, no secrets).
 
 **Acceptance**
 - [ ] Arabic loads by default with correct RTL; switching to English leaves no untranslated strings (key-parity test).
@@ -454,6 +454,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - Trigger: on sign-up, create a profile and a personal org (`individual`, EGP, `Africa/Cairo`) with the user as `owner`.
 - No entitlements service and no gating yet: they are built in Phase 7 (§2). Every account works with everything open.
 - PostHog provider: nothing is captured until the user opts in; it does nothing when the key is missing.
+- **Privacy page first (rule, 2026-10-08):** `/privacy` is updated before PostHog, Resend or any other new processor or data collection ships, in the same pull request at the latest. It names what is collected, the processor and its region, and how to opt out or delete.
 - ~~GitHub Actions: apply migrations to dev, then run `pnpm test:db`.~~ *Since 2026-10-08:* migrations are applied by the Supabase GitHub integration when they merge to `main`; `pnpm test:db` runs in GitHub Actions (and in cloud sessions) on a throwaway local Postgres that mirrors Supabase's roles, creating its own users. It never touches the hosted project and needs no secrets.
 - Vercel Production and Preview both point at the one Backdesk project.
 
@@ -473,10 +474,13 @@ The first part of Phases 0a and 0b, not a separate phase. Everything stays open:
   - Signed in, Units, the calculator and the own-unit card read and write the account's apartments: add, rename, edit and delete, up to 5. A 6th shows the "باقات خاصة" contact, not an error.
   - The apartment-count answer is stored on the profile.
   - المزيد: sign out, and "احذف حسابي وبياناتي" with a confirmation step.
-  - A short privacy page in Arabic and English, giving `info@backdeskapp.com` as the contact.
+  - A short privacy page in Arabic and English (`/privacy`, `/en/privacy`), giving `support@backdeskapp.com` as the contact. It lists what Supabase Auth keeps (Google name, email, ID and profile-picture link; sign-in times; sessions and logs with IP and user agent), Vercel's request logs, the processors and their regions, and "no analytics yet".
   - The Free card on the pricing page gains "نسبة الإشغال ومتوسط سعر الليلة".
   - `src/types/database.ts` is generated from the local test database.
-  - **Blocking before merge:** Amir confirms `info@backdeskapp.com` receives mail.
+  - ~~**Blocking before merge:** Amir confirms the contact mailbox receives mail.~~ *Resolved 2026-10-08:* the contact is `support@backdeskapp.com` and it receives mail.
+  - *Added 2026-10-08:* the top line never labels a signed-in user's own apartments as sample data ("شققك محفوظة في حسابك" there; "بيانات تجريبية" for visitors and on every sample screen; CLAUDE.md §7).
+  - *Added 2026-10-08:* in-app browsers (Facebook, Messenger, Instagram and others, detected by user agent): every sign-in button opens an "open in your browser" sheet (copy link; Android: open in Chrome; iOS: the steps), because Google refuses OAuth there.
+  - *Added 2026-10-08:* GitHub Actions CI (lint, typecheck, test, build) and Vercel functions in `dub1`.
 - **Moving the guest's apartment at sign-in (decided 2026-10-08):**
   - If the account has no apartments, the browser's apartment moves to the account automatically (up to the limit), and the browser copy is cleared.
   - If the browser's apartment is identical to one already in the account, the browser copy is cleared without asking.
@@ -488,8 +492,10 @@ The first part of Phases 0a and 0b, not a separate phase. Everything stays open:
   - `plans`, `plan_prices` and `subscriptions`: manual grants (Phase 5) and payments (Phase 4) will record paid months and update `org_entitlements`.
   - `audit_log`, with `transactions` (Phase 5).
   - Middleware session refresh, when a server component first needs the session.
-  - PostHog (0b).
-  - The rest of 0a: Prettier, themes, PWA, the error boundary, and CI for lint, typecheck and unit tests (the database job exists since slice 1).
+  - PostHog (0b), error tracking and the PWA: Batch 3 **PR C, "live test readiness"**, after PR B merges (planned 2026-10-08; the privacy page is updated first).
+  - The rest of 0a: Prettier, themes, PWA (PR C), the error boundary (PR C). CI for lint, typecheck, unit tests and build exists since PR B; the database job since PR A.
+  - Moving the signed-in app out of `/demo` (for example to `/app`): open issue, PROGRESS.md.
+  - Tightening Supabase's redirect URLs to exact `/auth/callback` paths on `backdeskapp.com` once sign-in works there (Amir, by hand; `docs/SETUP_AUTH.md`, "After PR B merges").
   - Google brand verification or a Supabase custom domain, after the domain is live.
   - Removing the preview wildcard redirect (Phase 10).
 
@@ -694,7 +700,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 14 | Lookup rule: when the top-precedence row at a level has `sample_size` below `MIN_SAMPLE`, should the lookup try the next source at the same level before rolling up? (raised while reconciling, 2026-09-30) | Phase 2 | The rule as written (no fall-through). Recommended change: fall through, because a small `curated` own-portfolio row (likely fewer than 30 units) would otherwise always force a roll-up, even when the same area has a solid API figure |
 | 15 | Setup-cost benchmarks: the revised `benchmarks` table has no setup-cost column, but the earlier long format could hold one and §0's `benchmarks.csv` listed setup-cost figures (raised while reconciling, 2026-09-30) | Phase 2 | Setup-cost references come from Phase 3's inventory budget planner, not from `benchmarks` |
 | 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free (Amir kept this default on 2026-10-08; the question stays open) |
-| 19 | The Supabase project is in Ireland (`eu-west-1`) but Vercel functions are pinned to Frankfurt (`fra1`, CLAUDE.md §3): move them to Dublin (`dub1`)? Every server action and the sign-in callback cross that border once per call (raised 2026-10-08) | PR B of Phase 0b slice 1 | `fra1`, as written |
+| 19 | ~~The Supabase project is in Ireland (`eu-west-1`) but Vercel functions are pinned to Frankfurt (`fra1`, CLAUDE.md §3): move them to Dublin (`dub1`)?~~ **Decided 2026-10-08: `dub1`** (in PR B), next to Supabase | — | — |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 
@@ -706,6 +712,7 @@ Decided on 2026-10-08:
 - **Question 16, sign-in:** Google only for now (Phase 0b). Email codes come later, once there is a domain and a custom SMTP sender (question 1), because Supabase's built-in mailer delivers only to the project's team members.
 - **Question 17, trial and gating:** the trial clock and all gating are built together with the month report, in Phase 7 (§2). Until then every account works with everything open.
 - Also: Free shows the current month's occupancy and average nightly rate from actual figures; break-even, payback and the rest of the month breakdown stay Pro (§2).
+- **Question 19, region:** Vercel functions move to Dublin (`dub1`), next to Supabase in Ireland (Batch 3 PR B).
 
 Question 18 stays open, with its default.
 

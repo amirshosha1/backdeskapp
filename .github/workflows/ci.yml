@@ -1,0 +1,44 @@
+# Pull-request checks (CLAUDE.md §8): lint, typecheck, unit tests and a
+# production build. No secrets: the build gets placeholder public Supabase
+# values (a `.invalid` host that never resolves), so it compiles the app
+# with accounts switched on without contacting anything. The database tests
+# have their own workflow (db-tests.yml).
+#
+# GitHub Free on a private repository cannot enforce required checks, so
+# "CI / checks" and "Database tests / rls" being green before a merge is a
+# manual rule (docs/SETUP_AUTH.md).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.invalid
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
