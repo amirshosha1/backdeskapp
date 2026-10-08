@@ -39,6 +39,8 @@ export const PLANS: PlanFixture[] = [
       { ar: "إدخال الحجوزات والمصروفات بلا حدود", en: "Unlimited booking and expense entries" },
       { ar: "حاسبة الجدوى كاملة", en: "The full feasibility calculator" },
       { ar: "نتيجة الشهر الحالي: مكسب أو خسارة", en: "This month's result: profit or loss" },
+      // Decided 2026-10-08: occupancy and the average nightly rate (from actual figures) are free.
+      { ar: "نسبة الإشغال ومتوسط سعر الليلة", en: "Occupancy and average nightly rate" },
     ],
   },
   {

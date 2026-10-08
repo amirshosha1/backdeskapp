@@ -42,12 +42,17 @@ describe("<PricingScreen />", () => {
     expect(screen.queryByText("بزنس")).toBeNull();
   });
 
-  it("Free: one apartment and exactly its three lines", () => {
+  it("Free: one apartment and exactly its four lines", () => {
     renderPricing();
     const free = card("مجاني");
     expect(within(free).getByText("شقة واحدة")).toBeInTheDocument();
     expect(within(free).getByText("مجانًا")).toBeInTheDocument();
-    expect(bullets(free)).toEqual(["إدخال الحجوزات والمصروفات بلا حدود", "حاسبة الجدوى كاملة", "نتيجة الشهر الحالي: مكسب أو خسارة"]);
+    expect(bullets(free)).toEqual([
+      "إدخال الحجوزات والمصروفات بلا حدود",
+      "حاسبة الجدوى كاملة",
+      "نتيجة الشهر الحالي: مكسب أو خسارة",
+      "نسبة الإشغال ومتوسط سعر الليلة",
+    ]);
     expect(screen.queryByText("حسابات كاملة لوحدة واحدة")).toBeNull();
   });
 
