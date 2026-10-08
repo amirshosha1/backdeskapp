@@ -34,3 +34,13 @@ describe("message key parity (CLAUDE.md §7: no hardcoded UI strings)", () => {
     }
   });
 });
+
+describe("plan wording (BUILD_PLAN §2: Pro is the only paid plan)", () => {
+  it("never speaks of paid plans in the plural", () => {
+    const values = (tree: MessageTree): string[] =>
+      Object.values(tree).flatMap((value) => (typeof value === "string" ? [value] : values(value)));
+
+    for (const value of values(ar as MessageTree)) expect(value).not.toContain("الباقات المدفوعة");
+    for (const value of values(en as MessageTree)) expect(value).not.toMatch(/paid plans/i);
+  });
+});

@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { ownUnit, useGuest } from "@/lib/guest/store";
+import { feedbackWhatsAppUrl } from "@/lib/whatsapp";
 
 const ROW = "flex w-full items-center gap-3 py-4 text-start";
 
@@ -27,7 +28,7 @@ export function MoreScreen() {
     writeFirstRunAnswers(null);
     router.push("/demo/start");
   }
-  const feedbackNumber = process.env.NEXT_PUBLIC_FEEDBACK_WHATSAPP;
+  const feedbackUrl = feedbackWhatsAppUrl();
 
   return (
     <div>
@@ -78,8 +79,8 @@ export function MoreScreen() {
           <span className="min-w-0 flex-1 text-[0.9375rem] font-medium">{t("about")}</span>
         </button>
 
-        {feedbackNumber && (
-          <a href={`https://wa.me/${feedbackNumber}`} target="_blank" rel="noopener noreferrer" className={`tap ${ROW}`}>
+        {feedbackUrl && (
+          <a href={feedbackUrl} target="_blank" rel="noopener noreferrer" className={`tap ${ROW}`}>
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-profit-soft text-profit">
               <MessageCircle className="h-5 w-5" aria-hidden="true" />
             </span>

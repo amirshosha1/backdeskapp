@@ -3,18 +3,23 @@ import { useLocale, useTranslations } from "next-intl";
 import { Money } from "@/components/common/money";
 import { SampleBadge } from "@/components/common/sample-badge";
 import { HeroTitle, RoyalHero } from "@/components/layout/royal-hero";
+import { ApartmentTotals } from "./apartment-totals";
 import { PlanCard } from "./plan-card";
 import { PreorderAction } from "./preorder-button";
 import type { AppLocale } from "@/i18n/routing";
 import type { FOUNDING_OFFER, PlanFixture, SETUP_KIT } from "@/demo/fixtures/pricing";
+import type { ApartmentTotal } from "@/lib/pricing/apartment-price";
 
 export interface PricingScreenProps {
   plans: PlanFixture[];
+  /** Pro's monthly totals for 2 to `maxListedApartments` apartments. */
+  apartmentTotals: ApartmentTotal[];
+  maxListedApartments: number;
   setupKit: typeof SETUP_KIT;
   foundingOffer: typeof FOUNDING_OFFER;
 }
 
-export function PricingScreen({ plans, setupKit, foundingOffer }: PricingScreenProps) {
+export function PricingScreen({ plans, apartmentTotals, maxListedApartments, setupKit, foundingOffer }: PricingScreenProps) {
   const t = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
 
@@ -35,8 +40,15 @@ export function PricingScreen({ plans, setupKit, foundingOffer }: PricingScreenP
         <p className="rounded-tile bg-amber-soft px-4 py-3 text-center text-xs text-amber">{t("samplePricesNote")}</p>
 
         {plans.map((plan) => (
-          <PlanCard key={plan.code} plan={plan} />
+          <PlanCard key={plan.code} plan={plan}>
+            {plan.code === "pro" && <ApartmentTotals totals={apartmentTotals} maxApartments={maxListedApartments} />}
+          </PlanCard>
         ))}
+
+        <div className="flex flex-col gap-1 px-2 text-center text-sm text-muted" data-testid="plan-terms">
+          <p>{t("firstMonthOpen")}</p>
+          <p>{t("monthToMonth")}</p>
+        </div>
 
         <article className="rounded-card bg-fill p-5">
           <h2 className="text-lg font-semibold">{setupKit.name[locale]}</h2>

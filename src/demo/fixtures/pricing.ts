@@ -1,3 +1,4 @@
+import { listedTotals, type ApartmentTotal } from "@/lib/pricing/apartment-price";
 import type { Localized } from "./types";
 
 /**
@@ -7,12 +8,24 @@ import type { Localized } from "./types";
  * the `plans` and `plan_prices` tables instead.
  */
 
+/**
+ * The Pro plan's monthly price for one apartment, in EGP (SAMPLE). It is the
+ * only plan price: each extra apartment costs half of it, rounded up to a
+ * whole pound, and every total on the page is computed from it
+ * (`src/lib/pricing/apartment-price.ts`).
+ */
+export const PRO_PLAN_PRICE = "249.00";
+
+/** Totals are listed up to this many apartments; above it, a private plan. */
+export const MAX_LISTED_APARTMENTS = 5;
+
+/** Monthly totals for 2 to `MAX_LISTED_APARTMENTS` apartments, computed from `PRO_PLAN_PRICE`. */
+export const PRO_APARTMENT_TOTALS: ApartmentTotal[] = listedTotals(PRO_PLAN_PRICE, MAX_LISTED_APARTMENTS);
+
 export interface PlanFixture {
-  code: "free" | "solo" | "pro" | "business";
+  code: "free" | "pro";
   name: Localized;
-  unitLimit: number;
   priceMonthly: string | null;
-  priceAnnual: string | null;
   features: Localized[];
   highlighted?: boolean;
 }
@@ -21,51 +34,25 @@ export const PLANS: PlanFixture[] = [
   {
     code: "free",
     name: { ar: "مجاني", en: "Free" },
-    unitLimit: 1,
     priceMonthly: null,
-    priceAnnual: null,
     features: [
-      { ar: "حسابات كاملة لوحدة واحدة", en: "Full books for one unit" },
-      { ar: "حاسبة الجدوى بلا حدود", en: "Unlimited feasibility calculations" },
-      { ar: "دليل التجهيز (نظرة عامة)", en: "Setup guide (overview)" },
-    ],
-  },
-  {
-    code: "solo",
-    name: { ar: "سولو", en: "Solo" },
-    unitLimit: 3,
-    priceMonthly: "249.00",
-    priceAnnual: "2490.00",
-    features: [
-      { ar: "حتى 3 وحدات", en: "Up to 3 units" },
-      { ar: "استيراد تقارير Airbnb", en: "Payout import" },
-      { ar: "كشوف حساب الملاك", en: "Owner statements" },
+      { ar: "إدخال الحجوزات والمصروفات بلا حدود", en: "Unlimited booking and expense entries" },
+      { ar: "حاسبة الجدوى كاملة", en: "The full feasibility calculator" },
+      { ar: "نتيجة الشهر الحالي: مكسب أو خسارة", en: "This month's result: profit or loss" },
     ],
   },
   {
     code: "pro",
     name: { ar: "برو", en: "Pro" },
-    unitLimit: 10,
-    priceMonthly: "549.00",
-    priceAnnual: "5490.00",
+    priceMonthly: PRO_PLAN_PRICE,
     features: [
-      { ar: "حتى 10 وحدات", en: "Up to 10 units" },
-      { ar: "تسجيل المصروفات بالذكاء الاصطناعي", en: "AI smart entry" },
-      { ar: "تنبيهات تلقائية", en: "Alerts" },
+      { ar: "كل ما في المجاني", en: "Everything in Free" },
+      { ar: "تفصيل الشهر كاملًا وكل الشهور السابقة", en: "The full monthly breakdown and every past month" },
+      { ar: "تقرير الشهر PDF وكشف حساب المالك", en: "The monthly PDF report and the owner statement" },
+      { ar: "استيراد تقارير Airbnb", en: "Airbnb report import" },
+      { ar: "كل شقة إضافية بنصف سعر الباقة", en: "Each extra apartment at half the plan price" },
     ],
     highlighted: true,
-  },
-  {
-    code: "business",
-    name: { ar: "بزنس", en: "Business" },
-    unitLimit: 30,
-    priceMonthly: "999.00",
-    priceAnnual: "9990.00",
-    features: [
-      { ar: "حتى 30 وحدة", en: "Up to 30 units" },
-      { ar: "تصدير Excel وPDF", en: "Excel and PDF exports" },
-      { ar: "حسابات لفريق العمل", en: "Team accounts" },
-    ],
   },
 ];
 

@@ -9,7 +9,7 @@
     "sampleBadge": "تجريبي",
     "dataWarningOccupancy": "الليالي المحجوزة أكثر من الليالي المتاحة. راجع عدد الليالي المغلقة.",
     "unlockWithPro": "عرض الباقات",
-    "lockedTeaserBody": "متاح في الباقات المدفوعة",
+    "lockedTeaserBody": "متاح في الباقة المدفوعة",
     "feedbackCta": "رأيك؟",
     "feedbackPrefill": "ملاحظتي على شاشة {path} في النسخة التجريبية من باك ديسك:",
     "bottomNavLabel": "التنقل الرئيسي",
@@ -328,9 +328,6 @@
     "exampleNote": "هذا مثال ولا يُحفظ.",
     "exampleAdd": "أضف شقتك الأولى",
     "ownNote": "أرقام «شقتك الأولى»: تعديلاتك تُحفظ على هذا الجهاز فقط.",
-    "replaceTitle": "استبدال أرقام شقتك؟",
-    "replaceBody": "سيحل المثال محل أرقام «شقتك الأولى» المحفوظة على هذا الجهاز.",
-    "replaceConfirm": "استبدل الأرقام",
     "sections": {
       "unitDetails": "بيانات الوحدة",
       "revenue": "الإيراد",
@@ -364,7 +361,7 @@
     "checklistTitle": "قائمة المهام",
     "checklistProgress": "{done} من {total}",
     "detailedPlaybookTitle": "الدليل التفصيلي",
-    "detailedPlaybookLockedBody": "الخطوات التفصيلية وقوائم الموردين متاحة في الباقات المدفوعة"
+    "detailedPlaybookLockedBody": "الخطوات التفصيلية وقوائم الموردين متاحة في الباقة المدفوعة"
   },
   "expense": {
     "title": "إضافة مصروف",
@@ -404,11 +401,18 @@
   "pricing": {
     "title": "الباقات",
     "perMonth": "شهريًا",
-    "mostPopular": "الأكثر اختيارًا",
-    "everythingInPrevious": "كل ما في الباقة السابقة، بالإضافة إلى:",
-    "unitsUpTo": "حتى {count, plural, one {وحدة واحدة} two {وحدتين} few {# وحدات} many {# وحدة} other {# وحدة}}",
-    "unitsOne": "وحدة واحدة",
+    "scope": {
+      "free": "شقة واحدة",
+      "pro": "شقة أو أكثر"
+    },
     "free": "مجانًا",
+    "totalsTitle": "الإجمالي شهريًا",
+    "apartmentCount": "{count, plural, one {شقة واحدة} two {شقتان} few {# شقق} many {# شقة} other {# شقة}}",
+    "customPlans": "أكثر من {count, plural, one {شقة واحدة} two {شقتين} few {# شقق} many {# شقة} other {# شقة}}: باقات خاصة",
+    "contactUs": "تواصل معنا",
+    "customPlansPrefill": "مرحبًا، أسأل عن باقة خاصة في باك ديسك لأكثر من {count, plural, one {شقة واحدة} two {شقتين} few {# شقق} many {# شقة} other {# شقة}}.",
+    "firstMonthOpen": "أول شهر بعد إنشاء الحساب: كل شيء مفتوح.",
+    "monthToMonth": "الدفع شهر بشهر، بلا تجديد تلقائي.",
     "preorderCta": "احجز مكانك",
     "choosePlan": "اختر {plan}",
     "startFree": "ابدأ مجانًا",

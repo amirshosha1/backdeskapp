@@ -9,7 +9,6 @@ import { LockedTeaser } from "@/components/common/locked-teaser";
 import { Money } from "@/components/common/money";
 import { Percent } from "@/components/common/percent";
 import { SampleBadge } from "@/components/common/sample-badge";
-import { Sheet } from "@/components/common/sheet";
 import { ToastButton, useToast } from "@/components/common/toast";
 import { HeroTitle, RoyalHero } from "@/components/layout/royal-hero";
 import { Link } from "@/i18n/navigation";
@@ -322,7 +321,6 @@ function AllNumbersTab({
   const tToast = useTranslations("toast");
   const tModel = useTranslations("calculator.modelChip");
   const locale = useLocale() as AppLocale;
-  const [confirmPreset, setConfirmPreset] = useState<CalculatorPreset["id"] | null>(null);
   const form = s.form;
   const isArbitrage = form.operatingModel === "rental_arbitrage";
   const isManaged = form.operatingModel === "managed_for_owner";
@@ -354,25 +352,23 @@ function AllNumbersTab({
   const occupancy = displayOccupancy(s.result.kpis.occupancy);
   const pct = (ratio: Decimal, decimals = 1) => formatPercent(ratio.toNumber(), { locale, decimals, isolate: true });
 
-  function choosePreset(id: CalculatorPreset["id"]) {
-    if (s.mode === "own") setConfirmPreset(id);
-    else s.loadPreset(id);
-  }
-
   return (
     <>
-      <ChoiceGroup onPage label={t("presetsLabel")} value={s.activePresetId} options={presets.map((p) => ({ value: p.id, label: t(`presets.${p.id}`) }))} onChange={choosePreset} />
       {s.mode === "own" ? (
         <p className="text-xs leading-relaxed text-muted" data-testid="storage-note">
           {t("ownNote")}
         </p>
       ) : (
-        <p className="flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-muted" data-testid="storage-note">
-          <span>{t("exampleNote")}</span>
-          <Link href="/demo/start" className="inline-flex min-h-11 items-center font-semibold text-brand">
-            {t("exampleAdd")}
-          </Link>
-        </p>
+        <>
+          {/* Only for the example: above the visitor's own numbers, a loader looked like the model chips below it. */}
+          <ChoiceGroup onPage label={t("presetsLabel")} value={s.activePresetId} options={presets.map((p) => ({ value: p.id, label: t(`presets.${p.id}`) }))} onChange={s.loadPreset} />
+          <p className="flex flex-wrap items-center gap-x-2 text-xs leading-relaxed text-muted" data-testid="storage-note">
+            <span>{t("exampleNote")}</span>
+            <Link href="/demo/start" className="inline-flex min-h-11 items-center font-semibold text-brand">
+              {t("exampleAdd")}
+            </Link>
+          </p>
+        </>
       )}
 
       {s.stale && (
@@ -537,23 +533,6 @@ function AllNumbersTab({
         </div>
       </LockedTeaser>
 
-      <Sheet open={confirmPreset !== null} onOpenChange={(open) => !open && setConfirmPreset(null)} title={t("replaceTitle")} description={t("replaceBody")}>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            className="tap h-12 rounded-full bg-ink text-sm font-medium text-white"
-            onClick={() => {
-              if (confirmPreset) s.loadPreset(confirmPreset);
-              setConfirmPreset(null);
-            }}
-          >
-            {t("replaceConfirm")}
-          </button>
-          <button type="button" className="tap h-12 rounded-full bg-fill text-sm font-medium" onClick={() => setConfirmPreset(null)}>
-            {tCommon("cancel")}
-          </button>
-        </div>
-      </Sheet>
     </>
   );
 }

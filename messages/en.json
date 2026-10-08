@@ -9,7 +9,7 @@
     "sampleBadge": "SAMPLE",
     "dataWarningOccupancy": "Booked nights exceed available nights. Check the blocked nights.",
     "unlockWithPro": "See plans",
-    "lockedTeaserBody": "Available on paid plans",
+    "lockedTeaserBody": "Available on the paid plan",
     "feedbackCta": "Feedback?",
     "feedbackPrefill": "My feedback on the {path} screen in the Backdesk prototype:",
     "bottomNavLabel": "Main navigation",
@@ -328,9 +328,6 @@
     "exampleNote": "This is an example and isn't saved.",
     "exampleAdd": "Add your first apartment",
     "ownNote": "Your first apartment's numbers: your changes are saved on this device only.",
-    "replaceTitle": "Replace your apartment's numbers?",
-    "replaceBody": "The example will replace the numbers saved for “Your first apartment” on this device.",
-    "replaceConfirm": "Replace the numbers",
     "sections": {
       "unitDetails": "Unit details",
       "revenue": "Revenue",
@@ -364,7 +361,7 @@
     "checklistTitle": "Checklist",
     "checklistProgress": "{done} of {total}",
     "detailedPlaybookTitle": "Detailed playbook",
-    "detailedPlaybookLockedBody": "Detailed steps and supplier lists are available on paid plans"
+    "detailedPlaybookLockedBody": "Detailed steps and supplier lists are available on the paid plan"
   },
   "expense": {
     "title": "Add expense",
@@ -404,11 +401,18 @@
   "pricing": {
     "title": "Plans",
     "perMonth": "per month",
-    "mostPopular": "Most popular",
-    "everythingInPrevious": "Everything in the previous plan, plus:",
-    "unitsUpTo": "Up to {count, plural, one {# unit} other {# units}}",
-    "unitsOne": "1 unit",
+    "scope": {
+      "free": "One apartment",
+      "pro": "One apartment or more"
+    },
     "free": "Free",
+    "totalsTitle": "Total per month",
+    "apartmentCount": "{count, plural, one {# apartment} other {# apartments}}",
+    "customPlans": "More than {count, plural, one {# apartment} other {# apartments}}: custom plans",
+    "contactUs": "Contact us",
+    "customPlansPrefill": "Hello, I'd like to ask about a custom Backdesk plan for more than {count, plural, one {# apartment} other {# apartments}}.",
+    "firstMonthOpen": "Your first month after creating an account: everything is unlocked.",
+    "monthToMonth": "Pay month to month, with no automatic renewal.",
     "preorderCta": "Reserve your place",
     "choosePlan": "Choose {plan}",
     "startFree": "Start free",

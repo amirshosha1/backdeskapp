@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
 import { Money } from "@/components/common/money";
 import { SampleBadge } from "@/components/common/sample-badge";
 import { ToastButton } from "@/components/common/toast";
@@ -9,7 +9,8 @@ import type { AppLocale } from "@/i18n/routing";
 import type { PlanFixture } from "@/demo/fixtures/pricing";
 import { cn } from "@/lib/utils";
 
-export function PlanCard({ plan }: { plan: PlanFixture }) {
+/** One plan. `children` sit between the feature list and the action (Pro's apartment totals). */
+export function PlanCard({ plan, children }: { plan: PlanFixture; children?: ReactNode }) {
   const t = useTranslations("pricing");
   const tToast = useTranslations("toast");
   const locale = useLocale() as AppLocale;
@@ -21,13 +22,8 @@ export function PlanCard({ plan }: { plan: PlanFixture }) {
         plan.highlighted ? "bg-page shadow-[0_1px_2px_rgb(10_18_36/0.04),0_16px_36px_-18px_rgb(29_78_216/0.35)] ring-2 ring-brand" : "bg-fill",
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">{plan.name[locale]}</h2>
-        {plan.highlighted && <Badge variant="brand">{t("mostPopular")}</Badge>}
-      </div>
-      <p className="mt-0.5 text-sm text-muted">
-        {plan.unitLimit === 1 ? t("unitsOne") : t("unitsUpTo", { count: plan.unitLimit })}
-      </p>
+      <h2 className="text-lg font-semibold">{plan.name[locale]}</h2>
+      <p className="mt-0.5 text-sm text-muted">{t(`scope.${plan.code}`)}</p>
 
       <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
         {plan.priceMonthly ? (
@@ -42,7 +38,6 @@ export function PlanCard({ plan }: { plan: PlanFixture }) {
       </div>
 
       <ul className="mt-4 flex flex-col gap-2 text-sm">
-        {plan.priceMonthly && <li className="text-xs font-medium text-muted">{t("everythingInPrevious")}</li>}
         {plan.features.map((feature) => (
           <li key={feature.en} className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
@@ -50,6 +45,8 @@ export function PlanCard({ plan }: { plan: PlanFixture }) {
           </li>
         ))}
       </ul>
+
+      {children}
 
       <div className="mt-5">
         {plan.priceMonthly ? (

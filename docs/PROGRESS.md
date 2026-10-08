@@ -1,7 +1,7 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-07 (P.2 slice 1 — first-run flow, Units entry, calculator redesign — built on branch `ui-first-run-calculator`, in review as amirshosha1/str-money-finder#9).
+> Last updated: 2026-10-08 (cleanup after P.2 slice 1, the two-plan pricing page, the confirmed plan model and Amir's final answers on sign-in and gating, on branch `post-slice1-pricing`, in review as amirshosha1/str-money-finder#10; slice 1 itself is merged as amirshosha1/str-money-finder#9).
 
 ## Current status
 
@@ -10,9 +10,10 @@
 - **Phase P.1.1 (fix pass on an independent end-to-end test) is built**, on top of P.1: the break-even rule changed (fixed costs now include the monthly maintenance/irregular allowance by default — see "Phase P.1.1 decisions" below, and `docs/BUILD_PLAN.md` §4.3 and Example B/B2), a shared `parseAmount` utility (`src/lib/format/amount.ts`) handles Arabic-Indic/Persian digits and Arabic separators on every numeric input, three expense categories were added, the language switch now keeps the current owner/co-host mode (via a `?view=` query param, not just the screen), commission basis is shown on managed units and the statement, the desktop shell is constrained to ~480px, the "نص مبدئي" UI label is gone, an axe-core accessibility sweep runs on every screen, paid pricing tiers say "كل ما في الباقة السابقة، بالإضافة إلى:", and the pre-order button's real `href`/`target`/`rel` now has its own e2e coverage. See "Phase P.1.1 decisions" and "Phase P.1.1 build notes" below.
 - **Phase 1 (finance engine) is merged** (amirshosha1/str-money-finder#6, review fixes #7): every module of BUILD_PLAN §4 in `src/lib/finance/` (pure, `Decimal`, typed `Result` errors, Zod schemas for every input and output, `ENGINE_VERSION`), all worked examples A–K as tests (B: 19.38 nights with maintenance, B2: 18.99 without), the §4.7 invariants as fast-check properties, and 99.8% line / 98.6% branch coverage. Every `/demo` figure is now computed by the engine from raw sample inputs (`src/demo/sample-data/`), the four sample units differ, the month-over-month chips are computed from a sample August, and `/demo/calculator` is live. See "Phase 1 decisions" and "Phase 1 build notes" below.
 - **The rename to Backdesk · باك ديسك is merged** (amirshosha1/str-money-finder#8).
-- **P.2 slice 1 ("UI batch 2") is built** on branch `ui-first-run-calculator`, in review: the first-run guided flow (`/demo/start`), the visitor's own first unit kept in this browser only, Units with the own unit first and the samples under "أمثلة تجريبية", and the calculator as "الملخص" / "كل الأرقام" with the headline **after depreciation**. It is the first part of P.2, not a separate phase. See "P.2 slice 1 decisions" and "P.2 slice 1 build notes" below.
-- **Next step:** Amir reviews the slice 1 PR on the Vercel preview (phone). After merge: the **host review with 3–5 hosts** (BUILD_PLAN §0 and P.2), then the rest of P.2 — send the standard phase prompt with `{N} = P.2` and say "remaining items". Phase P.1.1 was merged into `main` on 2026-10-02 (amirshosha1/str-money-finder#3).
-- **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link stays hidden until then). Per §0, the prototype is shown to 3–5 hosts once P.2 slice 1 is merged.
+- **P.2 slice 1 ("UI batch 2") is merged** (amirshosha1/str-money-finder#9): the first-run guided flow (`/demo/start`), the visitor's own first unit kept in this browser only, Units with the own unit first and the samples under "أمثلة تجريبية", and the calculator as "الملخص" / "كل الأرقام" with the headline **after depreciation**. It is the first part of P.2, not a separate phase. See "P.2 slice 1 decisions" and "P.2 slice 1 build notes" below.
+- **Cleanup after slice 1, the pricing page and the plan model** are built on branch `post-slice1-pricing`, in review (amirshosha1/str-money-finder#10): `agentRules: false`, `next-env.d.ts` no longer tracked, no example loaders above the visitor's own numbers, 44 px statement buttons on the sample cards, `/demo/pricing` with two plans (Free and Pro, extra apartments at half price), and the confirmed plan model written into `CLAUDE.md` and `docs/BUILD_PLAN.md`. Final edits (2026-10-08): sign-in is Google only, the trial clock and all gating come in Phase 7 with the month report, Free also shows occupancy and the average nightly rate, and the two "paid plans" strings are singular. See "Post-slice-1 cleanup and pricing (2026-10-07)", "Plan model (2026-10-07)" and "Final review of #10 (2026-10-08)" below.
+- **Next step:** Amir merges amirshosha1/str-money-finder#10. After merge: the **host review with 3–5 hosts** (BUILD_PLAN §0 and P.2), then the rest of P.2 — send the standard phase prompt with `{N} = P.2` and say "remaining items". Phase P.1.1 was merged into `main` on 2026-10-02 (amirshosha1/str-money-finder#3).
+- **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then) and optionally `NEXT_PUBLIC_FEEDBACK_WHATSAPP` (the "رأيك؟" link and the pricing page's "تواصل معنا" for more than 5 apartments stay hidden until then). Per §0, the prototype now goes to 3–5 hosts (P.2 slice 1 is merged).
 - **Deferred to Phase P.2:** live Home updates after saving an expense or income (data stays browser-only). The editable calculator and the varied sample data, deferred from P.1.1, are done in Phase 1.
 - **Docs-only, 2026-09-29 and 2026-09-30:** Phase 2's benchmark design is decided. Benchmarks are area medians from the AirROI API, refreshed quarterly and rolled up through a `regions` hierarchy, with `curated` own-portfolio rows taking precedence. It is recorded in `docs/BUILD_PLAN.md` §3, §5 and §6, and in "Phase 2 decision revision (2026-09-30)" below, which supersedes the AirROI parts of the 2026-09-29 pre-decisions. Nothing is implemented yet: Phase 1 is still in progress, and two pre-build gates (coverage spike, licensing) come first.
 
@@ -24,15 +25,15 @@
 | P — Clickable prototype | ✅ Merged (2026-09-26) |
 | P.1 — Prototype fixes and redesign | ✅ Merged (2026-10-02, #3): built 2026-09-27, fix pass "P.1.1" built 2026-09-28 |
 | 1 — Finance engine (+ wire the `/demo` calculator to it) | ✅ Merged (#6, review fixes #7) |
-| P.2 — Interactive demo, data in the browser only | 🔨 Slice 1 built (2026-10-07), in review; then the host review (3–5 hosts); then ⏭ the remaining P.2 items |
+| P.2 — Interactive demo, data in the browser only | 🔨 Slice 1 merged (2026-10-07, amirshosha1/str-money-finder#9); then the host review (3–5 hosts); then ⏭ the remaining P.2 items |
 | 0a — App shell, i18n, PWA, CI | Not started |
-| 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project |
+| 0b — Supabase dev project, auth, migration 001, DB tests in CI | Not started. Needs Amir's approval before creating the dev project, and a Google OAuth client (Google is the only sign-in) |
 | 2 — Free calculator | Not started. Benchmark design decided (AirROI area medians with regional roll-up, revised 2026-09-30); pre-build gates pending |
 | 3 — Setup guide, checklists, Setup Kit, minimal `units` table | Not started |
 | ⛔ Validation Gate | Waiting for 20 pre-orders paid by InstaPay (tracked by Amir outside the app) and the exact line `Gate passed: {number} paid pre-orders.` |
 | 5 — ERP core (+ basic team invitations) | Blocked by the gate |
 | 6 — Payout import | Not started |
-| 7 — Reports and owner statements | Not started |
+| 7 — Reports and owner statements | Not started. Also builds the entitlements service, the trial clock and all gating (decided 2026-10-08) |
 | 8 — Smart entry and alerts | Not started |
 | 4 — Payments and legal | Not started |
 | 10 — Hardening | Not started |
@@ -53,8 +54,8 @@
 ### Product and plans
 - Working name: **Backdesk · باك ديسك** (formerly **Safi / صافي**; renamed 2026-10-06, see "Rename to Backdesk" below).
 - The home screen depends on the operating model. The owner view shows net profit. The co-host view shows commission minus manager-borne costs, summed across managed units, with portfolio-level overhead subtracted as its own line.
-- "Never hide the answer" stays. **Free** gets a manual ledger for 1 unit with full history, including agreements and commission calculation, recurring rules and receipt photos. On Free, receipt photos are compressed in the browser and capped by `receipt_photos_max` in the plan entitlements. **Paid** unlocks 2+ units, payout import, owner statements, AI entry, alerts and exports.
-- Fixed paid tiers: **Solo** up to 3 units, **Pro** up to 10, **Business** up to 30. They have identical features and differ only by unit limit. Prices live in the `plan_prices` table.
+- *Superseded on 2026-10-07 by "Plan model (2026-10-07)" below (data entry is free, outputs are paid; Free sees the current month only):* ~~"Never hide the answer" stays. **Free** gets a manual ledger for 1 unit with full history, including agreements and commission calculation, recurring rules and receipt photos. On Free, receipt photos are compressed in the browser and capped by `receipt_photos_max` in the plan entitlements. **Paid** unlocks 2+ units, payout import, owner statements, AI entry, alerts and exports.~~
+- *Superseded on 2026-10-07 (one paid plan, Pro, priced per apartment; no Solo, Business or annual prices):* ~~Fixed paid tiers: **Solo** up to 3 units, **Pro** up to 10, **Business** up to 30. They have identical features and differ only by unit limit.~~ Prices live in the `plan_prices` table.
 - Utilities default to a fixed monthly cost and can be switched per category. Every worked example states its cost types.
 - The Free calculator runs in the browser. The 12-month projection and benchmarks are server-only.
 - An anonymous draft scenario stays in the browser until sign-up, then is saved to the org.
@@ -68,7 +69,7 @@
   - The `/demo` calculator is read-only (one sample scenario, no inputs) until the engine is wired.
 - Phase P also sets up ESLint, Vitest and the `lint`, `typecheck` and `test` scripts, so the end-of-phase checks work before Phase 0a adds CI.
 - **Phase 1** runs right after P because the engine needs no database or auth. At the end of Phase 1, the `/demo` calculator is wired to the real engine.
-- Phase 0 is split into 0a and 0b. The entitlements service moves from old Phase 4 to 0b.
+- Phase 0 is split into 0a and 0b. The entitlements service moves from old Phase 4 to 0b. *(Superseded on 2026-10-08: it is built in Phase 7 with the rest of the gating.)*
 - No payment integration until just before launch: Phase 4 runs after Phase 8. Launch comes after Phase 10, and **Phase 9 is post-launch growth**.
 - **Gate before Phase 5:** 20 pre-orders paid by manual InstaPay transfer after hosts see the prototype. No code is needed for this.
   - Until Phase 5, Amir tracks pre-orders outside the app.
@@ -86,11 +87,11 @@
 - Migrations and RLS tests run in GitHub Actions against dev, using a credential scoped to the dev database. Tests create their own users and clean up.
 - Claude only ever sees dev keys. Prod keys live only in Vercel and GitHub secrets.
 - Amir tests on Vercel preview links on a phone. Supabase dev Auth gets wildcard redirect URLs for Vercel previews.
-- Resend is the SMTP provider for dev from Phase 0b; there is no local test inbox.
+- ~~Resend is the SMTP provider for dev from Phase 0b~~ *(superseded on 2026-10-08: sign-in is Google only; Resend becomes the Auth SMTP sender once email sign-in is added)*; there is no local test inbox.
 - Vercel functions run in `fra1`.
 
 ### Auth and migration 001
-- Sign-in: 6-digit email code plus Google, with Google off by config until it is set up.
+- ~~Sign-in: 6-digit email code plus Google, with Google off by config until it is set up.~~ *Reopened on 2026-10-07; decided on 2026-10-08 (BUILD_PLAN §6 question 16):* sign-in is Google only for now. Email codes come later, once there is a domain and a custom SMTP sender.
 - Roles: owner, admin, member, accountant. Owners of managed units get access through a separate grant, never as org members.
 - Tables: `plan_prices` replaces the price columns. Entitlements are JSON on each plan, with an optional override per subscription.
 - `audit_log` is append-only and written by triggers. The only permitted change is personal-data redaction on deletion.
@@ -116,7 +117,7 @@
 - **Example A:** the owner bears all costs.
 - **Per-month stay allocations** are computed by the engine and stored.
 - **Worked examples A–K** are in BUILD_PLAN §4.6 (A2, E2 and G–K were added at kickoff).
-- **Units table:** a minimal `units` table is created in Phase 3, with plan unit limits enforced from then on, and Phase 5 extends the same table. There is never a second units table.
+- **Units table:** a minimal `units` table is created in Phase 3, with plan unit limits enforced from then on *(superseded on 2026-10-08: from Phase 7)*, and Phase 5 extends the same table. There is never a second units table.
 
 ### Phase P.1 decisions (2026-09-27)
 
@@ -149,7 +150,7 @@ UI batch 2, the first part of P.2 (not a parallel phase): the first-run guided f
 - **تجريبي tag** (Amir): every input the flow didn't ask about is assumed until the visitor *commits* it — focus, then blur or Enter — even without changing the value. Only inputs the visitor can see for the current model count toward the tag on the own card.
 - **Unit details** (Amir): shown, read-only as before, only when the calculator shows the example; never for the visitor's own unit.
 - **Managed own unit** (Amir): the Units card follows the managed pattern (management profit = the commission, since a scenario has no manager-borne costs, plus "العمولة: 20% من صافي المحوّل"; no break-even bar); the calculator and the verdict keep the owner's view ("صافي ربح المالك بعد الإهلاك", "مكسب المالك"). "مؤشرات أخرى" shows the same management profit, so the two screens reconcile.
-- **Example loaders** at the top of "كل الأرقام"; with an own unit, loading one asks first ("استبدال أرقام شقتك؟").
+- **Example loaders** at the top of "كل الأرقام"; with an own unit, loading one asks first ("استبدال أرقام شقتك؟"). *Superseded on 2026-10-07: with an own unit the loaders are not shown at all (see "Post-slice-1 cleanup and pricing").*
 - **Phase record** (Amir): this batch is P.2's first slice (BUILD_PLAN P.2 lists what it delivers and what remains); the 3–5 host review moves to after it and before the rest of P.2.
 - Defaults kept from the plan: the flow keeps the "بيانات تجريبية" banner and the language switch (Board 1 had neither; CLAUDE.md §7 requires both behaviours); no back link on the calculator tab; sample cards unchanged; a displayed net of 0.00 counts as "مكسب".
 
@@ -162,6 +163,57 @@ UI batch 2, the first part of P.2 (not a parallel phase): the first-run guided f
 - **`DataWarning`** used colour classes that didn't exist (unstyled since Phase P); `warning` tokens added.
 - **`e2e/calculator.spec.ts`** still asserted the pre-rename verdict wording on `main` (missed in #8); rewritten here.
 - **`sameForm`** now compares field by field: a form read back from storage has its values in another key order.
+
+### Post-slice-1 cleanup and pricing (2026-10-07)
+
+Two small tasks from Amir in one branch (`post-slice1-pricing`). No engine change.
+
+**Done**
+- **`agentRules: false`** in `next.config.ts`: `next dev` no longer appends its generated "nextjs-agent-rules" block to `CLAUDE.md` (checked by running `pnpm dev` once: `CLAUDE.md` unchanged). `next-env.d.ts` still changes under `next dev`; that is a separate mechanism with no config switch (see open issues).
+- **No example loaders above the visitor's own numbers** ("كل الأرقام"): they sat directly above the model chips and looked the same, so a visitor could replace their unit by mistake. They stay, unchanged, when the calculator shows the example. The confirm sheet ("استبدال أرقام شقتك؟") and its three message keys are removed.
+- **Sample statement buttons** on the managed sample cards are 44 px tall (were 40 px); nothing else on the sample cards changed. `e2e/navigation.spec.ts` measures both.
+- **`/demo/pricing`, two plans:** Free ("مجاني", one apartment: unlimited bookings and expenses, the full calculator, this month's result) and Pro ("برو", 249 EGP a month, تجريبي: everything in Free, the full month and past months, the monthly PDF and the owner statement, Airbnb import, each extra apartment at half price). Pro lists the monthly totals for 2–5 apartments (374 / 499 / 624 / 749), then "أكثر من 5 شقق: باقات خاصة" with "تواصل معنا". Two lines under the cards: the first month is fully open; payment is month to month, with no automatic renewal. Solo, Business and the old free line "حسابات كاملة لوحدة واحدة" are gone; the founding-members block, the setup kit and the تجريبي tags are unchanged.
+
+**Decisions and build notes**
+- **One price constant:** `PRO_PLAN_PRICE` in `src/demo/fixtures/pricing.ts` (SAMPLE). `src/lib/pricing/apartment-price.ts` computes the extra apartment (half, rounded up to a whole pound: 125) and the totals with `decimal.js`; property-tested. A test fails if any price or total appears in the `pricing` messages. Plan pricing is what a host pays Backdesk, not a host's financial figure, so it is outside `src/lib/finance/`.
+- **"تواصل معنا"** reuses the feedback WhatsApp number through one helper (`src/lib/whatsapp.ts`, now also used by the "رأيك؟" link and More) and prefills "مرحبًا، أسأل عن باقة خاصة في باك ديسك لأكثر من 5 شقق." so the chat says why it was opened. While `NEXT_PUBLIC_FEEDBACK_WHATSAPP` is unset, the action is not rendered. `playwright.preorder.config.ts` now builds with a test number too, so `e2e/preorder-env.spec.ts` checks the real link.
+- Each card says how many apartments it covers ("شقة واحدة" / "شقة أو أكثر"), where the unit limits used to be.
+- **No "الأكثر اختيارًا" badge** (Amir, review of #10): there are no customers yet and only one paid plan, so the claim is not true. Its two message keys are removed; Pro keeps its highlighted frame.
+- **`next-env.d.ts` is not tracked** (Amir, review of #10): it is in `.gitignore`, and `pnpm typecheck` is `next typegen && tsc --noEmit`, so a fresh clone (no `.next`, no `next-env.d.ts`) still type-checks; checked on a fresh clone, with a deliberate type error as a negative control. After `pnpm dev`, `git status` stays clean.
+
+### Plan model (2026-10-07)
+
+Confirmed by Amir in the review of #10, written into `CLAUDE.md` §1 and §9 and `docs/BUILD_PLAN.md` §0, §1 (personas), §2, §3, Phases 0b, 3, 5, 7 and 4, and §6. **It supersedes "Free gets a manual ledger for 1 unit with full history"** ("Never hide the answer", in "Product and plans" above) and the Solo / Pro / Business tiers. No migration is written yet.
+
+- **Principle:** data entry is free, outputs are paid. The free figure is always the full, correct number, never a degraded one.
+- **Free:** one apartment; unlimited entry of bookings and expenses; the full feasibility calculator; the current month's result (profit or loss), plus its occupancy and average nightly rate from actual figures (added by Amir on 2026-10-08). No breakdown, no past months, no reports, no import.
+- **Pro:** 249 EGP a month, tentative. The full month breakdown, all past months, the monthly PDF report, owner statements, Airbnb report import. Each additional apartment costs half the plan price (rounded up to a whole pound), up to 5 apartments; more than 5 is a custom plan by contact.
+- **Trial:** the first month after creating an account, everything is open for every apartment the user declared.
+- **After the trial without a subscription:** the user keeps working month by month on Free. Their data is kept, never deleted. Extra apartments are frozen with their data.
+- **Payment:** monthly, no auto-renewal, manual at first. Solo, Business and the annual prices are removed.
+- **How I mapped the capabilities the model doesn't name** (`docs/BUILD_PLAN.md` §2 table; confirmed by Amir on 2026-10-08, with the one change noted below):
+  - Entry stays free wherever the month's result depends on it: recurring rules, agreements and commission settings, receipt photos (still capped by `receipt_photos_max`), and CAPEX, including the actual cost entered on a Phase 3 checklist item (previously paid).
+  - "The full calculator" on Free includes the sensitivity grid at full size, 7 × 7 (previously 3 × 3 on Free, 7 × 7 paid; BUILD_PLAN Phase 2 updated to match). The 12-month projection and the benchmarks stay Pro (server-only, CLAUDE.md §6.5), as do saved-scenario comparison and exports.
+  - Break-even, payback and the rest of the month breakdown (including RevPAR) are Pro (previously Free for 1 unit). *Changed by Amir on 2026-10-08:* occupancy and the average nightly rate from actual figures are Free.
+  - Smart entry (AI) stays Pro for now: it is entry, but every call costs money (BUILD_PLAN §6 question 18: Amir kept this default on 2026-10-08 and left the question open).
+  - Alerts, exports, team seats and the owner portal stay Pro; the setup guide, checklists, inventory and Setup Kit are unchanged.
+  - **Manual entry of a booking and of other income** is added to Phase 5, free on every plan. Free promises "unlimited entry of bookings", but no phase built a way to enter one by hand: `stays` came only from the Pro payout import (Phase 6), so a Free month result had no revenue path. The form itself is set in the Phase 5 plan.
+  - Data model: `plans` seeds `free` and `pro` (no other tiers); `plan_prices` has monthly and one-time prices only, and the extra-apartment price is derived by `src/lib/pricing/apartment-price.ts`, never stored; `subscriptions` is one row per paid month with the number of apartments and the amount charged. Phase 4's Paymob checkout charges one month at a time (no `cancel`, no recurring billing) next to manual InstaPay payments.
+- **Open** (recorded in "Open issues" and BUILD_PLAN §6): the sign-in method (question 16); when the trial clock and the gating get built (question 17); smart entry on Free (question 18). *Questions 16 and 17 were decided on 2026-10-08; see the next section.*
+
+### Final review of #10 (2026-10-08)
+
+Amir's answers before merging #10, written into `CLAUDE.md` §1, §3, §5 and §6.5 and `docs/BUILD_PLAN.md` §0, §1, §2, Phases 0b, 2, 3, 5, 7 and 9, and §6.
+
+- **Sign-in (question 16): Google only for now.** Email codes come later, once there is a domain and a custom SMTP sender (Resend), because Supabase's built-in mailer delivers only to the project's team members. Consequences: a Google Cloud OAuth client becomes a Phase 0b prerequisite; the domain (question 1) now blocks email sign-in and every email Backdesk sends, starting with Phase 5's invitations, which are accepted by signing in with Google as the invited address.
+- **Trial and gating (question 17): built together with the month report, in Phase 7.** Until then every account works with everything open. The entitlements service (`getEntitlements`, `useEntitlements`) moves from Phase 0b to Phase 7, and the limits written into Phases 2, 3 and 5 (saved scenarios, apartments, the guide's paid sections, the inventory preview, the receipt-photo cap) are enforced from Phase 7; their acceptance checks moved there. Migration 001 still creates `plans`, `plan_prices` and `subscriptions`, so founding members and Setup Kit buyers are recorded before Phase 7. Phase 7 now names the month report ("تقرير الشهر", each unit's month on screen and as a PDF). Left to the Phase 7 plan: how the declared apartment count is captured, which apartment stays active after the trial, and when the trial clock starts for accounts created before Phase 7.
+- **My reading, to confirm in the Phase 2 and 3 plans:** signed-out visitors are not accounts, so "accounts work with everything open" doesn't cover them. Default: they see the Free view (the projection and benchmark teasers), with sign-up as the call to action.
+- **Smart entry (question 18):** default Pro kept; the question stays open.
+- **Free also shows occupancy and the average nightly rate** from actual figures, for the current month. Break-even, payback and the rest of the month breakdown (including RevPAR) stay Pro.
+- **The other capability mappings are confirmed** as written in "Plan model (2026-10-07)": CAPEX entry, recurring rules, agreements and receipt photos on Free; the full 7 × 7 grid on Free; the rest of the Pro list.
+- **Copy:** `common.lockedTeaserBody` is now "متاح في الباقة المدفوعة" / "Available on the paid plan", and the guide's `detailedPlaybookLockedBody` says "الباقة المدفوعة" / "the paid plan". A test in `src/test/i18n.test.ts` keeps any message from saying "paid plans" in the plural again.
+- The `/demo/pricing` cards are unchanged: Free's three lines still don't mention occupancy and the nightly rate.
+
 
 ### Rename to Backdesk (2026-10-06)
 
@@ -343,7 +395,7 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## Open issues
 
-- **Questions for Amir:** see `docs/BUILD_PLAN.md` §6. The most urgent are the pre-order button destination (`NEXT_PUBLIC_PREORDER_URL`, still unset) and the Vercel connection, both blocking Amir's phone review; the domain (Phase 0b) and prices/founding terms (before the pre-order campaign) come next.
+- **Questions for Amir:** see `docs/BUILD_PLAN.md` §6. The most urgent are the pre-order button destination (`NEXT_PUBLIC_PREORDER_URL`, still unset) and the Vercel connection, both blocking Amir's phone review; prices/founding terms (before the pre-order campaign), the Google OAuth client (Phase 0b) and the domain (email sign-in and every email, from Phase 5) come next.
 - **Technical checks:**
   - Does Serwist work with the current Next.js bundler? (Phase 0a — not yet checked)
   - ~~Does IBM Plex Sans Arabic, as served, expose tabular numerals?~~ **Resolved in Phase P:** yes for Western digits (the default); Arabic-Indic digits are not tabular — see "Phase P build notes" above.
@@ -356,9 +408,14 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 - **Locked-month posting moves nights too (decide in Phase 5/7):** `postAllocations` re-posts the part of a stay that falls in a locked month to the next open month, nights included, so that month's occupancy would count nights that belong to the locked month. Revenue posting is per the spec; whether KPIs should use the posting month or the night's own month needs a decision before Phase 5's period locks.
 - **Other fees on check-in (confirm in Phase 6):** the spec fixes the recognition date for cleaning fees but not for "other fees"; the engine recognizes them on check-in, like cleaning. Revisit if a real Airbnb export shows per-night extras (e.g. extra-guest fees).
 - **Calculator scope left for Phase 2:** no tax input yet (the engine supports it), a fixed 30-day month, no sensitivity grid or break-even ADR on screen (both exist in the engine), and the unit details are read-only (shown only for the example scenario since P.2 slice 1).
-- **`next dev` writes into `CLAUDE.md` (Next.js 16.3):** running `pnpm dev` appends a generated "nextjs-agent-rules" block to `CLAUDE.md` (and edits `next-env.d.ts`). It is only switched off by `agentRules: false` in `next.config.ts`. Found while building P.2 slice 1; the block was reverted, not committed, and `next.config.ts` was left unchanged. Decide whether to add `agentRules: false`.
+- ~~**`next dev` writes into `CLAUDE.md` (Next.js 16.3)**~~ **Closed on 2026-10-07:** `agentRules: false` is set in `next.config.ts`; `pnpm dev` leaves `CLAUDE.md` unchanged.
+- ~~**`next dev` rewrites `next-env.d.ts` (Next.js 16.3)**~~ **Closed on 2026-10-07:** the file is no longer tracked (`.gitignore`), and `pnpm typecheck` runs `next typegen && tsc --noEmit`, so a fresh clone still type-checks.
 - **Home and the visitor's own unit (rest of P.2):** Home still shows only the sample units; its hero, carousel and break-even tile don't include the visitor's unit, and its labels say "صافي الربح" (after depreciation) where Units says "الصافي بعد الإهلاك". The own unit is a calculator scenario (monthly averages), not a ledger month — P.2 decides how it joins Home's totals.
-- **Units sample statement buttons are 40 px tall** (`unit-card.tsx`, `h-10`), under the 44 px touch-target rule the new screens follow. Left as is in slice 1 because the sample cards were to stay unchanged.
+- ~~**Units sample statement buttons are 40 px tall**~~ **Closed on 2026-10-07:** both are 44 px (`h-11`), measured in `e2e/navigation.spec.ts`.
+- ~~**Plan model**~~ **Decided on 2026-10-07:** Free and one paid plan, Pro, priced per apartment; written into `CLAUDE.md` and `docs/BUILD_PLAN.md`. See "Plan model (2026-10-07)" above.
+- ~~**Sign-in method (open, decide before Phase 0b)**~~ **Decided on 2026-10-08:** Google only for now; email codes once there is a domain and a custom SMTP sender. See "Final review of #10 (2026-10-08)" above.
+- ~~**When the trial clock and the gating get built (open)**~~ **Decided on 2026-10-08:** in Phase 7, together with the month report; until then every account works with everything open. The Phase 7 plan settles the declared apartment count, which apartment stays active after the trial, and when the clock starts for accounts created earlier. See "Final review of #10 (2026-10-08)" above.
+- **Smart entry on Free (open, Phase 8):** BUILD_PLAN §6 question 18. Default: Pro, as before (Amir kept it on 2026-10-08).
 
 ## How to resume in a fresh session (including Claude Code on the web)
 
