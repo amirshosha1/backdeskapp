@@ -3,8 +3,9 @@ import { modelPnl, type PerNightModel, type ProfitBasis } from "./model";
 import { ONE, ZERO } from "./money";
 
 /**
- * Sensitivity grid: occupancy × ADR (BUILD_PLAN.md §2 — Free 3 × 3, paid
- * 7 × 7; the plan gate is enforced where the grid is served, not here).
+ * Sensitivity grid: occupancy × ADR (BUILD_PLAN.md §2 and Phase 2: the
+ * full 7 × 7 grid is part of the Free calculator since 2026-10-07; 3 × 3
+ * stays available as a compact size).
  * Each cell is the profit on the caller's basis, from `modelPnl`. The
  * occupancy axis is kept inside [0, 100%]: these are hypothetical axis
  * values, not data, so nothing is being hidden by bounding them.

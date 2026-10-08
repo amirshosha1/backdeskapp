@@ -193,7 +193,7 @@ Confirmed by Amir in the review of #10, written into `CLAUDE.md` §1 and §9 and
 - **Payment:** monthly, no auto-renewal, manual at first. Solo, Business and the annual prices are removed.
 - **How I mapped the capabilities the model doesn't name** (`docs/BUILD_PLAN.md` §2 table; Amir to confirm or change):
   - Entry stays free wherever the month's result depends on it: recurring rules, agreements and commission settings, receipt photos (still capped by `receipt_photos_max`), and CAPEX, including the actual cost entered on a Phase 3 checklist item (previously paid).
-  - "The full calculator" on Free includes the sensitivity grid at full size (previously 3 × 3 on Free, 7 × 7 paid). The 12-month projection and the benchmarks stay Pro (server-only, CLAUDE.md §6.5), as do saved-scenario comparison and exports.
+  - "The full calculator" on Free includes the sensitivity grid at full size, 7 × 7 (previously 3 × 3 on Free, 7 × 7 paid; BUILD_PLAN Phase 2 updated to match). The 12-month projection and the benchmarks stay Pro (server-only, CLAUDE.md §6.5), as do saved-scenario comparison and exports.
   - KPIs, break-even and payback from actuals are part of the month breakdown, so they move to Pro (previously Free for 1 unit).
   - Smart entry (AI) stays Pro for now: it is entry, but every call costs money (open: BUILD_PLAN §6 question 18).
   - Alerts, exports, team seats and the owner portal stay Pro; the setup guide, checklists, inventory and Setup Kit are unchanged.
@@ -400,7 +400,7 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 - ~~**Units sample statement buttons are 40 px tall**~~ **Closed on 2026-10-07:** both are 44 px (`h-11`), measured in `e2e/navigation.spec.ts`.
 - ~~**Plan model**~~ **Decided on 2026-10-07:** Free and one paid plan, Pro, priced per apartment; written into `CLAUDE.md` and `docs/BUILD_PLAN.md`. See "Plan model (2026-10-07)" above.
 - **Sign-in method (open, decide before Phase 0b):** BUILD_PLAN §6 question 16. Phase 0b still describes a 6-digit email code and Google, as the default until decided.
-- **When the trial clock and the gating get built (open):** BUILD_PLAN §6 question 17 — the one-month trial for every declared apartment, Free's current-month-only view, freezing extra apartments, how the declared apartment count is captured, and which apartment stays active after the trial. Until decided, nothing is gated.
+- **When the trial clock and the gating get built (open):** BUILD_PLAN §6 question 17 — the one-month trial for every declared apartment, Free's current-month-only view, freezing extra apartments, how the declared apartment count is captured, and which apartment stays active after the trial. Until decided, there is no trial clock, no current-month-only view and no freezing; the Free apartment limit and the guide's paid sections apply as written.
 - **Smart entry on Free (open, Phase 8):** BUILD_PLAN §6 question 18. Default: Pro, as before.
 - **Two UI strings still say "paid plans" in the plural** (`common.lockedTeaserBody` "متاح في الباقات المدفوعة" and the guide's `detailedPlaybookLockedBody`), though there is now one paid plan. Not changed in #10 (out of its scope); a one-line copy fix.
 
