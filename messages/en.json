@@ -9,7 +9,7 @@
     "sampleBadge": "SAMPLE",
     "dataWarningOccupancy": "Booked nights exceed available nights. Check the blocked nights.",
     "unlockWithPro": "See plans",
-    "lockedTeaserBody": "Available on paid plans",
+    "lockedTeaserBody": "Available on the paid plan",
     "feedbackCta": "Feedback?",
     "feedbackPrefill": "My feedback on the {path} screen in the Backdesk prototype:",
     "bottomNavLabel": "Main navigation",
@@ -361,7 +361,7 @@
     "checklistTitle": "Checklist",
     "checklistProgress": "{done} of {total}",
     "detailedPlaybookTitle": "Detailed playbook",
-    "detailedPlaybookLockedBody": "Detailed steps and supplier lists are available on paid plans"
+    "detailedPlaybookLockedBody": "Detailed steps and supplier lists are available on the paid plan"
   },
   "expense": {
     "title": "Add expense",

@@ -9,7 +9,7 @@
     "sampleBadge": "تجريبي",
     "dataWarningOccupancy": "الليالي المحجوزة أكثر من الليالي المتاحة. راجع عدد الليالي المغلقة.",
     "unlockWithPro": "عرض الباقات",
-    "lockedTeaserBody": "متاح في الباقات المدفوعة",
+    "lockedTeaserBody": "متاح في الباقة المدفوعة",
     "feedbackCta": "رأيك؟",
     "feedbackPrefill": "ملاحظتي على شاشة {path} في النسخة التجريبية من باك ديسك:",
     "bottomNavLabel": "التنقل الرئيسي",
@@ -361,7 +361,7 @@
     "checklistTitle": "قائمة المهام",
     "checklistProgress": "{done} من {total}",
     "detailedPlaybookTitle": "الدليل التفصيلي",
-    "detailedPlaybookLockedBody": "الخطوات التفصيلية وقوائم الموردين متاحة في الباقات المدفوعة"
+    "detailedPlaybookLockedBody": "الخطوات التفصيلية وقوائم الموردين متاحة في الباقة المدفوعة"
   },
   "expense": {
     "title": "إضافة مصروف",
