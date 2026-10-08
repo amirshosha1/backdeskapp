@@ -14,14 +14,14 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 - [x] Node.js LTS, pnpm, Git and Claude Code installed and signed in
 - [x] GitHub repo `amirshosha1/str-money-finder` (keep it private): `CLAUDE.md` at the root, this file at `docs/BUILD_PLAN.md`
 - [ ] Vercel account connected to the repo — needed for the Phase P preview
-- [ ] Supabase account with one free project slot — Claude Code creates the dev project (Frankfurt) in Phase 0b, only after your approval
+- [x] Supabase project "Backdesk" (ref `kmmfhaypqgzhoptmljki`, West EU / Ireland `eu-west-1`, Free plan), created by Amir. **It is the production project; there is no separate dev or prod project** (decided 2026-10-08). The Supabase GitHub integration applies `supabase/migrations/` when they merge to `main`. Database tests never touch it: they run on a throwaway local Postgres (`pnpm test:db`)
 - [ ] Resend account with a verified sending domain — needed once there is a domain: for email sign-in codes (Google is the only sign-in until then, §6 question 16) and for every email Backdesk sends, starting with Phase 5's team invitations
 - [ ] PostHog project (EU cloud) — Phase 0b
-- [ ] Google Cloud OAuth client — **needed for Phase 0b**: Google is the only sign-in method (§6 question 16). Consent screen "External"; while it is in Testing mode only the test users you list can sign in, so publish it before hosts sign up
+- [ ] Google Cloud OAuth client — **needed for Phase 0b**: Google is the only sign-in method (§6 question 16). Consent screen "External"; while it is in Testing mode only the test users you list can sign in, so publish it before hosts sign up. Step by step: `docs/SETUP_AUTH.md`
 - [ ] Paymob merchant account — start verification early; not needed until the pre-launch payments phase
 - [ ] Anthropic API key (needed from Phase 8)
 - [ ] AirROI account and API key (airroi.com) — needed for Phase 2's benchmark feature (a quarterly refresh plus a small pre-build coverage spike); self-serve, pay-per-call, $0.01/call, no monthly minimum (see Phase 2 scope in §5)
-- [ ] Supabase prod project on a paid plan — only before launch
+- [ ] Before launch, with your approval: move the Backdesk Supabase project (production) to a paid plan for backups, and remove the Vercel preview wildcard redirect or move previews to a separate Supabase project (Phase 10)
 
 ### Data to prepare
 - [ ] `data/seed/inventory.csv` — your 81-item list with columns: `code, name_ar, name_en, category, tier (economy|mid|premium), qty_per_unit, unit_cost_min, unit_cost_max, useful_life_months, supplier_name, notes` (Phase 3)
@@ -108,15 +108,16 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 
 | Table | Key columns / notes |
 |---|---|
-| `profiles` | `user_id`, `full_name`, `locale`, `digit_style`, `default_currency` |
+| `profiles` | `user_id`, `apartment_count_answer` (the first-run answer to "how many apartments", a range: `1`, `2-3`, `4-10`, `10+`; the only column a user may change), then later `locale`, `digit_style`, `default_currency`. Created at sign-up (Phase 0b slice 1). The Google name and email stay in `auth.users` and are not copied here. |
 | `orgs` | `name`, `type` (individual/company), `country`, `default_currency`, `timezone` |
 | `org_members` | `org_id`, `user_id`, `role` (owner, admin, member, accountant). Unit owners are never members — see `owner_grants`. |
 | `org_invitations` | `org_id`, `email`, `role` (admin, member, accountant), `token_hash` (the raw token is never stored), `invited_by`, `expires_at`, `accepted_at`, `revoked_at` (Phase 5) |
 | `plans` | `code` (free, pro, setup_kit, founding), `name_ar`, `name_en`, `kind` (free, subscription, one_time), `unit_limit` (free 1; pro 5, the self-serve maximum, raised per subscription for a custom plan), `entitlements` jsonb, `active`, `sort_order` |
 | `plan_prices` | `plan_id`, `currency`, `interval` (month, one_time; no annual prices), `amount` (for `pro`, the monthly price of one apartment; the extra-apartment price is derived from it, §2, never stored), `active` |
 | `subscriptions` | one row per paid month (no auto-renewal): `org_id`, `plan_id`, `status`, `period_start`, `period_end`, `apartments` (how many apartments the month covers), `amount` and `currency` (what was charged, as a snapshot), `provider` (manual, paymob), `provider_ref`, `is_founding`, `entitlements_override` jsonb |
+| `org_entitlements` | one row per org, created at sign-up (Phase 0b slice 1): `plan` (free, pro), `max_units` (5, the self-serve maximum; raised by hand for a custom plan), `trial_started_at`, `trial_ends_at`, `paid_until`, `is_founding`. The resolved state of what the org may use. Users can read it; no user can insert, update or delete it (no grant, enforced by the database); only the project owner changes it, in the Supabase dashboard, until Phase 4/5 record paid months in `subscriptions` and update it on the server. Gating reads it from Phase 7. |
 | `purchases` | one-time purchases (Setup Kit, founding pre-order): `plan_id`, `amount`, `currency`, `status`, `provider` (manual, paymob), `provider_ref` |
-| `units` | `name`, `city`, `area`, `bedrooms`, `bathrooms`, `max_guests`, `status` (planning, setup, live, paused, archived), `operating_model`, `currency` (the unit currency), `go_live_date`. Created with minimal columns in Phase 3; Phase 5 extends the same table (never a second units table). |
+| `units` | `name`, `city`, `area`, `bedrooms`, `bathrooms`, `max_guests`, `status` (planning, setup, live, paused, archived), `operating_model`, `currency` (the unit currency), `go_live_date`. Created in Phase 0b slice 1 with `name`, `operating_model`, `currency` (EGP), `calculator_inputs` (jsonb: the calculator's inputs for the apartment, never results), `engine_version` and `created_by`; at most `org_entitlements.max_units` per org, enforced by a trigger. Phase 3 adds the columns checklists need and Phase 5 extends the same table (never a second units table). |
 | `unit_month_settings` | `unit_id`, `month`, `blocked_nights` (entered by hand; there is no calendar) |
 | `parties` | owners, cleaners, suppliers, co-hosts: `type`, `name`, optional `phone` |
 | `agreements` | one effective agreement per unit at any time: `unit_id`, `owner_party_id` (managed units only), `commission_basis` (none, gross_revenue, net_payout, noi, fixed_monthly, hybrid), `commission_rate`, `fixed_fee`, `hybrid_mode` (sum, max), `hybrid_basis` (gross_revenue, net_payout, noi), `include_cleaning_fees`, `expense_bearer_rules` jsonb, `statement_basis` (cash — default, accrual), `tax_rate` (null = no tax), `tax_base` (pre_tax_profit — default, gross_revenue, net_payout), `effective_from`, `effective_to`. Owner-operated and rental-arbitrage units use basis `none`, and the UI calls their record **"unit settings"**, never "agreement". |
@@ -140,7 +141,7 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 | `unit_checklist_progress` | `unit_id`, `item_id`, `done_at`, `actual_cost` |
 | `audit_log` | `org_id`, `actor`, `table_name`, `row_id`, `action`, `before`, `after`, `at`, `redacted_at` |
 
-**`audit_log` design (built in Phase 0b):**
+**`audit_log` design (built in Phase 5, with `transactions`, the first financial table; moved from Phase 0b on 2026-10-08, because slice 1's tables hold no financial records):**
 - Written only by `SECURITY DEFINER` triggers on financial tables. No client role can insert, update or delete rows.
 - Readable by the org's `owner` and `admin` roles.
 - Personal-data columns are listed in one registry (e.g. `profiles.full_name`, `parties.name`, `parties.phone`, `owner_grants.email`).
@@ -412,7 +413,7 @@ RTL and translation issues, missing tests, performance. List issues by severity,
 - In `/demo`, a visitor can add a unit, add expenses and record income, and Home updates live through the Phase 1 engine. The data lives in the browser only: no account, nothing sent to a server.
 - "تقرير الشهر" (owner view) opens each unit's monthly report instead of a toast.
 - The "بيانات تجريبية" banner, `noindex` and the no-silent-taps rule stay. The fixture data remains the starting point, with a way to reset to it.
-- At sign-up (Phase 0b onward), the visitor's browser data migrates into their new org by default — the same policy as the anonymous calculator draft (`docs/PROGRESS.md`, kickoff decisions) — through a server-side import path with the usual Zod validation and `audit_log` entries.
+- At sign-up (Phase 0b onward), the visitor's browser data migrates into their new org by default — the same policy as the anonymous calculator draft (`docs/PROGRESS.md`, kickoff decisions) — through a server-side import path with the usual Zod validation and `audit_log` entries. *Phase 0b slice 1 moves the visitor's apartment on first sign-in (rule in that slice below); `audit_log` entries start in Phase 5.*
 
 **Acceptance**
 - [ ] Adding a unit, an expense or income updates Home immediately, with every figure computed by `src/lib/finance/` (component or e2e test).
@@ -427,7 +428,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   - "A visitor can add a unit" for the **first** unit: the flow's answers become the visitor's own unit, kept in this browser only (one versioned localStorage key, `backdesk:guest`; the flow's answers in sessionStorage, never in the URL). Reloading keeps it.
   - Units shows the visitor's own unit first ("شقتك الأولى"), the sample units below under "أمثلة تجريبية", and the add-unit states (first unit free; a second one opens the subscription card, with no real gating).
   - The calculator becomes two tabs on one state: "الملخص" (one screen) and "كل الأرقام" (every input and figure). The headline is net profit **after** depreciation (see §4.3).
-- **Remaining in P.2:** adding expenses and recording income; Home updating live (Home does not show the visitor's unit yet); "تقرير الشهر" per unit; resetting to the fixtures; more than one own unit; turning the scenario-based own unit into a ledger unit; the sign-up migration (Phase 0b onward).
+- **Remaining in P.2:** adding expenses and recording income; Home updating live (Home does not show the visitor's unit yet); "تقرير الشهر" per unit; resetting to the fixtures; more than one own unit; turning the scenario-based own unit into a ledger unit; the sign-up migration (Phase 0b slice 1 moves the apartment; expenses and income follow when they exist).
 - **Then:** the host review (3–5 hosts), before the remaining P.2 items are built.
 
 ### Phase 0a — Foundation: app shell (no database)
@@ -446,20 +447,51 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 
 ### Phase 0b — Foundation: Supabase, auth and database tests in CI
 **Scope**
-- After Amir approves: create the dev Supabase project in Frankfurt (free plan) through the Supabase connector. Touch no other project.
-- Server and browser Supabase clients; session refresh and next-intl routing combined in one middleware.
+- ~~After Amir approves: create the dev Supabase project in Frankfurt (free plan) through the Supabase connector.~~ *Done differently (2026-10-08): Amir created the Backdesk project himself (Ireland, Free plan). It is production; the Supabase GitHub integration applies migrations from `main`.* Touch no other project.
+- Server and browser Supabase clients; session refresh and next-intl routing combined in one middleware. *Slice 1: the clients only. Pages stay static and read in the browser, so the middleware gets no session refresh until a server component needs the session.*
 - Auth: **Google sign-in only** (decided 2026-10-08, §6 question 16). Email codes come later, once there is a domain and a custom SMTP sender (Resend): Supabase's built-in mailer delivers only to the project's team members. Wildcard redirect URLs for Vercel previews (`https://*-<vercel-scope>.vercel.app/**`).
-- Migration 001: `profiles`, `orgs`, `org_members` (owner, admin, member, accountant), `plans` (seeded: `free` with 1 apartment, `pro` with up to 5, `setup_kit`, `founding`; no other tiers), `plan_prices` (monthly and one-time only; no rows until prices are confirmed), `subscriptions` (one row per paid month, with `apartments`, the amount charged and `entitlements_override`), `audit_log` (append-only, with the redaction function in §3) — all with RLS.
+- Migration 001: `profiles`, `orgs`, `org_members` (owner, admin, member, accountant), `plans` (seeded: `free` with 1 apartment, `pro` with up to 5, `setup_kit`, `founding`; no other tiers), `plan_prices` (monthly and one-time only; no rows until prices are confirmed), `subscriptions` (one row per paid month, with `apartments`, the amount charged and `entitlements_override`), `audit_log` (append-only, with the redaction function in §3) — all with RLS. *Slice 1 (2026-10-08) creates `profiles`, `orgs`, `org_members`, `org_entitlements` and `units`; `plans`, `plan_prices` and `subscriptions` come with manual grants and payments (Phase 5 / Phase 4), and `audit_log` with the first financial table (Phase 5).*
 - Trigger: on sign-up, create a profile and a personal org (`individual`, EGP, `Africa/Cairo`) with the user as `owner`.
 - No entitlements service and no gating yet: they are built in Phase 7 (§2). Every account works with everything open.
 - PostHog provider: nothing is captured until the user opts in; it does nothing when the key is missing.
-- GitHub Actions: apply migrations to dev, then run `pnpm test:db`. Tests create their own users through the admin API and delete them afterwards.
-- The Vercel Preview environment points at dev.
+- ~~GitHub Actions: apply migrations to dev, then run `pnpm test:db`.~~ *Since 2026-10-08:* migrations are applied by the Supabase GitHub integration when they merge to `main`; `pnpm test:db` runs in GitHub Actions (and in cloud sessions) on a throwaway local Postgres that mirrors Supabase's roles, creating its own users. It never touches the hosted project and needs no secrets.
+- Vercel Production and Preview both point at the one Backdesk project.
 
 **Acceptance**
 - [ ] On a Vercel preview, a first Google sign-in creates a profile, a personal org and an owner membership.
-- [ ] RLS tests: a user cannot read or write another org's rows; no client role can update or delete `audit_log`; only the redaction function can redact it.
+- [ ] RLS tests: a user cannot read or write another org's rows *(slice 1, `tests/db/rls.test.ts`)*; no client role can update or delete `audit_log`; only the redaction function can redact it *(Phase 5, with `audit_log`)*.
 - [ ] CI is green, including the database job.
+
+#### 0a/0b slice 1 — accounts with Google sign-in, apartments saved to the account (Batch 3, 2026-10-08)
+The first part of Phases 0a and 0b, not a separate phase. Everything stays open: no trial clock, no gating, no payments. Guest mode keeps working exactly as before, without an account. Two pull requests, in order:
+- **PR A — schema only** (no app code):
+  - Migration `supabase/migrations/20261008180000_accounts_and_units.sql`: `profiles`, `orgs`, `org_members`, `org_entitlements`, `units`, each with RLS. Policies resolve org membership from `auth.uid()` through two helpers in the `private` schema, which the Data API does not expose. Column grants: `anon` gets nothing; `authenticated` may write only `units` content columns (`name`, `operating_model`, `calculator_inputs`, `engine_version`, and `org_id` on insert) and `profiles.apartment_count_answer`. Plan, limit, trial and paid-until dates, ownership, ids and timestamps are not writable by any user (42501). Triggers set ownership and timestamps, create the profile, personal org, owner membership and a free 5-apartment entitlements row at sign-up (with a backfill), and enforce the apartment limit with a per-org lock. `public.delete_my_account()` deletes the caller's account without a service-role key.
+  - Proof: `pnpm test:db` (`scripts/test-db.sh`, `tests/db/`) on a throwaway local Postgres whose superuser is `supabase_admin` and where `postgres` is not a superuser, as on Supabase; also `.github/workflows/db-tests.yml`. `docs/verify_after_migration.sql` is the read-only check Amir runs in the SQL editor after the migration lands; the tests run it too, and break the schema on purpose to show each check fails.
+  - `docs/SETUP_AUTH.md`: Amir's manual steps (Google OAuth client, Supabase Google provider, email sign-up off, URL configuration, Vercel variables).
+- **PR B — the app**, built after PR A is applied:
+  - Sign-in entry points: the "أضف شقة" card for a guest who already has one apartment (it offers "احفظ شقتك وأضف غيرها بحساب Google" instead of the subscription card), and a row in المزيد. No forced sign-in anywhere else.
+  - Signed in, Units, the calculator and the own-unit card read and write the account's apartments: add, rename, edit and delete, up to 5. A 6th shows the "باقات خاصة" contact, not an error.
+  - The apartment-count answer is stored on the profile.
+  - المزيد: sign out, and "احذف حسابي وبياناتي" with a confirmation step.
+  - A short privacy page in Arabic and English, giving `info@backdeskapp.com` as the contact.
+  - The Free card on the pricing page gains "نسبة الإشغال ومتوسط سعر الليلة".
+  - `src/types/database.ts` is generated from the local test database.
+  - **Blocking before merge:** Amir confirms `info@backdeskapp.com` receives mail.
+- **Moving the guest's apartment at sign-in (decided 2026-10-08):**
+  - If the account has no apartments, the browser's apartment moves to the account automatically (up to the limit), and the browser copy is cleared.
+  - If the browser's apartment is identical to one already in the account, the browser copy is cleared without asking.
+  - Otherwise, for example on a second device, one sheet asks: "أضفها إلى حسابي" (added as a new apartment; at the limit, the "باقات خاصة" contact instead) or "احذفها من هذا الجهاز". Until the person taps, the browser copy stays untouched and hidden.
+  - Server data is never overwritten by browser data. The apartment-count answer is copied only when the profile has none.
+- **Remaining after this slice:**
+  - The trial clock and all gating, with the month report (Phase 7).
+  - Email sign-in, once the domain and a custom SMTP sender exist (§6 questions 1 and 16).
+  - `plans`, `plan_prices` and `subscriptions`: manual grants (Phase 5) and payments (Phase 4) will record paid months and update `org_entitlements`.
+  - `audit_log`, with `transactions` (Phase 5).
+  - Middleware session refresh, when a server component first needs the session.
+  - PostHog (0b).
+  - The rest of 0a: Prettier, themes, PWA, the error boundary, and CI for lint, typecheck and unit tests (the database job exists since slice 1).
+  - Google brand verification or a Supabase custom domain, after the domain is live.
+  - Removing the preview wildcard redirect (Phase 10).
 
 ### Phase 2 — Free feasibility and profit calculator
 **Scope**
@@ -514,7 +546,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   6. Launch and first reviews
   7. Optimization
 - Frontmatter: `stage`, `order`, `tier` (free/pro), `est_cost_range`, `est_duration`. Claude Code writes skeleton drafts marked `DRAFT — Amir to review` and never states legal requirements as fact.
-- Create the `units` table with the minimal columns checklists need, with RLS; the plan's unit limit is enforced on the server from Phase 7 (§2). This is the same table Phase 5 extends; there is never a second units table.
+- Extend the `units` table (created in Phase 0b slice 1, with RLS and the 5-apartment limit) with the columns checklists need; the plan's unit limit (Free: 1) is enforced on the server from Phase 7 (§2). This is the same table Phase 5 extends; there is never a second units table.
 - Per-unit checklist progress; optional actual cost on each item creates a CAPEX asset (on Free too: it is data entry, and the month's result needs it, §2).
 - Import `data/seed/inventory.csv` into `inventory_templates`; budget planner totals by tier and bedroom count; Free preview shows the first 10 items (from Phase 7, §2).
 - Setup Kit entitlement flag. Before launch the Setup Kit is sold by InstaPay and granted with a `manual` purchase; payment wiring comes in Phase 4.
@@ -622,13 +654,13 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - [ ] Legal drafts exist, clearly marked DRAFT — for legal review.
 
 ### Phase 10 — Hardening and launch
-- Create the prod Supabase project (paid plan) with Amir's approval; prod keys only in Vercel and GitHub secrets.
+- ~~Create the prod Supabase project (paid plan)~~ *Since 2026-10-08 the Backdesk project is production:* move it to a paid plan (backups) with Amir's approval; keys only in Vercel and GitHub secrets.
 - Security: RLS test for every table × role, Storage policies, rate limiting on auth, AI and webhooks, secrets audit.
 - Privacy: user data export and account deletion, including `audit_log` redaction. The Phase 4 legal drafts are reviewed by a lawyer before launch.
 - Reliability: verified daily backups, error monitoring, uptime check.
 - Quality: Lighthouse mobile ≥ 90, WCAG AA contrast.
 - Onboarding emails (day 0, 2, 7) and in-app empty-state guidance.
-- Launch checklist in `docs/LAUNCH.md`, including removing `noindex` from `/demo` and confirming the benchmark feature is hidden unless sourced figures exist.
+- Launch checklist in `docs/LAUNCH.md`, including removing `noindex` from `/demo`, confirming the benchmark feature is hidden unless sourced figures exist, and **removing the Vercel preview wildcard from Supabase's redirect URLs, or moving previews to a separate Supabase project** (the wildcard was accepted on 2026-10-08 while this project is the only one; `docs/SETUP_AUTH.md` step 4).
 
 ### 🚀 LAUNCH
 Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms. Everything after this point is post-launch.
@@ -662,6 +694,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 14 | Lookup rule: when the top-precedence row at a level has `sample_size` below `MIN_SAMPLE`, should the lookup try the next source at the same level before rolling up? (raised while reconciling, 2026-09-30) | Phase 2 | The rule as written (no fall-through). Recommended change: fall through, because a small `curated` own-portfolio row (likely fewer than 30 units) would otherwise always force a roll-up, even when the same area has a solid API figure |
 | 15 | Setup-cost benchmarks: the revised `benchmarks` table has no setup-cost column, but the earlier long format could hold one and §0's `benchmarks.csv` listed setup-cost figures (raised while reconciling, 2026-09-30) | Phase 2 | Setup-cost references come from Phase 3's inventory budget planner, not from `benchmarks` |
 | 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free (Amir kept this default on 2026-10-08; the question stays open) |
+| 19 | The Supabase project is in Ireland (`eu-west-1`) but Vercel functions are pinned to Frankfurt (`fra1`, CLAUDE.md §3): move them to Dublin (`dub1`)? Every server action and the sign-in callback cross that border once per call (raised 2026-10-08) | PR B of Phase 0b slice 1 | `fra1`, as written |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 

@@ -34,21 +34,22 @@
 - `pnpm lint` / `pnpm typecheck`
 - `pnpm test` — Vitest unit and property tests (no network)
 - `pnpm test:coverage` — the same, enforcing ≥ 95% line and branch coverage on `src/lib/finance/`
-- `pnpm test:db` — RLS and database tests against the dev project (normally run by GitHub Actions)
+- `pnpm test:db` — RLS and database tests on a throwaway local Postgres that mirrors Supabase's roles (`scripts/test-db.sh`; needs Linux with the Postgres server binaries: cloud sessions and GitHub Actions). Never against the hosted project; no secrets
 - `pnpm test:e2e` — Playwright
-- `pnpm db:migrate` — apply pending migrations to the dev project (normally run by GitHub Actions)
-- `pnpm db:types` — regenerate `src/types/database.ts` from the dev project
+- Migrations: no script. The Supabase GitHub integration applies new files in `supabase/migrations/` when they merge to `main`
+- `pnpm db:types` — regenerate `src/types/database.ts` from the local test database (Claude's Supabase connector cannot see the Backdesk project)
 
 ## 5. Environments — cloud-first (non-negotiable)
 
 - **No Docker, WSL, local Supabase or other local installs.** Amir will not install anything else. The local machine has Node, pnpm and Git only.
-- **Dev database:** one hosted Supabase project in Frankfurt (free plan), created by Claude through the Supabase connector in Phase 0b, **only after Amir approves**. Never read, change or delete any other Supabase project in Amir's account.
-- **Prod database:** a separate Supabase project on a paid plan, created only before launch, with Amir's approval.
-- **Secrets:** Claude only ever sees dev keys. Prod keys live only in Vercel and GitHub secrets. Never commit secrets; `.env.example` lists variable names only. Prefer credentials scoped to the dev database over account-wide tokens.
-- **Migrations and database tests** run in GitHub Actions against dev. Migrations are forward-only; never edit a migration after it has been pushed. Tests create their own users and data with unique ids and delete them afterwards.
-- **Manual testing** happens on Vercel preview links on Amir's phone. Supabase dev Auth allows wildcard redirect URLs for Vercel previews.
+- **Database:** one hosted Supabase project, Backdesk (ref `kmmfhaypqgzhoptmljki`, West EU / Ireland, Free plan), created by Amir. **It is production; there is no separate dev or prod project** (decided 2026-10-08). Claude's Supabase connector is linked to a different Supabase account and cannot see it. Never read, change or delete any other Supabase project in Amir's account.
+- **Before launch:** the project moves to a paid plan (backups), and the Vercel preview wildcard redirect is removed or previews move to a separate project, both with Amir's approval (`docs/BUILD_PLAN.md` Phase 10).
+- **Secrets:** Claude never sees Supabase keys, the database password or the Google client secret: they live only in the Supabase dashboard and Vercel (`docs/SETUP_AUTH.md` lists which values are secret). Only the project URL and the publishable key reach the browser. Never commit secrets; `.env.example` lists variable names only.
+- **Migrations** (`supabase/migrations/`) are applied by the Supabase GitHub integration when they merge to `main`. They are forward-only; never edit a migration after it has been pushed. After one lands, Amir runs the read-only `docs/verify_after_migration.sql` in the SQL editor and pastes the result back.
+- **Database tests** (`pnpm test:db`) run on a throwaway local Postgres, in GitHub Actions and in cloud sessions, never against the hosted project. They create their own users and data with unique ids.
+- **Manual testing** happens on Vercel preview links on Amir's phone. Supabase Auth allows a wildcard redirect URL for Vercel previews until launch.
 - **Sign-in and email:** sign-in is **Google only** for now (decided 2026-10-08). Email codes come later, once there is a domain and a custom SMTP sender (Resend), because Supabase's built-in mailer delivers only to the project's team members. There is no local test inbox.
-- **Regions:** Supabase in Frankfurt; Vercel functions in `fra1`.
+- **Regions:** Supabase in Ireland (`eu-west-1`); Vercel functions in `fra1` (`docs/BUILD_PLAN.md` §6 question 19 asks whether to move them to `dub1`).
 - **Never create cloud resources** (Supabase projects, Vercel projects, paid services) or anything that costs money without Amir's explicit approval.
 - A fresh session, including Claude Code on the web, continues from the repo alone: this file, `docs/BUILD_PLAN.md` and `docs/PROGRESS.md` are the memory.
 
