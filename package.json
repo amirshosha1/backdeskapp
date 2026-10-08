@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:db": "bash scripts/test-db.sh",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:types": "UPDATE_DB_TYPES=1 bash scripts/test-db.sh tests/db/types.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
