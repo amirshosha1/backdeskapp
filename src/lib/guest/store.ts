@@ -1,13 +1,8 @@
 import { useSyncExternalStore } from "react";
-import {
-  FIELD_KIND,
-  parseCalculatorForm,
-  visibleFields,
-  type CalculatorForm,
-  type ManagedBasis,
-  type NumberField,
-} from "@/lib/calculator/form";
-import { ENGINE_VERSION, type OperatingModel, type PercentBasis } from "@/lib/finance";
+import { visibleFields, type CalculatorForm } from "@/lib/calculator/form";
+import { parseAssumed, parseStoredForm, type AssumedField } from "@/lib/calculator/stored-inputs";
+import { ENGINE_VERSION } from "@/lib/finance";
+import { APARTMENT_COUNTS, isApartmentCount, type ApartmentCount } from "@/lib/first-run/apartment-count";
 import { GUEST_KEY, GUEST_VERSION } from "./keys";
 
 /**
@@ -21,16 +16,18 @@ import { GUEST_KEY, GUEST_VERSION } from "./keys";
  * assumed (تجريبي), and the engine version — never computed results and
  * never the locale (the locale comes from the URL only, CLAUDE.md §7).
  * No Zod here (it would ship ~97 KB to the browser, PROGRESS.md Phase 1):
- * a stored form is checked by hand and then must pass `parseCalculatorForm`.
+ * a stored form is checked by hand (src/lib/calculator/stored-inputs.ts,
+ * shared with the account's apartments) and must pass `parseCalculatorForm`.
+ *
+ * A signed-in person's apartments live in their account, never here; this
+ * browser copy is moved into the account at sign-in
+ * (src/lib/account/adoption.ts) and then cleared.
  */
 
 export { GUEST_KEY, GUEST_VERSION } from "./keys";
 
-export const APARTMENT_COUNTS = ["1", "2-3", "4-10", "10+"] as const;
-export type ApartmentCount = (typeof APARTMENT_COUNTS)[number];
-
-/** An input that can still hold an assumed (example) value: a number field, or the commission basis. */
-export type AssumedField = NumberField | "commissionBasis";
+export { APARTMENT_COUNTS, type ApartmentCount };
+export type { AssumedField };
 
 export interface OwnUnit {
   id: "own-1";
@@ -48,42 +45,13 @@ export interface GuestState {
 
 export const EMPTY_GUEST: GuestState = { v: GUEST_VERSION, firstRun: { seen: false, count: null }, units: [] };
 
-const NUMBER_FIELDS = Object.keys(FIELD_KIND) as NumberField[];
-const MODELS: OperatingModel[] = ["owner_operated", "rental_arbitrage", "managed_for_owner"];
-const MANAGED_BASES: ManagedBasis[] = ["gross_revenue", "net_payout", "noi", "fixed_monthly", "hybrid"];
-const PERCENT_BASES: PercentBasis[] = ["gross_revenue", "net_payout", "noi"];
-
 const isRecord = (x: unknown): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x);
-const oneOf = <T extends string>(list: readonly T[], x: unknown): x is T => typeof x === "string" && (list as readonly string[]).includes(x);
-
-function parseForm(x: unknown): CalculatorForm | null {
-  if (!isRecord(x) || !oneOf(MODELS, x.operatingModel) || !isRecord(x.values) || !isRecord(x.commission)) return null;
-  const values = x.values;
-  if (!NUMBER_FIELDS.every((f) => typeof values[f] === "string")) return null;
-  const c = x.commission;
-  if (
-    !oneOf(MANAGED_BASES, c.basis) ||
-    !oneOf(["sum", "max"] as const, c.hybridMode) ||
-    !oneOf(PERCENT_BASES, c.hybridBasis) ||
-    typeof c.includeCleaningFees !== "boolean"
-  ) {
-    return null;
-  }
-  const form: CalculatorForm = {
-    operatingModel: x.operatingModel,
-    values: Object.fromEntries(NUMBER_FIELDS.map((f) => [f, values[f] as string])) as CalculatorForm["values"],
-    commission: { basis: c.basis, hybridMode: c.hybridMode, hybridBasis: c.hybridBasis, includeCleaningFees: c.includeCleaningFees },
-  };
-  // Only a form the engine accepts is ever used: an older or edited payload falls back to nothing.
-  return parseCalculatorForm(form).ok ? form : null;
-}
 
 function parseUnit(x: unknown): OwnUnit | null {
   if (!isRecord(x) || x.id !== "own-1" || typeof x.engineVersion !== "string" || !Array.isArray(x.assumed)) return null;
-  const form = parseForm(x.form);
+  const form = parseStoredForm(x.form);
   if (!form) return null;
-  const assumed = x.assumed.filter((f): f is AssumedField => f === "commissionBasis" || oneOf(NUMBER_FIELDS, f));
-  return { id: "own-1", engineVersion: x.engineVersion, form, assumed: [...new Set(assumed)] };
+  return { id: "own-1", engineVersion: x.engineVersion, form, assumed: parseAssumed(x.assumed) };
 }
 
 /** Reads a stored payload; anything unreadable gives the empty state (keeping the seen flag when it can). */
@@ -100,7 +68,7 @@ export function parseGuest(raw: string | null): GuestState {
   const units = Array.isArray(data.units) ? data.units.map(parseUnit).filter((u): u is OwnUnit => u !== null).slice(0, 1) : [];
   return {
     v: GUEST_VERSION,
-    firstRun: { seen: firstRun.seen === true, count: oneOf(APARTMENT_COUNTS, firstRun.count) ? firstRun.count : null },
+    firstRun: { seen: firstRun.seen === true, count: isApartmentCount(firstRun.count) ? firstRun.count : null },
     units,
   };
 }
@@ -180,6 +148,22 @@ export function setFirstRunSeen(): void {
 
 export function setApartmentCount(count: ApartmentCount): void {
   updateGuest((s) => ({ ...s, firstRun: { ...s.firstRun, count } }));
+}
+
+/** Removes the browser's apartment (it moved into the account, or the person deleted it from this device). */
+export function clearOwnUnit(): void {
+  updateGuest((s) => ({ ...s, units: [] }));
+}
+
+/** Forgets everything this browser holds for Backdesk (after the account is deleted). */
+export function clearGuest(): void {
+  try {
+    window.localStorage.removeItem(GUEST_KEY);
+  } catch {
+    // Storage blocked: nothing was kept beyond this page view.
+  }
+  memoryRaw = null;
+  listeners.forEach((listener) => listener());
 }
 
 /**
