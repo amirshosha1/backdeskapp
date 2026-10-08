@@ -15,9 +15,9 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 - [x] GitHub repo `amirshosha1/str-money-finder` (keep it private): `CLAUDE.md` at the root, this file at `docs/BUILD_PLAN.md`
 - [ ] Vercel account connected to the repo — needed for the Phase P preview
 - [ ] Supabase account with one free project slot — Claude Code creates the dev project (Frankfurt) in Phase 0b, only after your approval
-- [ ] Resend account with a verified sending domain — needed from Phase 0b (until the domain is verified, dev sign-in emails reach only your own Resend address)
+- [ ] Resend account with a verified sending domain — needed once there is a domain: for email sign-in codes (Google is the only sign-in until then, §6 question 16) and for every email Backdesk sends, starting with Phase 5's team invitations
 - [ ] PostHog project (EU cloud) — Phase 0b
-- [ ] Google Cloud OAuth client — whenever convenient; Google sign-in stays off by config until then
+- [ ] Google Cloud OAuth client — **needed for Phase 0b**: Google is the only sign-in method (§6 question 16). Consent screen "External"; while it is in Testing mode only the test users you list can sign in, so publish it before hosts sign up
 - [ ] Paymob merchant account — start verification early; not needed until the pre-launch payments phase
 - [ ] Anthropic API key (needed from Phase 8)
 - [ ] AirROI account and API key (airroi.com) — needed for Phase 2's benchmark feature (a quarterly refresh plus a small pre-build coverage spike); self-serve, pay-per-call, $0.01/call, no monthly minimum (see Phase 2 scope in §5)
@@ -44,7 +44,7 @@ Most Egyptian STR hosts do not know their true net profit. They track payouts in
 
 ### Personas (in order of monetization priority)
 1. **Co-host / small management company (3–30 units)** — manages units for owners; needs commissions and owner statements. **Primary paid buyer** (Pro up to 5 apartments; a custom plan above that).
-2. **Owner-operator (1–3 units)** — wants true profit and cost control. Free (one apartment, this month's result) or Pro.
+2. **Owner-operator (1–3 units)** — wants true profit and cost control. Free (one apartment: this month's result, occupancy and nightly rate) or Pro.
 3. **Aspiring investor** — deciding whether to buy, rent or furnish a unit for STR. Free calculator user and Setup Kit buyer.
 4. **Unit owner (managed)** — reads finalized statements through signed links (Phase 7) and, after launch, the owner portal (Phase 9). Never an org member.
 
@@ -65,7 +65,7 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 
 ## 2. Plans and gating
 
-**Principle: data entry is free, outputs are paid** (decided 2026-10-07; replaces "gate by scale and depth, never by hiding the answer"). The free figure is always the full, correct number, never a degraded one: the current month's result on Free is the same engine figure Pro shows, computed from everything the user entered. Gating removes outputs (breakdowns, past months, reports, imports); it never changes a number, and it never blocks the entry a correct result depends on.
+**Principle: data entry is free, outputs are paid** (decided 2026-10-07; replaces "gate by scale and depth, never by hiding the answer"). The free figure is always the full, correct number, never a degraded one: the current month's result, occupancy and average nightly rate on Free are the same engine figures Pro shows, computed from everything the user entered. Gating removes outputs (breakdowns, past months, reports, imports); it never changes a number, and it never blocks the entry a correct result depends on.
 
 | Capability | Free (1 apartment) | Pro | Setup Kit (one-time) |
 |---|---|---|---|
@@ -76,7 +76,8 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 | 12-month seasonal projection (server-only) | Blurred placeholder teaser | ✅ | — |
 | Area benchmark comparison (server-only; hidden entirely while no sourced figures exist) | Blurred placeholder teaser | ✅ | — |
 | The current month's result (profit or loss, the full figure) | ✅ | ✅ | — |
-| The full month breakdown (P&L lines, KPIs, break-even, payback, portfolio) | — | ✅ | — |
+| The current month's occupancy and average nightly rate (ADR), from actual figures | ✅ (added 2026-10-08) | ✅ | — |
+| The full month breakdown (P&L lines, RevPAR, break-even, payback, portfolio) | — | ✅ | — |
 | Past months | — (entries are kept, never deleted) | ✅ all | — |
 | Monthly PDF report | — | ✅ | — |
 | Owner statements (finalize, PDF, signed links) | — | ✅ | — |
@@ -96,8 +97,9 @@ See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
 - **Trial:** the first month after an account is created, everything is open for every apartment the user declared.
 - **After the trial, or after a paid month, without a payment:** the account continues on Free, month by month. Its data is kept and never deleted. Apartments beyond the Free limit are **frozen** with their data and come back when the user pays for them.
 - **Payment:** monthly, no auto-renewal. Each payment buys one month of Pro for a stated number of apartments. Manual at first (InstaPay transfer, granted by an admin script); Paymob checkout of one month comes in Phase 4.
-- **Open (§6):** the sign-in method (question 16); when the trial clock and the gating get built, including which apartment stays active after the trial (question 17).
-- Entitlements are stored as JSON on each plan, can be overridden per subscription (`entitlements_override`, e.g. founding members, custom plans or complimentary access), and are resolved on the server by `getEntitlements(orgId)`.
+- **When the gating is built (decided 2026-10-08, §6 question 17):** the trial clock and **all** gating — every limit and every Pro-only output in the table above — are built in Phase 7, together with the month report. Until then every account works with everything open, whatever its plan; plans, subscriptions and purchases are still recorded. Signed-out visitors are not accounts: what they see before Phase 7 is settled in the plan of the phase that builds the screen (default: the Free view, with sign-up as the call to action). The Phase 7 plan settles how the declared apartment count is captured, which apartment stays active after the trial, and when the trial clock starts for accounts created before Phase 7.
+- **Still open (§6):** smart entry on Free (question 18; default Pro).
+- Entitlements are stored as JSON on each plan, can be overridden per subscription (`entitlements_override`, e.g. founding members, custom plans or complimentary access), and are resolved on the server by `getEntitlements(orgId)` (built in Phase 7).
 - Until the payments phase, paid access is granted manually: a subscription or purchase with `provider = 'manual'` (InstaPay), created by a server-only admin script (from Phase 5). Before Phase 5, Amir tracks InstaPay pre-orders outside the app.
 
 ---
@@ -446,18 +448,17 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 **Scope**
 - After Amir approves: create the dev Supabase project in Frankfurt (free plan) through the Supabase connector. Touch no other project.
 - Server and browser Supabase clients; session refresh and next-intl routing combined in one middleware.
-- Auth: the sign-in method is open (§6 question 16). Planned until decided: 6-digit email code (the email also carries a sign-in link) and Google, off by config until the OAuth client exists. Resend as SMTP for dev Auth. Wildcard redirect URLs for Vercel previews (`https://*-<vercel-scope>.vercel.app/**`).
+- Auth: **Google sign-in only** (decided 2026-10-08, §6 question 16). Email codes come later, once there is a domain and a custom SMTP sender (Resend): Supabase's built-in mailer delivers only to the project's team members. Wildcard redirect URLs for Vercel previews (`https://*-<vercel-scope>.vercel.app/**`).
 - Migration 001: `profiles`, `orgs`, `org_members` (owner, admin, member, accountant), `plans` (seeded: `free` with 1 apartment, `pro` with up to 5, `setup_kit`, `founding`; no other tiers), `plan_prices` (monthly and one-time only; no rows until prices are confirmed), `subscriptions` (one row per paid month, with `apartments`, the amount charged and `entitlements_override`), `audit_log` (append-only, with the redaction function in §3) — all with RLS.
 - Trigger: on sign-up, create a profile and a personal org (`individual`, EGP, `Africa/Cairo`) with the user as `owner`.
-- Entitlements service `getEntitlements(orgId)` (server-only) and a `useEntitlements` hook that reads flags only; an org with no subscription is Free.
+- No entitlements service and no gating yet: they are built in Phase 7 (§2). Every account works with everything open.
 - PostHog provider: nothing is captured until the user opts in; it does nothing when the key is missing.
 - GitHub Actions: apply migrations to dev, then run `pnpm test:db`. Tests create their own users through the admin API and delete them afterwards.
 - The Vercel Preview environment points at dev.
 
 **Acceptance**
-- [ ] On a Vercel preview, signing up with a 6-digit email code creates a profile, a personal org and an owner membership.
+- [ ] On a Vercel preview, a first Google sign-in creates a profile, a personal org and an owner membership.
 - [ ] RLS tests: a user cannot read or write another org's rows; no client role can update or delete `audit_log`; only the redaction function can redact it.
-- [ ] `getEntitlements` returns Free for a new org and the paid limits for a `manual` subscription.
 - [ ] CI is green, including the database job.
 
 ### Phase 2 — Free feasibility and profit calculator
@@ -469,7 +470,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   4. **Costs:** fixed monthly (utilities default here), per-stay (cleaning, consumables, laundry), per-night, setup CAPEX (quick total or itemized) and useful life.
   5. **Results.**
 - Results: monthly and annual net profit, margin, break-even occupancy and ADR, payback months, cash-on-cash, 7 × 7 sensitivity grid (the full grid, on Free too, §2), and a plain-language verdict generated by rules, not AI (e.g. "خسارة" with "ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.").
-- Paid teasers: 12-month projection and area benchmark as blurred **placeholder** visuals with an "Unlock with Pro" call to action. The real projection and benchmarks are computed only on the server, for paid orgs.
+- Paid teasers: 12-month projection and area benchmark as blurred **placeholder** visuals with an "Unlock with Pro" call to action. The real projection and benchmarks are computed only on the server, for orgs entitled to them; until Phase 7 builds the gating, that is every signed-in account (§2).
 - Defaults from `calculator_presets`, editable, each labelled SAMPLE until a source is supplied.
 - **Benchmarks: area medians from the AirROI API, with regional roll-up** (decided 2026-09-29, revised 2026-09-30; not yet implemented while Phase 1 is in progress). The calculator needs a reference average for any area in Egypt, not a listing-level dataset: `benchmarks` is a small lookup table of medians over `regions` (§3), refreshed quarterly. AirROI is self-serve and pay-per-call ($0.01/call, no monthly minimum).
   - **Pre-build gates** (record the results in `docs/PROGRESS.md` before any implementation):
@@ -487,14 +488,14 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
     6. Return the figures plus `resolved_level`, `resolved_region_name` and `sample_size`.
   - **UI:** when the resolved level differs from the requested one, label it (e.g. "بناءً على متوسط <region>"). Show "عينة محدودة" only when the resolved row's `sample_size` is below `MIN_SAMPLE`, which can only happen at the national fallback. For seasonal regions the `annual` row drives the headline figure; peak and off-peak ADR and occupancy are shown alongside when those rows exist.
   - **Removed from the 2026-09-29 plan:** a scheduled job of unset frequency (now quarterly or manual, and never daily) and any listing-level storage. The standalone "sample size below 30" flag on any row is replaced by the roll-up rule; the flag now appears only at the national fallback. Madinaty no longer needs a special fallback decision: an uncovered or thin area rolls up to its parent automatically.
-- Saving a scenario requires sign-up (the conversion moment); the browser draft is then saved to the user's org. Free keeps 1 saved scenario.
+- Saving a scenario requires sign-up (the conversion moment); the browser draft is then saved to the user's org. Free keeps 1 saved scenario (enforced from Phase 7, §2).
 - **Share card:** a generated image (OG image route) of the headline results with branding, designed for host WhatsApp and Facebook groups. Sensitive inputs hidden by default.
 - Analytics events: `calculator_started`, `step_completed`, `results_viewed`, `teaser_clicked`, `scenario_saved`, `share_clicked`.
 
 **Acceptance**
 - [ ] Full flow on a 360 px screen in Arabic takes under 3 minutes with defaults.
 - [ ] Results match the finance-engine outputs for the Example A and B inputs (e2e test).
-- [ ] Network inspection and a bundle check show no paid data and no projection or benchmark code in the Free client.
+- [ ] Network inspection and a bundle check show no projection or benchmark code in any client bundle, and no projection or benchmark data in a signed-out session.
 - [ ] An anonymous user who signs up keeps the draft scenario, now saved to the org.
 - [ ] Any seeded region returns a benchmark via roll-up, and the UI shows the resolved level.
 - [ ] All stored figures are medians; no raw listing data exists in the database.
@@ -513,33 +514,32 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   6. Launch and first reviews
   7. Optimization
 - Frontmatter: `stage`, `order`, `tier` (free/pro), `est_cost_range`, `est_duration`. Claude Code writes skeleton drafts marked `DRAFT — Amir to review` and never states legal requirements as fact.
-- Create the `units` table with the minimal columns checklists need, with RLS and the plan's unit limit enforced on the server. This is the same table Phase 5 extends; there is never a second units table.
+- Create the `units` table with the minimal columns checklists need, with RLS; the plan's unit limit is enforced on the server from Phase 7 (§2). This is the same table Phase 5 extends; there is never a second units table.
 - Per-unit checklist progress; optional actual cost on each item creates a CAPEX asset (on Free too: it is data entry, and the month's result needs it, §2).
-- Import `data/seed/inventory.csv` into `inventory_templates`; budget planner totals by tier and bedroom count; Free preview shows the first 10 items.
+- Import `data/seed/inventory.csv` into `inventory_templates`; budget planner totals by tier and bedroom count; Free preview shows the first 10 items (from Phase 7, §2).
 - Setup Kit entitlement flag. Before launch the Setup Kit is sold by InstaPay and granted with a `manual` purchase; payment wiring comes in Phase 4.
 
 **Acceptance**
 - [ ] Guide pages are readable offline once visited.
-- [ ] Paid sections are gated on the server.
 - [ ] Inventory import validates the CSV and reports row-level errors; budget totals match a hand-calculated fixture.
 
 ### ⛔ VALIDATION GATE (before Phase 5)
 - Hosts see the Phase P prototype (plus whatever of Phases 1–3 is live) and pay a founding-member pre-order by **manual InstaPay transfer**. Amir tracks the payments outside the app until Phase 5. No code and no payment integration are needed for this.
 - Stop after Phase 3. **Do not start Phase 5** until Amir sends this exact line: `Gate passed: {number} paid pre-orders.` The target is ≥ 20. If the target is not met, the next work is distribution (content, outreach, host groups), not code. Claude Code must ask for this line before planning Phase 5.
 
-### Phase 5 — ERP core (Free for 1 unit, paid for more)
+### Phase 5 — ERP core
 **Scope**
 - Migrations: extend `units` (created in Phase 3), add `unit_month_settings`, `parties`, `agreements`, `categories` (seeded Egyptian STR chart of accounts in AR/EN; utilities `fixed`), `transactions`, `recurring_rules`, `capex_assets`, `period_locks`, `stays`, `stay_month_allocations`.
 - Units CRUD with operating model; one effective agreement per unit; agreement editor (commission basis including the hybrid basis, statement basis, tax rate and base, expense bearers) with a live preview of the commission on a sample month. For owner-operated and rental-arbitrage units the same editor is labelled "unit settings" and shows only what applies (tax, statement basis).
 - Blocked nights per unit per month, entered by hand.
 - **Manual entry of a booking** (a stay's dates, nights and amounts; no guest data) **and of other income**, free on every plan (§2: Free's month result depends on it, and the payout import is Pro). The form and its mapping to `stays` and `transactions` are set in the Phase 5 plan.
-- **Add expense in ≤ 4 taps:** amount keypad first, then category chips (most recent first), unit (preselected when there is one unit, otherwise the last used), date defaulting to today, save. Optional receipt photo to a private Storage bucket served by signed URLs; on Free, photos are compressed in the browser before upload and capped by `receipt_photos_max` in the plan entitlements. PostHog `expense_added` event with `duration_ms`.
+- **Add expense in ≤ 4 taps:** amount keypad first, then category chips (most recent first), unit (preselected when there is one unit, otherwise the last used), date defaulting to today, save. Optional receipt photo to a private Storage bucket served by signed URLs; on Free (from Phase 7, §2), photos are compressed in the browser before upload and capped by `receipt_photos_max` in the plan entitlements. PostHog `expense_added` event with `duration_ms`.
 - FX: a transaction in a currency other than the unit's requires an explicit rate; the unit-currency amount is shown before saving.
 - Portfolio-level costs (no unit) are recorded as manager overhead.
 - Recurring rules (rent, internet, compound fees) materialized daily by pg_cron.
 - Period locks enforced at database level; anything dated in a locked month posts to the next open period; `audit_log` on every insert, update and delete of financial tables.
-- Apartment limits enforced on the server (§2): Free 1; Pro the apartments paid for, up to 5 (more through a custom plan's `entitlements_override`). The trial clock, freezing extra apartments and the output gating are built when §6 question 17 decides.
-- **Team invitations (basic seats):** an org owner or admin invites by email with one of the existing roles (admin, member, accountant). The invitee signs in with the 6-digit email code and joins the org; invitations expire and can be revoked. The email is sent via Resend, and an org switcher appears when a user belongs to more than one org. Every person has their own login, so `audit_log` attributes each write to an individual; no shared logins.
+- No plan limits in this phase: the apartment limits (Free 1; Pro the apartments paid for, up to 5, more through a custom plan's `entitlements_override`), the receipt-photo cap, the trial clock and freezing are built in Phase 7 with the rest of the gating (§2).
+- **Team invitations (basic seats):** an org owner or admin invites by email with one of the existing roles (admin, member, accountant). The invitee signs in with Google, using the invited email address (§6 question 16), and joins the org; invitations expire and can be revoked. The email is sent via Resend, which needs the sending domain (§6 question 1), and an org switcher appears when a user belongs to more than one org. Every person has their own login, so `audit_log` attributes each write to an individual; no shared logins.
 - A role matrix for owner, admin, member and accountant, presented in the phase plan for approval, then tested.
 - Founding members: a server-only admin script grants paid access (a `manual` subscription with `is_founding`).
 
@@ -549,8 +549,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - [ ] Edits in a locked period are blocked by the database (trigger or RLS), not only the UI; a new entry dated in a locked month lands in the next open period.
 - [ ] Role-matrix tests for owner, admin, member and accountant.
 - [ ] An invited user joins with exactly the invited role; expired or revoked invitations fail; `audit_log` records the invited user, not the inviter, as the actor of their writes.
-- [ ] A Free org cannot create a second unit or exceed its receipt-photo limit.
-- [ ] A Free org can enter a booking and income by hand, and the current month's result includes them.
+- [ ] An org can enter a booking and income by hand, and the current month's result includes them (entry stays free on every plan, §2).
 
 ### Phase 6 — Payout import
 **Scope**
@@ -569,11 +568,16 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 ### Phase 7 — Reports and owner statements
 **Scope**
 - Home dashboard: this month's **org profit** as the hero number (owner view for owner-operated and rental-arbitrage units; co-host view for managed units: Σ commission − manager-borne costs, with portfolio overhead as its own line), change vs last month, occupancy / ADR / RevPAR (occupancy display capped at 100% with a data warning on an availability conflict), a break-even progress bar ("break-even reached on day 19"), top 3 expense categories. One total per currency.
-- P&L per unit and per portfolio: accrual ⇄ cash toggle; month, quarter, year; drill-down by category.
+- P&L per unit and per portfolio: accrual ⇄ cash toggle; month, quarter, year; drill-down by category. **The month report** ("تقرير الشهر"): each unit's month on screen and as a PDF, rendered like the statements.
 - Owner statements: basis from the agreement (cash by default); opening balance (carried forward; entered by hand on an owner's first statement), revenue, fees, owner-borne expenses, commission, owner payouts and balance due; draft → review → finalize (locks the period and snapshots the commission transaction) → PDF in AR or EN → signed, expiring share link (`statement_links`). Render HTML and print with headless Chromium to guarantee correct Arabic shaping and bidi; avoid PDF libraries with weak Arabic support. Sequential statement numbering per org.
 - Commission payable summary for managers across all owners.
 - Exports: CSV and XLSX for transactions and P&L.
-- Gating (§2; built when §6 question 17 decides): Free sees the current month's result only, the same engine figure as Pro; the breakdown, past months, reports, statements and exports are Pro.
+- **The trial clock and all gating (§2), built here together with the month report** (decided 2026-10-08, §6 question 17); before this phase every account works with everything open.
+  - `getEntitlements(orgId)` (server-only) and a `useEntitlements` hook that reads flags only; an org with no subscription is Free once its trial ends.
+  - The one-month trial for every declared apartment.
+  - Free sees the current month's result, occupancy and average nightly rate (ADR), the same engine figures as Pro. Everything else is Pro: the breakdown (P&L lines, RevPAR, break-even, payback, portfolio), past months, the month report, statements and exports.
+  - The apartment limits and freezing extra apartments; the receipt-photo cap (Phase 5); the saved-scenario limit, projection and benchmarks (Phase 2); the guide's paid sections and the inventory preview (Phase 3).
+  - The phase plan settles how the declared apartment count is captured, which apartment stays active after the trial, and when the trial clock starts for accounts created before this phase.
 
 **Acceptance**
 - [ ] Arabic text in PDFs shapes correctly (visual snapshot test).
@@ -581,6 +585,9 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 - [ ] A finalized statement cannot change; corrections appear as adjustments in the next open period.
 - [ ] The home hero number equals `org-profit` output for owner-operated, managed and mixed portfolio fixtures.
 - [ ] Revoked or expired statement links return nothing.
+- [ ] `getEntitlements` returns the trial for a new org, Free after it, and the paid limits for a `manual` subscription.
+- [ ] On Free, the current month's result, occupancy and ADR equal Pro's figures for the same data, and no breakdown or past-month data reaches the client (network check).
+- [ ] A Free org cannot create a second unit or exceed its receipt-photo limit; the guide's paid sections are gated on the server.
 
 ### Phase 8 — Smart entry and alerts
 **Scope**
@@ -627,7 +634,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms. Everything after this point is post-launch.
 
 ### Phase 9 — Growth and moat (post-launch)
-- Owner portal: sign-in with a 6-digit email code; access only through `owner_grants` (read-only, finalized statements of that owner's units). Owners never become org members. Until then, owners use signed statement links (Phase 7).
+- Owner portal: sign-in with a 6-digit email code (needs email sign-in, §6 questions 1 and 16); access only through `owner_grants` (read-only, finalized statements of that owner's units). Owners never become org members. Until then, owners use signed statement links (Phase 7).
 - WhatsApp entry: a signed webhook endpoint consumed by Amir's n8n instance and the WhatsApp Business API; same parser as Phase 8; phone numbers linked to users.
 - Benchmarks: anonymized aggregates from opted-in orgs (minimum 5 units per cell, no org identifiable), next to the curated benchmarks from Phase 2.
 - GCC: SAR and AED presets and locale presets (per-transaction FX already exists from Phase 5).
@@ -639,7 +646,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 
 | # | Question | Blocks | Default if unanswered |
 |---|---|---|---|
-| 1 | Domain for Backdesk (Resend sending domain, production URLs) | Phase 0b | Dev sign-in emails reach only Amir's own address |
+| 1 | Domain for Backdesk (Resend sending domain, production URLs) | Email sign-in codes (question 16) and every email Backdesk sends (Phase 5 invitations onward) | Google sign-in only; no email is sent |
 | 2 | Where the prototype's pre-order button goes (e.g. a WhatsApp number or a form) | Phase P | Placeholder link, clearly marked |
 | 3 | Confirm the Pro monthly price (249 EGP, tentative; extra apartments follow from it, §2); the Setup Kit price and founding-member terms | Pre-order campaign (after Phase P) | SAMPLE prices in the prototype |
 | 4 | Phase 2 benchmark pre-build gates: the AirROI coverage spike (Madinaty, New Cairo, North Coast, Hurghada) and confirmation that AirROI's terms allow storing and displaying derived medians (see Phase 2 scope in §5) | Phase 2 implementation | — (a gate, not a default: nothing is built until both results are recorded) |
@@ -654,15 +661,20 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 13 | Does AirROI offer market-level summaries? This determines the refresh design | Phase 2 (pre-build gate) | Compute medians in memory from listing-level data and persist only the aggregated rows |
 | 14 | Lookup rule: when the top-precedence row at a level has `sample_size` below `MIN_SAMPLE`, should the lookup try the next source at the same level before rolling up? (raised while reconciling, 2026-09-30) | Phase 2 | The rule as written (no fall-through). Recommended change: fall through, because a small `curated` own-portfolio row (likely fewer than 30 units) would otherwise always force a roll-up, even when the same area has a solid API figure |
 | 15 | Setup-cost benchmarks: the revised `benchmarks` table has no setup-cost column, but the earlier long format could hold one and §0's `benchmarks.csv` listed setup-cost figures (raised while reconciling, 2026-09-30) | Phase 2 | Setup-cost references come from Phase 3's inventory budget planner, not from `benchmarks` |
-| 16 | Sign-in method (open since the plan model was confirmed, 2026-10-07) | Phase 0b | 6-digit email code with a sign-in link, plus Google off by config (as written in Phase 0b) |
-| 17 | When the trial clock and the gating get built (§2): the one-month trial for every declared apartment, Free's current-month-only view, and freezing extra apartments — including how the declared apartment count is captured and which apartment stays active after the trial | The phase that builds them (0b, 5 or 7) | — (open; until decided there is no trial clock, no current-month-only view and no freezing; the Free apartment limit (Phases 3 and 5) and the guide's paid sections apply as written) |
-| 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free |
+| 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free (Amir kept this default on 2026-10-08; the question stays open) |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 
 Resolved on 2026-09-29, revised 2026-09-30: Phase 2's benchmarks are area medians from the AirROI API, with regional roll-up; `curated` own-portfolio rows take precedence (§3 and §5, Phase 2 scope). Still open: questions 4 and 10–15 above.
 
 Decided on 2026-10-07: the plan model (§2): Free and one paid plan, Pro, priced per apartment, with a one-month trial and monthly payment without auto-renewal. Open from it: questions 16–18.
+
+Decided on 2026-10-08:
+- **Question 16, sign-in:** Google only for now (Phase 0b). Email codes come later, once there is a domain and a custom SMTP sender (question 1), because Supabase's built-in mailer delivers only to the project's team members.
+- **Question 17, trial and gating:** the trial clock and all gating are built together with the month report, in Phase 7 (§2). Until then every account works with everything open.
+- Also: Free shows the current month's occupancy and average nightly rate from actual figures; break-even, payback and the rest of the month breakdown stay Pro (§2).
+
+Question 18 stays open, with its default.
 
 ---
 
