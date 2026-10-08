@@ -1,0 +1,16 @@
+# Supabase CLI and GitHub integration settings for Backdesk.
+#
+# The Supabase GitHub integration (working directory ".") applies every new
+# file in supabase/migrations/ to the Backdesk project when it lands on
+# main. On "Deploy to production" it reads only migrations (and Edge
+# Functions or Storage buckets declared here, of which there are none):
+# Auth settings — the Google provider, redirect URLs, disabling email
+# sign-up — are set by hand in the dashboard, see docs/SETUP_AUTH.md.
+#
+# Migrations are forward-only: never edit one after it has been pushed
+# (CLAUDE.md §5). Database tests: `pnpm test:db` (scripts/test-db.sh, tests/db/).
+# They live outside supabase/ on purpose: supabase/tests/ is the Supabase
+# CLI's pgTAP directory, and tests/db/shim.sql must never run against a real
+# database.
+
+project_id = "backdesk"
