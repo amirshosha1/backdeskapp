@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { resetGuestOnEveryLoad, seedFirstRunAnswers, withOwnUnit } from "./guest";
-import { ALL_SCREENS } from "./screens";
+import { ALL_SCREENS, PUBLIC_PAGES } from "./screens";
 
 /**
  * BUILD_PLAN.md Phase P.1.1, item 11: an automated accessibility sweep of
@@ -12,7 +12,7 @@ import { ALL_SCREENS } from "./screens";
  */
 const BLOCKING_IMPACT = new Set(["serious", "critical"]);
 
-for (const path of ALL_SCREENS) {
+for (const path of [...PUBLIC_PAGES, ...ALL_SCREENS]) {
   test(`${path}: no serious or critical accessibility violations`, async ({ page }) => {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).include("body").analyze();

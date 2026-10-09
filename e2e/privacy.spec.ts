@@ -35,12 +35,12 @@ for (const { path, lang, dir, heading } of [
   });
 }
 
-test("the back button returns to المزيد and the language switch keeps the page", async ({ page }) => {
+test("the back button returns to the home page and the language switch keeps the page", async ({ page }) => {
   await page.goto("/privacy");
   await page.getByTestId("language-switch").click();
   await expect(page).toHaveURL(/\/en\/privacy$/);
-  await page.getByRole("link", { name: "Back to the app" }).click();
-  await expect(page).toHaveURL(/\/en\/demo\/more$/);
+  await page.getByRole("link", { name: "Back to the home page" }).click();
+  await expect(page).toHaveURL(/\/en$/);
 });
 
 test("المزيد links to the privacy page", async ({ page }) => {

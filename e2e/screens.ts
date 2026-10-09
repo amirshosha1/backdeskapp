@@ -19,3 +19,6 @@ const TASK_SCREENS = ["/demo/expenses/new", "/demo/start"];
 
 /** Screens that sit under the floating bottom navigation. */
 export const TAB_SCREENS = ALL_SCREENS.filter((path) => !TASK_SCREENS.includes(path));
+
+/** Public pages outside /demo that the a11y sweep and the tap crawler also cover (the landing; privacy has its own spec). */
+export const PUBLIC_PAGES = ["/", "/en"];
