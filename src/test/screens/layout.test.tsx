@@ -23,9 +23,10 @@ describe("<BottomNav />", () => {
 });
 
 describe("<DemoBanner />", () => {
-  it('reads just "بيانات تجريبية"', () => {
+  it('without accounts configured, reads just "محفوظ على هذا الجهاز" (nothing to sign in to), never "بيانات تجريبية"', () => {
     renderWithIntl(<DemoBanner />);
-    expect(screen.getByTestId("demo-banner")).toHaveTextContent(/^بيانات تجريبية$/);
+    expect(screen.getByTestId("device-banner")).toHaveTextContent(/^محفوظ على هذا الجهاز$/);
+    expect(screen.queryByText("بيانات تجريبية")).toBeNull();
   });
 });
 

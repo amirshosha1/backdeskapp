@@ -33,7 +33,6 @@ export function MoreScreen() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [rerunOpen, setRerunOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const banner = account === null || account.status === "loading" ? "pending" : signedIn ? "account" : "sample";
 
   function startFirstRun() {
     writeFirstRunAnswers(null);
@@ -43,7 +42,7 @@ export function MoreScreen() {
 
   return (
     <div>
-      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} banner={banner} />
+      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} />
 
       <div className="divide-y divide-line px-4 pt-2">
         {account?.status === "guest" && <SignInButton variant="row" />}

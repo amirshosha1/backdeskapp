@@ -18,18 +18,19 @@ function inAppHere(): { inApp: boolean; platform: Platform } {
 }
 
 /**
- * Every Google sign-in button. Inside an in-app browser (Facebook,
- * Messenger, Instagram…) it opens the "open in your browser" sheet instead
- * of starting a sign-in Google would refuse. Otherwise it leaves for Google
- * and comes back to this page (src/lib/account/store.ts).
+ * Starts a Google sign-in from any control (the buttons below, the guest
+ * banner). Inside an in-app browser (Facebook, Messenger, Instagram…) it
+ * opens the "open in your browser" sheet instead of starting a sign-in
+ * Google would refuse. Otherwise it leaves for Google and comes back to
+ * this page (src/lib/account/store.ts). Render `sheet` next to the control.
  */
-export function SignInButton({ variant, title }: { variant: "row" | "primary"; title?: string }) {
+export function useGoogleSignIn() {
   const t = useTranslations("account");
   const { show } = useToast();
   const [busy, setBusy] = useState(false);
   const [inApp, setInApp] = useState<Platform | null>(null);
 
-  // Coming back with the browser's back button restores this page from memory: un-stick the button.
+  // Coming back with the browser's back button restores this page from memory: un-stick the control.
   useEffect(() => {
     const onShow = (e: PageTransitionEvent) => e.persisted && setBusy(false);
     window.addEventListener("pageshow", onShow);
@@ -46,6 +47,15 @@ export function SignInButton({ variant, title }: { variant: "row" | "primary"; t
       show(t(`errors.${result.error}`));
     }
   }
+
+  const sheet = <InAppSheet open={inApp !== null} onOpenChange={(open) => !open && setInApp(null)} platform={inApp ?? "other"} />;
+  return { busy, start, sheet };
+}
+
+/** Every Google sign-in button (useGoogleSignIn). */
+export function SignInButton({ variant, title }: { variant: "row" | "primary"; title?: string }) {
+  const t = useTranslations("account");
+  const { busy, start, sheet } = useGoogleSignIn();
 
   const label = busy ? t("signingIn") : (title ?? t("signIn"));
 
@@ -73,7 +83,7 @@ export function SignInButton({ variant, title }: { variant: "row" | "primary"; t
           {label}
         </button>
       )}
-      <InAppSheet open={inApp !== null} onOpenChange={(open) => !open && setInApp(null)} platform={inApp ?? "other"} />
+      {sheet}
     </>
   );
 }

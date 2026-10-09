@@ -27,9 +27,18 @@ test("a visitor sees sign-in on المزيد, and nothing is requested from Supa
   const requests = await interceptSupabase(page);
   await page.goto("/demo/more");
   await expect(page.getByTestId("sign-in")).toBeVisible();
-  await expect(page.getByTestId("demo-banner")).toHaveText("بيانات تجريبية");
+  await expect(page.getByTestId("guest-banner")).toHaveText("محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك");
+  await expect(page.getByText("بيانات تجريبية")).toHaveCount(0);
   await page.waitForLoadState("networkidle");
   expect(requests).toEqual([]);
+});
+
+test("the visitor's top line is a way in: tapping it starts Google sign-in", async ({ page }) => {
+  const requests = await interceptSupabase(page);
+  await page.goto("/demo/units");
+  await page.getByTestId("guest-banner").click();
+  await page.waitForURL(`${SUPABASE_URL}/**`);
+  expect(requests.some((u) => u.includes("/auth/v1/authorize"))).toBe(true);
 });
 
 test("Google sign-in: redirect_to is exactly /auth/callback, PKCE, and the page travels in a cookie", async ({ page, context, baseURL }) => {
