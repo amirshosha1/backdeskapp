@@ -40,7 +40,7 @@ export function PrivacyScreen() {
     <div className="flex min-h-dvh justify-center bg-fill-strong">
       <div className="min-h-dvh w-full max-w-[30rem] bg-page">
         <header className="flex items-center gap-2 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2">
-          <Link href="/demo/more" aria-label={t("back")} className="tap flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-ink">
+          <Link href="/" aria-label={t("back")} className="tap flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-ink">
             <ChevronLeft className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
           </Link>
           <p className="min-w-0 flex-1 truncate text-center text-sm font-semibold text-ink-2">{tCommon("brandName")}</p>

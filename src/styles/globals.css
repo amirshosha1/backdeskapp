@@ -24,6 +24,13 @@
   .tabular-nums-money {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Every number in the subtree tabular (the landing page sets it on its
+     root): only figures change, Arabic letters are untouched. */
+  .tnum {
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 @layer components {

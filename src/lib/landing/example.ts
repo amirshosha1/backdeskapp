@@ -2,6 +2,7 @@ import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
 import { parseCalculatorForm } from "@/lib/calculator/form";
 import { computeScenario, scenarioView, toMoneyString, type ScenarioSentence } from "@/lib/finance";
 import type { OperatingModel } from "@/lib/finance";
+import type { Localized } from "@/demo/fixtures/types";
 
 /**
  * The landing page's example verdict (Batch 4, decision 3): the named
@@ -16,6 +17,8 @@ export const LANDING_PRESET_ID = "arbitrage";
 
 export interface LandingExample {
   model: OperatingModel;
+  /** The preset's descriptive area ("مثال عام"): no city, no market claim. */
+  area: Localized;
   outcome: "profit" | "loss";
   /** Net after depreciation, to the piastre (rounded to whole pounds only when shown). */
   net: string;
@@ -36,6 +39,7 @@ export function landingExample(): LandingExample {
   const view = scenarioView(parsed.input, result);
   return {
     model: preset.form.operatingModel,
+    area: preset.unit.area,
     outcome: view.outcome,
     net: toMoneyString(view.netAfterDepreciation),
     adr: preset.form.values.adr,
