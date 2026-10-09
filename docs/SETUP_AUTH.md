@@ -142,6 +142,13 @@ with the same Google account, then submit the branding for verification
 (Branding → *Verify branding*). A Supabase custom domain (so the screen shows
 your own domain) is a paid add-on and needs your approval first.
 
+Google's brand review opens the application home page. Since Batch 4 PR 2,
+`https://backdeskapp.com` is the public landing page (status 200, no redirect,
+the name "Backdesk" visible and a link to the privacy page), which is what the
+review expects. Use a **Domain** property in Search Console (it covers `www`
+and every path); once verified, submit `https://backdeskapp.com/sitemap.xml`
+there too.
+
 ## 7. After PR A merged: check the database (done 2026-10-08: 14 × PASS)
 
 1. Supabase → **Integrations → GitHub**: the migration
