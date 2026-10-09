@@ -1,5 +1,5 @@
-# Pull-request checks (CLAUDE.md §8): lint, typecheck, unit tests and a
-# production build. No secrets: the build gets placeholder public Supabase
+# Pull-request checks (CLAUDE.md §8): lint, typecheck, unit tests, a
+# production build and the public-page bundle check. No secrets: the build gets placeholder public Supabase
 # values (a `.invalid` host that never resolves), so it compiles the app
 # with accounts switched on without contacting anything. The database tests
 # have their own workflow (db-tests.yml).
@@ -42,3 +42,6 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.invalid
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      # The public pages ("/", /privacy) must not ship app-only code (the
+      # stores, the engine). e2e does not run in CI, so this check does.
+      - run: pnpm check:bundle
