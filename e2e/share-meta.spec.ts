@@ -36,7 +36,7 @@ for (const { path, url, ogLocale, alternateLocale, image, title } of [
     expect(await meta('meta[property="og:image:width"]')).toBe("1200");
     expect(await meta('meta[property="og:image:height"]')).toBe("630");
     expect(await meta('meta[property="og:image:type"]')).toBe("image/png");
-    expect(await meta('meta[property="og:image:alt"]')).toMatch(path === "/" ? /خسارة 7,014/ : /loss of EGP 7,014/);
+    expect(await meta('meta[property="og:image:alt"]')).toMatch(path === "/" ? /خسارة 7,014/ : /loss of EGP\s7,014/);
     expect(await meta('meta[name="twitter:card"]')).toBe("summary_large_image");
 
     const ogImage = (await meta('meta[property="og:image"]'))!;
