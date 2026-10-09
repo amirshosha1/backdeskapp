@@ -1,17 +1,18 @@
-import { MessageCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { MailLink } from "@/components/common/mail-link";
 import { Money } from "@/components/common/money";
 import type { ApartmentTotal } from "@/lib/pricing/apartment-price";
-import { feedbackWhatsAppUrl } from "@/lib/whatsapp";
+import { supportMailto } from "@/lib/contact";
 
 /**
  * Pro's monthly totals for 2 to `maxApartments` apartments (computed from
  * the one plan price), then custom plans above that. The contact action
- * reuses the feedback WhatsApp number and is not rendered while it is unset.
+ * is an email to the support address.
  */
 export function ApartmentTotals({ totals, maxApartments }: { totals: ApartmentTotal[]; maxApartments: number }) {
   const t = useTranslations("pricing");
-  const contactUrl = feedbackWhatsAppUrl(t("customPlansPrefill", { count: maxApartments }));
+  const contactUrl = supportMailto(t("customPlans", { count: maxApartments }), t("customPlansPrefill", { count: maxApartments }));
 
   return (
     <section className="mt-4 rounded-tile bg-fill px-4 pt-3 pb-1" data-testid="apartment-totals">
@@ -28,18 +29,14 @@ export function ApartmentTotals({ totals, maxApartments }: { totals: ApartmentTo
       </dl>
       <div className="flex min-h-14 items-center justify-between gap-3 border-t border-line py-2 text-sm">
         <p className="min-w-0">{t("customPlans", { count: maxApartments })}</p>
-        {contactUrl && (
-          <a
-            href={contactUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-testid="custom-plans-contact"
-            className="tap flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
-          >
-            <MessageCircle className="h-4 w-4" aria-hidden="true" />
-            {t("contactUs")}
-          </a>
-        )}
+        <MailLink
+          href={contactUrl}
+          testId="custom-plans-contact"
+          className="tap flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-page px-4 text-sm font-medium text-brand"
+        >
+          <Mail className="h-4 w-4" aria-hidden="true" />
+          {t("contactUs")}
+        </MailLink>
       </div>
     </section>
   );

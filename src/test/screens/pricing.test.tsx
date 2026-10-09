@@ -100,23 +100,16 @@ describe("<PricingScreen />", () => {
     }
   });
 
-  it("more than 5 apartments: custom plans, with no contact action while the WhatsApp number is unset", () => {
-    vi.stubEnv("NEXT_PUBLIC_FEEDBACK_WHATSAPP", "");
+  it("more than 5 apartments: custom plans, with an email contact to support@ (subject and question prefilled)", () => {
     renderPricing();
     expect(screen.getByText("أكثر من 5 شقق: باقات خاصة")).toBeInTheDocument();
-    expect(screen.queryByTestId("custom-plans-contact")).toBeNull();
-    expect(screen.queryByText("تواصل معنا")).toBeNull();
-  });
-
-  it("with the WhatsApp number set, the contact action opens the feedback chat with the question prefilled", () => {
-    vi.stubEnv("NEXT_PUBLIC_FEEDBACK_WHATSAPP", "201234567890");
-    renderPricing();
     const contact = screen.getByRole("link", { name: "تواصل معنا" });
-    const href = new URL(contact.getAttribute("href")!);
-    expect(href.origin + href.pathname).toBe("https://wa.me/201234567890");
-    expect(href.searchParams.get("text")).toBe("مرحبًا، أسأل عن باقة خاصة في باك ديسك لأكثر من 5 شقق.");
-    expect(contact).toHaveAttribute("target", "_blank");
-    expect(contact).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    const href = contact.getAttribute("href")!;
+    expect(href.startsWith("mailto:support@backdeskapp.com?")).toBe(true);
+    const query = new URLSearchParams(href.slice(href.indexOf("?") + 1));
+    expect(query.get("subject")).toBe("أكثر من 5 شقق: باقات خاصة");
+    expect(query.get("body")).toBe("مرحبًا، أسأل عن باقة خاصة في باك ديسك لأكثر من 5 شقق.");
+    expect(contact).not.toHaveAttribute("target");
   });
 
   it("two lines under the cards: the first month is open, and payment is month to month", () => {
@@ -130,7 +123,6 @@ describe("<PricingScreen />", () => {
   });
 
   it("works in English", () => {
-    vi.stubEnv("NEXT_PUBLIC_FEEDBACK_WHATSAPP", "201234567890");
     renderPricing("en");
     expect(screen.getByRole("heading", { name: "Pro", level: 2 })).toBeInTheDocument();
     expect(screen.queryByText("Most popular")).toBeNull();
@@ -138,7 +130,8 @@ describe("<PricingScreen />", () => {
     expect(screen.getByText("Total per month")).toBeInTheDocument();
     expect(screen.getByText("2 apartments")).toBeInTheDocument();
     expect(screen.getByText("More than 5 apartments: custom plans")).toBeInTheDocument();
-    expect(new URL(screen.getByRole("link", { name: "Contact us" }).getAttribute("href")!).searchParams.get("text")).toBe(
+    const href = screen.getByRole("link", { name: "Contact us" }).getAttribute("href")!;
+    expect(new URLSearchParams(href.slice(href.indexOf("?") + 1)).get("body")).toBe(
       "Hello, I'd like to ask about a custom Backdesk plan for more than 5 apartments.",
     );
     expect(screen.getByText("Pay month to month, with no automatic renewal.")).toBeInTheDocument();

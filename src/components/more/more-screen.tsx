@@ -5,6 +5,7 @@ import { Info, Languages, LogOut, MessageCircle, RotateCcw, ShieldCheck, Tag, Tr
 import { useLocale, useTranslations } from "next-intl";
 import { DeleteAccountSheet } from "@/components/account/delete-account-sheet";
 import { SignInButton } from "@/components/account/sign-in-button";
+import { MailLink } from "@/components/common/mail-link";
 import { ListRow } from "@/components/common/list-row";
 import { Sheet } from "@/components/common/sheet";
 import { useToast } from "@/components/common/toast";
@@ -14,7 +15,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { signOut, useAccount } from "@/lib/account/store";
 import { writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { ownUnit, useGuest } from "@/lib/guest/store";
-import { feedbackWhatsAppUrl } from "@/lib/whatsapp";
+import { FEEDBACK_SUBJECT, SUPPORT_EMAIL, supportMailto } from "@/lib/contact";
 
 const ROW = "flex w-full items-center gap-3 py-4 text-start";
 
@@ -38,7 +39,7 @@ export function MoreScreen() {
     writeFirstRunAnswers(null);
     router.push("/demo/start");
   }
-  const feedbackUrl = feedbackWhatsAppUrl();
+  const feedbackUrl = supportMailto(FEEDBACK_SUBJECT, tCommon("feedbackPrefill", { path: pathname }));
 
   return (
     <div>
@@ -100,14 +101,17 @@ export function MoreScreen() {
           <span className="min-w-0 flex-1 text-[0.9375rem] font-medium">{t("about")}</span>
         </button>
 
-        {feedbackUrl && (
-          <a href={feedbackUrl} target="_blank" rel="noopener noreferrer" className={`tap ${ROW}`}>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-profit-soft text-profit">
-              <MessageCircle className="h-5 w-5" aria-hidden="true" />
+        <MailLink href={feedbackUrl} testId="more-feedback" className={`tap ${ROW}`}>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-profit-soft text-profit">
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="text-[0.9375rem] font-medium">{t("feedback")}</span>
+            <span className="text-xs text-muted" dir="ltr">
+              {SUPPORT_EMAIL}
             </span>
-            <span className="min-w-0 flex-1 text-[0.9375rem] font-medium">{t("feedback")}</span>
-          </a>
-        )}
+          </span>
+        </MailLink>
 
         <ListRow href="/privacy" icon={<ShieldCheck className="h-5 w-5" aria-hidden="true" />} title={tAccount("privacy")} className="py-4" />
 

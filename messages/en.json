@@ -430,7 +430,7 @@
     "languageValue": "English",
     "about": "About this prototype",
     "aboutBody": "This is a Backdesk prototype. The units under “Sample units” and their numbers are examples. Without an account, your apartment is saved on this device only and is not sent anywhere. Signed in with Google, your apartments are saved to your account and open on any device.",
-    "feedback": "Send feedback on WhatsApp",
+    "feedback": "Send feedback by email",
     "rerun": "Redo the starting questions",
     "rerunTitle": "Redo the starting questions?",
     "rerunBody": "When you reach the result, your new answers replace the numbers saved for “Your first apartment”. If you skip the questions, your numbers stay as they are.",
@@ -592,5 +592,13 @@
       "body": "We update this page before any change to what we collect; the date of the last update is shown at the top."
     },
     "back": "Back to the app"
+  },
+  "contact": {
+    "fallbackTitle": "Email us",
+    "fallbackBody": "No mail app opened. Copy the address and write to us from your mail app.",
+    "addressLabel": "Email address",
+    "copy": "Copy address",
+    "copied": "Copied",
+    "copyFailed": "The address wasn’t copied. Press and hold it to copy."
   }
 }

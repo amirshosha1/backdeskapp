@@ -154,7 +154,6 @@ describe("Units, signed in", () => {
     fireEvent.click(within(sheet).getByTestId("add-unit-submit"));
     const notice = await screen.findByTestId("limit-notice");
     expect(notice).toHaveTextContent("لأكثر من 5 شقق نتفق معك على باقة خاصة");
-    // No WhatsApp number in tests: the support email is the contact.
     expect(within(notice).getByTestId("limit-contact").getAttribute("href")).toMatch(/^mailto:support@backdeskapp\.com\?subject=/);
     const sent = actions.createUnit.mock.calls[0]![0] as { name: string; inputs: { form: { operatingModel: string }; assumed: string[] } };
     expect(sent.name).toBe("شقة 6");

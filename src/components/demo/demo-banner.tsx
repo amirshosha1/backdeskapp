@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * The line at the top of every `/demo` screen, with the "رأيك؟" feedback
- * link beside it once a WhatsApp number is set.
+ * link beside it.
  *
  * - "sample": "بيانات تجريبية" — for visitors, and on every screen that
  *   shows sample data (BUILD_PLAN.md Phase P).
