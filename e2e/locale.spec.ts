@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { resetGuestOnEveryLoad, withOwnUnit } from "./guest";
 
 /**
  * Phase P.1: the Arabic/English switch. The URL is the only source of the
@@ -19,12 +20,13 @@ test("switching language keeps the current screen, both ways", async ({ page }) 
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 });
 
-test("switching language keeps the co-host mode on Home", async ({ page }) => {
+test("switching language keeps Home and the visitor's apartment", async ({ page }) => {
+  await resetGuestOnEveryLoad(page, withOwnUnit());
   await page.goto("/demo");
-  await page.getByRole("radio", { name: "أدير لملاك" }).click();
+  await expect(page.getByTestId("home-apartment")).toContainText("شقتك الأولى");
   await page.getByTestId("language-switch").click();
-  await expect(page).toHaveURL(/\/en\/demo\?view=cohost$/);
-  await expect(page.getByRole("radio", { name: "I manage" })).toHaveAttribute("aria-checked", "true");
+  await expect(page).toHaveURL(/\/en\/demo$/);
+  await expect(page.getByTestId("home-apartment")).toContainText("Your first apartment");
 });
 
 test("the language row on More switches too", async ({ page }) => {

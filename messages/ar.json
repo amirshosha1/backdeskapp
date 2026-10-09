@@ -5,7 +5,8 @@
   },
   "common": {
     "brandName": "باك ديسك",
-    "sampleDataBanner": "بيانات تجريبية",
+    "bannerGuest": "محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك",
+    "bannerDevice": "محفوظ على هذا الجهاز",
     "sampleBadge": "تجريبي",
     "dataWarningOccupancy": "الليالي المحجوزة أكثر من الليالي المتاحة. راجع عدد الليالي المغلقة.",
     "unlockWithPro": "عرض الباقات",
@@ -153,7 +154,16 @@
     "shareOfMonth": "{share} من مصروفات الشهر",
     "overheadTitle": "تكاليف الإدارة",
     "overheadLabel": "تكاليف إدارية عامة",
-    "overheadNote": "لا تُحمَّل على الملاك"
+    "overheadNote": "لا تُحمَّل على الملاك",
+    "totalTitle": "صافي شققك في الشهر",
+    "totalNote": "حسب أرقامك في الحاسبة",
+    "listTitle": "شققك",
+    "listAll": "عرض الكل",
+    "status": "{outcome, select, loss {خسارة} other {مكسب}}",
+    "unreadable": "تعذّر فتح أرقامها",
+    "emptyTitle": "ابدأ بشقتك الأولى",
+    "emptyBody": "أجب عن أسئلة قليلة لترى كم تكسب شقتك في الشهر.",
+    "emptyCta": "أضف شقتك الأولى"
   },
   "expenses": {
     "title": "المصروفات",
@@ -165,6 +175,7 @@
   "units": {
     "title": "الوحدات",
     "count": "{count, plural, one {وحدة واحدة} two {وحدتان} few {# وحدات} many {# وحدة} other {# وحدة}}",
+    "yours": "شققك",
     "operatingModel": {
       "owner_operated": "يديرها المالك",
       "rental_arbitrage": "إعادة تأجير",
@@ -183,7 +194,6 @@
     "noManagedBody": "عند إضافة وحدة بنظام الإدارة لحساب مالك، يظهر ربح الإدارة هنا.",
     "ownTitle": "شقتك الأولى",
     "ownHeroNone": "لم تضف شقتك بعد",
-    "firstFree": "الأولى مجانية",
     "examplesHeading": "أمثلة تجريبية",
     "ownNetLabel": "الصافي بعد الإهلاك",
     "ownOpen": "{name}، {model}: افتح الحاسبة",
@@ -460,8 +470,6 @@
     "deleteConfirm": "احذف نهائيًا",
     "deleting": "جارٍ الحذف…",
     "deleted": "حُذف حسابك وكل بياناته.",
-    "bannerAccount": "شققك محفوظة في حسابك",
-    "unitsOfMax": "{count} من {max} شقق",
     "firstUnitName": "شقتي الأولى",
     "newUnitName": "شقة {n}",
     "loadFailed": "تعذّر تحميل شققك.",
