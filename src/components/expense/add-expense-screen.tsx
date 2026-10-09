@@ -83,7 +83,7 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
   if (saved) {
     return (
       <div>
-        <PageHeader title={t("title")} backHref="/demo" />
+        <PageHeader title={t("title")} backHref="/demo" example />
         <div className="flex flex-col items-center px-6 pt-12 text-center">
           <span className="flex h-20 w-20 items-center justify-center rounded-full bg-profit-soft text-profit">
             <CheckCircle2 className="h-10 w-10" aria-hidden="true" />
@@ -112,7 +112,7 @@ export function AddExpenseScreen({ categories, units, defaultUnitId }: AddExpens
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <PageHeader title={t("title")} backHref="/demo" />
+      <PageHeader title={t("title")} backHref="/demo" example />
       <div className="flex flex-1 flex-col gap-6 px-4">
         <AmountKeypad
           value={amount}

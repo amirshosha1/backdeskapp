@@ -40,9 +40,16 @@ describe("<UnitsScreen />", () => {
     expect(screen.getByText("لا توجد وحدات بعد")).toBeInTheDocument();
   });
 
-  it("lists the sample units under أمثلة تجريبية", () => {
+  it("with no apartment: the samples under «أمثلة توضيحية (ليست بياناتك)», and the screen's example chip", () => {
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة تجريبية");
+    expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة توضيحية (ليست بياناتك)");
+    expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+  });
+
+  it("with the person's apartment: no example chip", () => {
+    saveOwnUnit(CALCULATOR_PRESETS[0]!.form, []);
+    renderWithIntl(<UnitsScreen units={UNITS} />);
+    expect(screen.queryByTestId("example-chip")).toBeNull();
   });
 });
 
@@ -137,11 +144,17 @@ describe("<OwnerStatement />", () => {
     expect(fees).toHaveAttribute("dir", "ltr");
   });
 
-  it("PDF and share-link explain they come in the full version (no disabled buttons)", () => {
+  it("is labelled an example: the title, the chip, and no PDF or owner-link actions", () => {
     renderWithIntl(<OwnerStatement statement={STATEMENT} />);
-    const pdf = screen.getByRole("button", { name: /تنزيل PDF/ });
-    expect(pdf).toBeEnabled();
-    fireEvent.click(pdf);
-    expect(screen.getByTestId("toast")).toHaveTextContent("تنزيل الكشف PDF متاح في النسخة الكاملة");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("مثال: كشف حساب مالك");
+    expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+    expect(screen.queryByText(/تنزيل PDF/)).toBeNull();
+    expect(screen.queryByText(/رابط للمالك/)).toBeNull();
+  });
+
+  it("in English: «Example: owner statement» and «Example · illustrative numbers»", () => {
+    renderWithIntl(<OwnerStatement statement={STATEMENT} />, { locale: "en" });
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Example: owner statement");
+    expect(screen.getByTestId("example-chip")).toHaveTextContent("Example · illustrative numbers");
   });
 });

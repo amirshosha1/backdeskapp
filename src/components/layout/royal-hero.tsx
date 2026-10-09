@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { BrandMark } from "@/components/common/brand-mark";
+import { ExampleChip } from "@/components/common/example-chip";
 import { DemoBanner } from "@/components/demo/demo-banner";
 import { LanguageSwitch } from "./language-switch";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,8 @@ export interface RoyalHeroProps {
   className?: string;
   /** Shown after the top line's text (the calculator's save status). */
   bannerTrailing?: ReactNode;
+  /** The screen shows sample data: "مثال · أرقام توضيحية" under the top bar. */
+  example?: boolean;
 }
 
 /**
@@ -22,7 +25,7 @@ export interface RoyalHeroProps {
  * top bar (leading · centre · language switch), then the screen's key
  * figure. Rounded at the bottom; the light page continues underneath.
  */
-export function RoyalHero({ leading, center, children, className, bannerTrailing }: RoyalHeroProps) {
+export function RoyalHero({ leading, center, children, className, bannerTrailing, example }: RoyalHeroProps) {
   return (
     <section
       className={cn(
@@ -36,6 +39,7 @@ export function RoyalHero({ leading, center, children, className, bannerTrailing
         <div className="min-w-0 flex-1">{center}</div>
         <LanguageSwitch />
       </div>
+      {example && <ExampleChip onDark className="mt-2" />}
       {children}
     </section>
   );

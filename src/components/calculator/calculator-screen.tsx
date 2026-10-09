@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Decimal from "decimal.js";
 import { useLocale, useTranslations } from "next-intl";
 import { DataWarning } from "@/components/common/data-warning";
+import { ExampleChip } from "@/components/common/example-chip";
 import { HeroFigure } from "@/components/common/hero-figure";
 import { LockedTeaser } from "@/components/common/locked-teaser";
 import { Money } from "@/components/common/money";
@@ -217,7 +218,7 @@ function CalculatorBody({ presets, own, onSave, title, bannerTrailing }: Calcula
 
   return (
     <div>
-      <CalculatorHero s={s} tab={tab} onTab={showTab} title={title} bannerTrailing={bannerTrailing} />
+      <CalculatorHero s={s} tab={tab} onTab={showTab} title={title} bannerTrailing={bannerTrailing} example={own === null} />
       <div role="tabpanel" id={`calc-panel-${tab}`} aria-labelledby={`calc-tab-${tab}`} className="flex flex-col gap-2.5 px-4 pt-2">
         {tab === "summary" ? (
           <SummaryTab s={s} onFixStale={openFirstInvalid} />
@@ -258,12 +259,15 @@ function CalculatorHero({
   onTab,
   title,
   bannerTrailing,
+  example,
 }: {
   s: CalculatorState;
   tab: Tab;
   onTab: (tab: Tab) => void;
   title?: string;
   bannerTrailing?: ReactNode;
+  /** The example's numbers, not the person's own apartment. */
+  example?: boolean;
 }) {
   const t = useTranslations("calculator");
   const tCommon = useTranslations("common");
@@ -276,7 +280,20 @@ function CalculatorHero({
   const be = s.view.breakEven;
 
   return (
-    <RoyalHero center={<HeroTitle>{title ?? t("title")}</HeroTitle>} className="pb-3" bannerTrailing={bannerTrailing}>
+    <RoyalHero
+      center={
+        example ? (
+          <div className="flex flex-col items-center">
+            <HeroTitle>{title ?? t("title")}</HeroTitle>
+            <ExampleChip onDark compact />
+          </div>
+        ) : (
+          <HeroTitle>{title ?? t("title")}</HeroTitle>
+        )
+      }
+      className="pb-3"
+      bannerTrailing={bannerTrailing}
+    >
       <div role="tablist" aria-label={t("tabsLabel")} className="mt-2 grid grid-cols-2 gap-1 rounded-full border border-white/18 bg-navy-950/35 p-1">
         {(["summary", "all"] as const).map((id) => (
           <button

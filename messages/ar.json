@@ -8,6 +8,7 @@
     "bannerGuest": "محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك",
     "bannerDevice": "محفوظ على هذا الجهاز",
     "sampleBadge": "تجريبي",
+    "exampleChip": "مثال · أرقام توضيحية",
     "dataWarningOccupancy": "الليالي المحجوزة أكثر من الليالي المتاحة. راجع عدد الليالي المغلقة.",
     "unlockWithPro": "عرض الباقات",
     "lockedTeaserBody": "متاح في الباقة المدفوعة",
@@ -194,7 +195,7 @@
     "noManagedBody": "عند إضافة وحدة بنظام الإدارة لحساب مالك، يظهر ربح الإدارة هنا.",
     "ownTitle": "شقتك الأولى",
     "ownHeroNone": "لم تضف شقتك بعد",
-    "examplesHeading": "أمثلة تجريبية",
+    "examplesHeading": "أمثلة توضيحية (ليست بياناتك)",
     "ownNetLabel": "الصافي بعد الإهلاك",
     "ownOpen": "{name}، {model}: افتح الحاسبة",
     "nightsBooked": "{booked, plural, one {ليلة واحدة محجوزة} two {ليلتان محجوزتان} few {# ليالٍ محجوزة} many {# ليلة محجوزة} other {# ليلة محجوزة}}",
@@ -395,7 +396,7 @@
     "backHome": "العودة للرئيسية"
   },
   "statement": {
-    "title": "كشف حساب المالك",
+    "title": "مثال: كشف حساب مالك",
     "number": "كشف رقم {number}",
     "statusFinalized": "معتمد",
     "basisCash": "أساس نقدي",

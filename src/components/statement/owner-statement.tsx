@@ -1,9 +1,7 @@
-import { Download, Link2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Money } from "@/components/common/money";
-import { ToastButton } from "@/components/common/toast";
 import type { AppLocale } from "@/i18n/routing";
 import type { STATEMENT } from "@/demo/fixtures/statement";
 import { cn } from "@/lib/utils";
@@ -15,12 +13,11 @@ import { cn } from "@/lib/utils";
  */
 export function OwnerStatement({ statement }: { statement: typeof STATEMENT }) {
   const t = useTranslations("statement");
-  const tToast = useTranslations("toast");
   const locale = useLocale() as AppLocale;
 
   return (
     <div>
-      <PageHeader title={t("title")} backHref="/demo/units" />
+      <PageHeader title={t("title")} backHref="/demo/units" example />
       <div className="px-4 pt-3">
         <article className="rounded-card bg-paper px-5 pt-5 pb-3 shadow-[0_1px_2px_rgb(10_18_36/0.04),0_16px_32px_-20px_rgb(10_18_36/0.25)]">
           <header className="border-b-2 border-ink pb-4">
@@ -67,22 +64,8 @@ export function OwnerStatement({ statement }: { statement: typeof STATEMENT }) {
           </dl>
         </article>
 
-        <div className="mt-4 flex gap-2">
-          <ToastButton
-            message={tToast("downloadPdf")}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-fill text-sm font-medium"
-          >
-            <Download className="h-4 w-4" aria-hidden="true" />
-            {t("downloadPdf")}
-          </ToastButton>
-          <ToastButton
-            message={tToast("shareLink")}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-fill text-sm font-medium"
-          >
-            <Link2 className="h-4 w-4" aria-hidden="true" />
-            {t("shareLink")}
-          </ToastButton>
-        </div>
+        {/* "تنزيل PDF" and "رابط للمالك" are hidden on the sample (hotfix, 2026-10-09):
+            they come back with real statements (Phase 5). */}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ export function StageDetailScreen({ stage, checklist }: StageDetailScreenProps) 
 
   return (
     <div>
-      <PageHeader title={t("stageLabel", { order: stage.order })} backHref="/demo/guide" />
+      <PageHeader title={t("stageLabel", { order: stage.order })} backHref="/demo/guide" example />
       <div className="flex flex-col gap-8 px-4 pt-4">
         <section className="rounded-card bg-fill p-5">
           <h2 className="text-2xl font-semibold">{stage.title[locale]}</h2>

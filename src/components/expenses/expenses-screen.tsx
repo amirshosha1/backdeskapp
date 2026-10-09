@@ -26,6 +26,7 @@ export function ExpensesScreen({ period, breakdown }: ExpensesScreenProps) {
         leading={<HeroBackLink href="/demo" label={tCommon("back")} />}
         center={<HeroTitle>{t("title")}</HeroTitle>}
         className="pb-8"
+        example
       >
         <ExpenseBubbles bubbles={breakdown.bubbles} label={t("bubblesLabel")} />
       </RoyalHero>

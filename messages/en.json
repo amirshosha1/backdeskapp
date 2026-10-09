@@ -8,6 +8,7 @@
     "bannerGuest": "Saved on this device · Sign in to save it to your account",
     "bannerDevice": "Saved on this device",
     "sampleBadge": "SAMPLE",
+    "exampleChip": "Example · illustrative numbers",
     "dataWarningOccupancy": "Booked nights exceed available nights. Check the blocked nights.",
     "unlockWithPro": "See plans",
     "lockedTeaserBody": "Available on the paid plan",
@@ -194,7 +195,7 @@
     "noManagedBody": "When you add a unit you manage for an owner, its management profit shows here.",
     "ownTitle": "Your first apartment",
     "ownHeroNone": "No apartment added yet",
-    "examplesHeading": "Sample units",
+    "examplesHeading": "Illustrative examples (not your data)",
     "ownNetLabel": "Net after depreciation",
     "ownOpen": "{name}, {model}: open the calculator",
     "nightsBooked": "{booked, plural, one {# night booked} other {# nights booked}}",
@@ -395,7 +396,7 @@
     "backHome": "Back to Home"
   },
   "statement": {
-    "title": "Owner statement",
+    "title": "Example: owner statement",
     "number": "Statement no. {number}",
     "statusFinalized": "Finalized",
     "basisCash": "Cash basis",

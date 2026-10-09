@@ -29,8 +29,10 @@ import { OwnUnitsCount, OwnUnitSection, UnitSummaryCard } from "./own-unit";
 
 export function UnitsHero() {
   const t = useTranslations("units");
+  const mine = useMyApartments();
+  // The samples show only while the person has no apartment: then the screen is labelled an example.
   return (
-    <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>}>
+    <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} example={mine !== null && mine.length === 0}>
       <OwnUnitsCount />
     </RoyalHero>
   );

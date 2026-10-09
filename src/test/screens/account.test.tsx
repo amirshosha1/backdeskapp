@@ -122,6 +122,8 @@ describe("the top line: one rule on every screen", () => {
       expect(screen.queryByTestId("device-banner")).toBeNull();
       expect(screen.queryByText("بيانات تجريبية")).toBeNull();
       expect(screen.queryByText("شققك محفوظة في حسابك")).toBeNull();
+      // The account's own apartments are never labelled an example.
+      expect(screen.queryByTestId("example-chip")).toBeNull();
       unmount();
     }
   });
