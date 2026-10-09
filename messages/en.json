@@ -555,11 +555,11 @@
   },
   "privacy": {
     "title": "Privacy policy",
-    "updated": "Last updated: 8 October 2026",
+    "updated": "Last updated: 9 October 2026",
     "intro": "Backdesk is a bookkeeping tool for short-term rental hosts. This page explains what we keep about you, where it is kept, who processes it, and how to delete it.",
     "guest": {
       "title": "Without an account",
-      "body": "You can use Backdesk without signing in. Your apartment's numbers and your answers then stay in your browser on this device only (local storage) and are not sent to our servers."
+      "body": "You can use Backdesk without signing in. Your apartment's numbers and your answers then stay in your browser on this device only (local storage) and are not sent to our servers. The only thing sent is the anonymous counting described under “Analytics” below, without any of your numbers."
     },
     "account": {
       "title": "When you sign in with Google",
@@ -574,7 +574,9 @@
     },
     "analytics": {
       "title": "Analytics and ads",
-      "body": "We use no analytics or tracking tool yet, show no ads, and sell your data to no one. We will update this page before adding any analytics tool."
+      "body": "We count how often a few steps happen, to see where visitors stop and improve Backdesk: opening the home page and tapping its button, starting the first questions, and seeing the result (profit or loss only, never a number). The counting is anonymous: no cookies, no browser storage, and no identifier for you or your device, so two events cannot be linked to each other or to you.",
+      "details": "With each event we send: the page's language, whether it was opened inside an app such as Facebook, whether Backdesk is installed on the home screen, the visit's source if the link carries one (such as utm_source), and the country our host derives from the IP address. We never send the IP address itself, your apartment's numbers or name, or anything you type. These events go to PostHog in the European Union.",
+      "noAds": "No ads, and we sell your data to no one. Because the counting is not linked to you, it cannot be shown to you or deleted individually."
     },
     "cookies": {
       "title": "Cookies and browser storage",
@@ -584,7 +586,8 @@
       "title": "Who processes your data",
       "supabase": "Supabase: the database and sign-in, in the European Union (Ireland).",
       "vercel": "Vercel: hosting. The servers that run requests are in the European Union (Dublin, Ireland); pages are delivered from Vercel's global network, from the location nearest to you.",
-      "google": "Google: sign-in with your Google account, under Google's privacy policy."
+      "google": "Google: sign-in with your Google account, under Google's privacy policy.",
+      "posthog": "PostHog: the anonymous counting (analytics), in the European Union (Frankfurt, Germany)."
     },
     "delete": {
       "title": "Deleting your account",

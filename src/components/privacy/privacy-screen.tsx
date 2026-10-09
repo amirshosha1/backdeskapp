@@ -21,7 +21,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
  * who processes it, and how to delete it. Outside /demo, so it carries no
  * sample-data banner and can be indexed (Google's consent screen links to
  * it). Update it before anything new is collected (BUILD_PLAN.md: before
- * PostHog or Resend ship).
+ * any new processor ships, in the same pull request at the latest); the
+ * anonymous counting is described under "analytics" (docs/ANALYTICS.md).
  */
 export function PrivacyScreen() {
   const t = useTranslations("privacy");
@@ -67,6 +68,8 @@ export function PrivacyScreen() {
           </Section>
           <Section title={t("analytics.title")}>
             <p>{t("analytics.body")}</p>
+            <p>{t("analytics.details")}</p>
+            <p>{t("analytics.noAds")}</p>
           </Section>
           <Section title={t("cookies.title")}>
             <p>{t("cookies.body")}</p>
@@ -76,6 +79,7 @@ export function PrivacyScreen() {
               <li>{t("processors.supabase")}</li>
               <li>{t("processors.vercel")}</li>
               <li>{t("processors.google")}</li>
+              <li>{t("processors.posthog")}</li>
             </ul>
           </Section>
           <Section title={t("delete.title")}>
