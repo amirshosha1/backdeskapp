@@ -4,6 +4,7 @@ import { renderWithIntl } from "@/test/render";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { DemoBanner } from "@/components/demo/demo-banner";
 import { LanguageSwitch } from "@/components/layout/language-switch";
+import NotFound from "@/app/[locale]/not-found";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 
@@ -37,5 +38,20 @@ describe("<LanguageSwitch />", () => {
     unmount();
     renderWithIntl(<LanguageSwitch />, { locale: "en" });
     expect(screen.getByTestId("language-switch")).toHaveTextContent("ع");
+  });
+});
+
+describe("the 404 page", () => {
+  it("ships no top line and no language switch; a plain link goes home in its language", () => {
+    const { unmount } = renderWithIntl(<NotFound />);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("الصفحة غير موجودة");
+    expect(screen.getByRole("link", { name: "العودة للرئيسية" })).toHaveAttribute("href", "/demo");
+    expect(screen.queryByTestId("device-banner")).toBeNull();
+    expect(screen.queryByTestId("guest-banner")).toBeNull();
+    expect(screen.queryByTestId("feedback-link")).toBeNull();
+    expect(screen.queryByTestId("language-switch")).toBeNull();
+    unmount();
+    renderWithIntl(<NotFound />, { locale: "en" });
+    expect(screen.getByRole("link", { name: "Back to Home" })).toHaveAttribute("href", "/en/demo");
   });
 });
