@@ -253,16 +253,23 @@ The empty unit costs 11,433 a month less than the furnished one (35,000 against 
 
 1. **Furnished flag** (already requested): `furnished = true` hides setup cost and depreciation.
 2. **Two arbitrage presets** replacing the current one: *furnished* (rent 35,000, setup 0) and *empty* (rent 18,000, setup 334,000, life 60). Label both "مثال", not a city. Cite the sources above in code comments.
-3. **Defaults:** booked nights 14 (not 18), ALOS 2.5, cleaning cost 500 for 2BR / 550 for 3BR, consumables 150 (2BR) / 180 (3BR).
+3. **Defaults:** booked nights 14 (not 18), ALOS 2.5, cleaning cost 450 for 2BR / 550 for 3BR (see §13), consumables 150 (2BR) / 180 (3BR).
 4. **New fields:** laundry per stay (default 250, SAMPLE); other monthly costs (software, phone line; default 0); broker fee (one-off, spread over the lease); prepaid months (cash timing only, shown in "money needed to start").
 5. **Hints:** under ADR, "سعر الحجز الفعلي غالبًا أقل من السعر المعروض"; under platform fee, "Booking.com: 15% أساسي، ظهر 17.4% على شقة في مدينتي".
 6. **Projection seasonality:** seed Madinaty multipliers from §2.4 and the electricity curve from §4.2, editable, marked SAMPLE, with Ramadan and Eid tied to Hijri dates.
 7. **Keep `SAMPLE`** on every O and E figure until a unit has real books. BUILD_PLAN §4.6 worked examples stay unchanged: they test the math, not the market.
 
-## 13. Open questions for Amir
+## 13. Decided defaults (replaces the five open questions)
 
-1. In a Madinaty rental, who pays the compound service fee: owner or tenant?
-2. Default ADR: the booked rate (~2,450, conservative) or the listed base (3,200)?
-3. Is the 334,000 cart total for the 3-bedroom empty unit, appliances and furniture together, ACs included or not?
-4. Does 1,500–2,000 a month electricity apply to a 3-bedroom with three inverter ACs year-round, or summer only?
-5. A real cleaning quote per turnover for 2BR and 3BR, to replace the ranges.
+Amir asked for these to be answered without waiting on him. Each is a working default, tagged `SAMPLE`, and each is replaced the moment a real quote or bill exists. None of them is a market fact.
+
+| # | Question | Decision | Why |
+|---|---|---|---|
+| 1 | Who pays the compound service fee? | **Owner pays by default.** Add an optional monthly field "رسوم الكمبوند" (default 0) that the host fills if the lease passes it to the tenant. Never silently add it. | In Egypt the owner normally carries compound and maintenance fees; a lease that shifts them is the exception and must be stated. A hidden cost is worse than an empty field. |
+| 2 | Default ADR: booked or listed? | **Booked rate, 2,450 for 3BR** (2BR: scale by the same 35% listed-to-booked gap, shown as a hint, not a number). The listed base (3,200) appears only as a hint under the field. | A verdict that is too optimistic costs the host real money; one that is too cautious costs a re-check. Finding 3 shows the listed price overstates by about 35%. Conservative is the correct side to err on. |
+| 3 | Does the 334,000 cover the 3BR unit fully? | **Treated as appliances + furniture + décor for a 3BR, ACs included**, labelled "تجهيز كامل لشقة ٣ غرف" and `SAMPLE`. A 2BR default is not derived from it by guesswork; the 2BR keeps a blank setup field until a 2BR cart exists. | The 313,050 + 34,500 cart in §7 was built as one full-unit list. Splitting it without a source would invent data. |
+| 4 | Electricity: year-round or summer only? | **Seasonal, not flat.** Use Amir's own curve (1,000 ×4 winter months, 1,500, 3,000, 4,000 ×3, 3,000, 2,500, 1,000; average 2,250). The flat 1,500–2,000 stays only as the single-number fallback for the quick calculator. | Three inverter ACs do not run year-round. A flat figure overstates winter and understates August, which hides exactly the months that decide the verdict. |
+| 5 | Cleaning cost per turnover | **550 for 3BR, 450 for 2BR**, `SAMPLE`, with the range 400–600 shown as a hint. Replace with the host's own quote. | Midpoint of the range in §5. No signed quote exists, so no tighter number is honest. |
+
+Consequences for §12: item 3 default cleaning becomes 450 (2BR) / 550 (3BR); item 4 adds the optional "رسوم الكمبوند" field; item 6 stays as written.
+
