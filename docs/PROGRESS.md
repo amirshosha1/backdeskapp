@@ -1,7 +1,7 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-08 (Batch 3, Phase 0a/0b slice 1: PR B, the app, on branch `claude/busy-curie-y0si27`. PR A, the schema, is merged as amirshosha1/str-money-finder#12 and applied to the hosted project).
+> Last updated: 2026-10-09 (Batch 4 PR 1, anonymous counting, on branch `claude/busy-curie-y0si27`. Batch 3 PR A #12, PR B #13 and the hotfix #14 are merged).
 
 ## Current status
 
@@ -12,15 +12,16 @@
 - **The rename to Backdesk · باك ديسك is merged** (amirshosha1/str-money-finder#8).
 - **P.2 slice 1 ("UI batch 2") is merged** (amirshosha1/str-money-finder#9): the first-run guided flow (`/demo/start`), the visitor's own first unit kept in this browser only, Units with the own unit first and the samples under "أمثلة تجريبية", and the calculator as "الملخص" / "كل الأرقام" with the headline **after depreciation**. It is the first part of P.2, not a separate phase. See "P.2 slice 1 decisions" and "P.2 slice 1 build notes" below.
 - **Cleanup after slice 1, the pricing page and the plan model** are merged (amirshosha1/str-money-finder#10): `agentRules: false`, `next-env.d.ts` no longer tracked, no example loaders above the visitor's own numbers, 44 px statement buttons on the sample cards, `/demo/pricing` with two plans (Free and Pro, extra apartments at half price), and the confirmed plan model written into `CLAUDE.md` and `docs/BUILD_PLAN.md`. Final edits (2026-10-08): sign-in is Google only, the trial clock and all gating come in Phase 7 with the month report, Free also shows occupancy and the average nightly rate, and the two "paid plans" strings are singular. See "Post-slice-1 cleanup and pricing (2026-10-07)", "Plan model (2026-10-07)" and "Final review of #10 (2026-10-08)" below.
-- **Batch 3 — Phase 0a/0b slice 1 (accounts with Google sign-in, apartments saved to the account) is in progress**, in three pull requests:
-  - **PR A (schema) is merged** (amirshosha1/str-money-finder#12). The Supabase GitHub integration applied `20261008180000_accounts_and_units`; `docs/verify_after_migration.sql` returned PASS on all 14 checks (users: 0).
-  - **PR B (the app) is built**, on `claude/busy-curie-y0si27`: Google sign-in (PKCE, back to exactly `/auth/callback`), the account's apartments on Units and the calculator (add, rename, delete, autosave, the limit), moving the browser apartment in, sign-out and account deletion, the in-app browser sheet, `/privacy`, CI, functions in `dub1`. See "Batch 3 PR B decisions and build notes (2026-10-08)" below.
-  - **PR C ("live test readiness")** follows: PostHog with the consent model Amir set on 2026-10-08, error tracking, the PWA and the privacy-page update. Planned while PR B is tested; built only after PR B merges. Amir does not open sign-in to the public or promote the Facebook link until PR C is merged.
-- **Hotfix before real visitors (2026-10-09), on `claude/busy-curie-y0si27`:** Home shows only the user's own apartments (browser or account): the total monthly net in whole pounds and each apartment's net and status (مكسب/خسارة), from the same engine figures as its Units card; with none, one call to action to `/demo/start`. The sample month, the owner/co-host switch and the add-expense, add-income and month-report entry points are gone from every screen (their code stays). Units hides "أمثلة تجريبية" once the user has an apartment, drops the تجريبي/SAMPLE badge from the user's own cards, and its header says "شققك" and the count (no "x من 5"). One top line everywhere: visitor = "محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك" (tappable to sign in), signed in = none; "بيانات تجريبية" is gone. Pricing's Free plan no longer lists "إدخال الحجوزات والمصروفات بلا حدود". Every screen with sample data shows a "مثال · أرقام توضيحية" chip at the top (in the calculator's top bar under the title, so the summary still fits 360×800); the sample statement is titled "مثال: كشف حساب مالك" and has no PDF or owner-link buttons; the Units samples sit under "أمثلة توضيحية (ليست بياناتك)". No route, engine or calculator-number changes. Screenshots: `docs/screenshots/hotfix-home/`.
-- **Next step (Batch 3):**
-  1. Amir tests PR B's preview on his phone (the checklist is in the PR description), then squash-merges it once "CI / checks" and "Database tests / rls" are green.
-  2. Amir tightens Supabase's redirect URLs (`docs/SETUP_AUTH.md`, "After PR B merges") and sets the privacy link on Google's consent screen (step 6).
-  3. Claude builds PR C on a fresh branch from `main`, after Amir approves its plan.
+- **Batch 3 — Phase 0a/0b slice 1 (accounts with Google sign-in, apartments saved to the account) is merged:** PR A, the schema (amirshosha1/str-money-finder#12, applied; `docs/verify_after_migration.sql` PASS on all 14 checks), and PR B, the app (amirshosha1/str-money-finder#13): Google sign-in (PKCE, back to exactly `/auth/callback`), the account's apartments on Units and the calculator, moving the browser apartment in, sign-out and account deletion, the in-app browser sheet, `/privacy`, CI, functions in `dub1`. See "Batch 3 PR B decisions and build notes (2026-10-08)" below.
+- **Hotfix before real visitors is merged** (amirshosha1/str-money-finder#14, 2026-10-09): Home shows only the user's own apartments (browser or account): the total monthly net in whole pounds and each apartment's net and status (مكسب/خسارة), from the same engine figures as its Units card; with none, one call to action to `/demo/start`. The sample month, the owner/co-host switch and the add-expense, add-income and month-report entry points are gone from every screen (their code stays). Units hides the samples once the user has an apartment, drops the تجريبي/SAMPLE badge from the user's own cards, and its header says "شققك" and the count. One top line everywhere: visitor = "محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك" (tappable to sign in), signed in = none; "بيانات تجريبية" is gone. Every screen with sample data shows a "مثال · أرقام توضيحية" chip; the sample statement is titled "مثال: كشف حساب مالك" without PDF or owner-link buttons; the Units samples sit under "أمثلة توضيحية (ليست بياناتك)". Screenshots: `docs/screenshots/hotfix-home/`.
+- **Batch 4 — the public landing page and anonymous counting (approved 2026-10-09), in order:**
+  1. **PR 1, "C1: anonymous counting"** (this PR): a ~1 KB first-party sender and the route `/api/e` forwarding to PostHog EU, counts only, no identifier; `first_run_started` (`entry`) and `verdict_shown` (`outcome` only) in the first-run flow; the landing events accepted by the route; the privacy page, `CLAUDE.md` §7, BUILD_PLAN Phase 0b and `docs/ANALYTICS.md`. See "Batch 4 decisions (2026-10-09)" below.
+  2. **The 404 fix:** `src/app/[locale]/not-found.tsx` stops shipping the app's client code (account and guest stores, engine, dialog: ~45–55 KB gzip) to every public page.
+  3. **Amir** creates the PostHog EU project, sets `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` in Vercel (Production and Preview), redeploys, and confirms the events in Live events from his phone (`docs/ANALYTICS.md` "Setup").
+  4. **PR 2, the landing page at `/` and `/en`.** Merge gate in its checklist: PR 1 merged, the PostHog values set in Production, and all four events seen in Live events from PR 2's preview.
+  5. **PR 3:** in-app browser hardening (the sheet warns that the apartment stays in the app's browser; Telegram and generic WebView detection; the missing iOS and Units-gate tests) and the fix for a signed-in person bounced from `/demo` to `/demo/start`.
+  The Facebook link is promoted after PR 1 and PR 2 merge. Sign-in stays unpromoted until PR C.
+- **PR C ("live test readiness") is queued after Batch 4:** the consent bar, the accepted tier (posthog-js, identification by Supabase user id, masked replay), the rest of the event catalogue, error tracking and the PWA. Its open questions are under "PR C open questions" below.
 - **Still ahead, unchanged:** the **host review with 3–5 hosts** (BUILD_PLAN §0 and P.2), then the rest of P.2 — send the standard phase prompt with `{N} = P.2` and say "remaining items". Phase P.1.1 was merged into `main` on 2026-10-02 (amirshosha1/str-money-finder#3).
 - **Still unset on Vercel:** `NEXT_PUBLIC_PREORDER_URL` (pre-order buttons show "الحجز المسبق يُفتح قريبًا" until then). *(Since 2026-10-09 feedback and contact go by email to `support@backdeskapp.com`; `NEXT_PUBLIC_FEEDBACK_WHATSAPP` no longer exists.)* Per §0, the prototype now goes to 3–5 hosts (P.2 slice 1 is merged).
 - **Deferred to Phase P.2:** live Home updates after saving an expense or income (data stays browser-only). The editable calculator and the varied sample data, deferred from P.1.1, are done in Phase 1.
@@ -36,7 +37,7 @@
 | 1 — Finance engine (+ wire the `/demo` calculator to it) | ✅ Merged (#6, review fixes #7) |
 | P.2 — Interactive demo, data in the browser only | 🔨 Slice 1 merged (2026-10-07, amirshosha1/str-money-finder#9); then the host review (3–5 hosts); then ⏭ the remaining P.2 items |
 | 0a — App shell, i18n, PWA, CI | 🔨 Slice 1 (Batch 3): the database CI job (PR A) and CI for lint, typecheck, unit tests and build (PR B). PWA and the error boundary come in PR C; Prettier and themes are not started |
-| 0b — Supabase project, auth, migration 001, DB tests in CI | 🔨 Slice 1 (Batch 3): PR A (schema, RLS, proof) merged (#12) and applied; PR B (Google sign-in and apartments in the app) built, in review; PR C (PostHog, error tracking, PWA) planned. The Supabase project exists (Amir, Ireland, Free plan, production) |
+| 0b — Supabase project, auth, migration 001, DB tests in CI | 🔨 Slice 1 (Batch 3): PR A (schema, RLS, proof) merged (#12) and applied; PR B (Google sign-in and apartments in the app) merged (#13); anonymous counting (Batch 4 PR 1) in review; PR C (consent bar, accepted tier, error tracking, PWA) queued. The Supabase project exists (Amir, Ireland, Free plan, production) |
 | 2 — Free calculator | Not started. Benchmark design decided (AirROI area medians with regional roll-up, revised 2026-09-30); pre-build gates pending |
 | 3 — Setup guide, checklists, Setup Kit, minimal `units` table | Not started |
 | ⛔ Validation Gate | Waiting for 20 pre-orders paid by InstaPay (tracked by Amir outside the app) and the exact line `Gate passed: {number} paid pre-orders.` |
@@ -73,7 +74,7 @@
 - Utilities default to a fixed monthly cost and can be switched per category. Every worked example states its cost types.
 - The Free calculator runs in the browser. The 12-month projection and benchmarks are server-only.
 - An anonymous draft scenario stays in the browser until sign-up, then is saved to the org.
-- Brand: a calm, neutral default palette, with all tokens in one file. Analytics: PostHog captures nothing until the user opts in and does nothing without a key.
+- Brand: a calm, neutral default palette, with all tokens in one file. Analytics: ~~PostHog captures nothing until the user opts in~~ anonymous counting only before any choice, nothing without a key (Amir, 2026-10-08; `docs/ANALYTICS.md`).
 
 ### Sequencing, payments and validation
 - Order: **P → 1 → 0a → 0b → 2 → 3 → Gate → 5 → 6 → 7 → 8 → 4 → 10 → LAUNCH → 9**. Phase numbers stay stable. *(Superseded on 2026-09-27: P.1 and P.2 were added, see "Phase P.1 decisions".)*
@@ -143,6 +144,30 @@
 - **Language switch moved from Phase 0a to P.1.** The locale comes from the URL only (no `Accept-Language` detection, no cookie); switching keeps the current screen.
 - **Copy register:** simple MSA with Egyptian terms (confirmed by Amir). "شقة المدينتي" → "شقة مدينتي". In English, the utilities category is "Utilities" (the Arabic stays "الكهرباء والمياه").
 - **Month-over-month change chip** on Home: a SAMPLE value (+8.4% owner, +5.2% co-host), requested for the design review and not in §4.6. From Phase 1 it comes from real data or is hidden. *(Done in Phase 1: computed from a sample August, see "Phase 1 decisions".)*
+
+### Batch 4 decisions (2026-10-09)
+Approved by Amir after the landing-page plan:
+1. Headline **"شقتك مكسب ولا خسارة؟"** / "Is your apartment a profit or a loss?".
+2. "How it works": four rows that mirror the flow, with a short note that owner-operated skips the fourth (rent or commission).
+3. The landing card shows the arbitrage preset through the engine: −7,014 (خسارة), labelled "مثال · أرقام توضيحية", area "مثال عام".
+4. PR C question 1 answered (a): anonymous counting before any consent choice; nothing is sent without `NEXT_PUBLIC_POSTHOG_KEY`. PR 1 merges first.
+5. Measurement by counts only: no identifier of any kind (a new random id per event, no person profile, no IP).
+6. `verdict_shown` carries the outcome only (no operating model).
+7. The 404 leak is fixed in its own small PR before the landing.
+8. The Facebook link is promoted after PR 1 and PR 2.
+Defaults accepted: `/` and `/en` indexable (canonical, hreflang), no top line on the landing, the Latin name "Backdesk" visible, two share images (AR, EN) rendered by a script with the engine figure and a CI staleness guard (satori cannot shape Arabic), the site-wide meta description changed to the feasibility wording, the privacy page's back arrow to `/`. Added by Amir for PR 2: `sitemap.xml` (`/`, `/en`) and `robots.txt` (both allowed, `/demo/*` disallowed); Latin text next to Arabic wrapped in `lang="en"`; `font-feature-settings: 'tnum'` on every number on the landing; a CI cap of 160 KB gzip of JS on `/` after the 404 fix (the exact number set from the preview measurement).
+Build notes for PR 1:
+- The sender posts `text/plain` (a simple same-origin request, so `sendBeacon` never needs a preflight); the route parses it as JSON.
+- `first_run_started` fires when the first question is on screen and `readFirstRunAnswers()` is null (read straight from storage: the hook reports null until hydration ends). Both flow events are once per page view; the route accepts the two landing events already, so PR 2 only adds the senders.
+- The route's robot filter matches `\bbot\b`, not "bot", so phone brands such as CUBOT are not dropped.
+- References: the audit cited in the brief (`claude/backdesk-ux-audit-2026-10-09.md`, items P1-12 and P3-8) is not in the repo, its branches or the connected Google Drive; the plan follows Amir's paraphrase. "Facebook post style 1" is the post style picked on 2026-10-06 (the app's question-screen look: navy-to-blue gradient, glass cards).
+
+### PR C open questions (logged 2026-10-09; question 1 answered)
+1. ~~"No network request before consent" vs "anonymous cookieless counting before any choice".~~ **Answered (a)** on 2026-10-09: cookieless anonymous counting before any choice; nothing sent without the key.
+2. **Remembering "reject":** (a) recommended: one first-party localStorage entry holding only `rejected` or `accepted`, no identifier; (b) don't store it, so the bar returns on every visit.
+3. **Replay masking:** (a) recommended: mask all text and all inputs; layout and taps stay visible and no number or apartment name can leak; (b) mask inputs plus elements marked as numbers or names (more readable, but one missed element leaks).
+4. **Autocapture:** (a) recommended: off; only the typed catalogue, pageviews with the query string stripped except `utm_*`, and web vitals; (b) on, with all element text masked.
+5. **PostHog data when an account is deleted:** (a) recommended for now: events stay tied to the deleted account's id, which can no longer be linked to a person; the privacy page says so, and deletion on request goes through support@; (b) delete automatically through PostHog's API (needs a PostHog personal API key as a Vercel secret).
 
 ### Batch 3 PR B decisions and build notes (2026-10-08)
 
@@ -504,7 +529,8 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## Open issues
 
-- **Batch 3, before PR B merges:** Amir tests the preview on his phone (the checklist is in PR B's description). Google's consent screen is in Testing, so only listed test users can sign in.
+- ~~**Batch 3, before PR B merges:** Amir tests the preview on his phone.~~ **Closed:** PR B merged (#13). Google's consent screen is still in Testing, so only listed test users can sign in until Amir publishes it.
+- **The UX audit cited in Batch 4 (`claude/backdesk-ux-audit-2026-10-09.md`) is not in the repo:** commit it under `docs/` (or paste it) so later sessions can quote items such as P1-12 and P3-8.
 - **Move the signed-in app out of `/demo` (for example to `/app`)** (raised by Amir, 2026-10-08). Signed-in apartments live on the `/demo` screens for now; since the 2026-10-09 hotfix no screen says "بيانات تجريبية" and a signed-in user sees no top line, and `/demo` stays `noindex`. Decide when, and what `/demo` becomes (the visitor demo only), before launch. Not done in PR B.
 - **Redirect URLs are wider than needed** until Amir tightens them after PR B (`https://backdeskapp.com/**` → exactly `/auth/callback`; delete the `www` entry): `docs/SETUP_AUTH.md`, "After PR B merges".
 - **Google's consent screen will say "continue to kmmfhaypqgzhoptmljki.supabase.co"** until the brand is verified. Now that `backdeskapp.com` is live, Amir can verify the domain in Search Console and submit the branding (free; `docs/SETUP_AUTH.md` step 6). The alternative, a Supabase custom domain, is a paid add-on and needs Amir's approval.
