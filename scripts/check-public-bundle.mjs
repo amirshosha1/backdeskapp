@@ -8,7 +8,13 @@
  * the 404 fix removed (docs/PROGRESS.md, Batch 4); e2e does not run in CI,
  * so this check has to.
  *
- * Prints each page's JS in gzip bytes. Usage: node scripts/check-public-bundle.mjs
+ * Also enforces the landing page's JS budget (Batch 4): Amir's ceiling is
+ * 160 KB gzip; the cap sits below it, at the measured size (138.8 KB on
+ * 2026-10-09: framework, layout and the next-intl provider; the landing
+ * itself ships no client code) plus room for routine framework updates.
+ * Raising it is a decision, not a fix.
+ *
+ * Prints each page's JS in gzip KB (1 KB = 1024 bytes). Usage: node scripts/check-public-bundle.mjs
  */
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -19,6 +25,10 @@ const NEXT = ".next";
 const PAGES = {
   "/": "[locale]/page",
   "/privacy": "[locale]/privacy/page",
+};
+/** JS budgets in gzip KB. */
+const CAPS_KB = {
+  "/": 150,
 };
 /** Strings that only exist in app-only modules. */
 const FORBIDDEN = [
@@ -53,11 +63,16 @@ for (const [path, route] of Object.entries(PAGES)) {
       }
     }
   }
-  console.log(`${path}: ${files.size} JS files, ${(gzip / 1024).toFixed(1)} KB gzip`);
+  const cap = CAPS_KB[path];
+  console.log(`${path}: ${files.size} JS files, ${(gzip / 1024).toFixed(1)} KB gzip${cap ? ` (cap ${cap} KB)` : ""}`);
+  if (cap && gzip > cap * 1024) {
+    failed = true;
+    console.error(`✗ ${path}: ${(gzip / 1024).toFixed(1)} KB gzip of JS is over its ${cap} KB cap.`);
+  }
 }
 
 if (failed) {
-  console.error("App-only code reaches a public page. See scripts/check-public-bundle.mjs.");
+  console.error("A public page carries app-only code or is over its JS budget. See scripts/check-public-bundle.mjs.");
   process.exit(1);
 }
-console.log("✓ No app-only code on the public pages.");
+console.log("✓ No app-only code on the public pages, and / is within its JS budget.");
