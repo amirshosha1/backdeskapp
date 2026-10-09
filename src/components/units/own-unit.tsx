@@ -8,7 +8,6 @@ import { DataWarning } from "@/components/common/data-warning";
 import { UnitGlyph } from "@/components/common/icons";
 import { Money } from "@/components/common/money";
 import { Percent } from "@/components/common/percent";
-import { SampleBadge } from "@/components/common/sample-badge";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { parseCalculatorForm, type CalculatorForm } from "@/lib/calculator/form";
@@ -19,7 +18,8 @@ import { formatNights } from "@/lib/format/nights";
 import { PrivacyNote, SignInButton } from "@/components/account/sign-in-button";
 import { useAccount } from "@/lib/account/store";
 import type { AssumedField } from "@/lib/calculator/stored-inputs";
-import { ownUnit, useGuest, visibleAssumed, type OwnUnit } from "@/lib/guest/store";
+import { ownUnit, useGuest, type OwnUnit } from "@/lib/guest/store";
+import { useMyApartments } from "./my-apartments";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,16 +28,23 @@ import { cn } from "@/lib/utils";
  * render fixed-size placeholders so nothing jumps.
  */
 
-/** The hero line: how many units the visitor has, and that the first is free. */
+/** The hero line: "شققك" and how many (the account's when signed in, else this browser's). */
 export function OwnUnitsCount() {
   const t = useTranslations("units");
-  const guest = useGuest();
-  if (guest === null) return <div className="mt-6 h-[4.25rem]" aria-hidden="true" />;
-  const count = guest.units.length;
+  const tPricing = useTranslations("pricing");
+  const mine = useMyApartments();
+  if (mine === null) return <div className="mt-6 h-[4.25rem]" aria-hidden="true" />;
+  const count = mine.length;
   return (
-    <div className="mt-6 flex min-h-[4.25rem] flex-col items-center gap-1 text-center" data-testid="units-hero-count">
-      <p className="text-3xl font-semibold tracking-tight">{count === 0 ? t("ownHeroNone") : t("count", { count })}</p>
-      {count > 0 && <p className="text-[0.8125rem] text-white/85">{t("firstFree")}</p>}
+    <div className="mt-6 flex min-h-[4.25rem] flex-col items-center justify-center gap-1 text-center" data-testid="units-hero-count">
+      {count === 0 ? (
+        <p className="text-3xl font-semibold tracking-tight">{t("ownHeroNone")}</p>
+      ) : (
+        <>
+          <p className="text-[0.8125rem] text-white/85">{t("yours")}</p>
+          <p className="text-3xl font-semibold tracking-tight">{tPricing("apartmentCount", { count })}</p>
+        </>
+      )}
     </div>
   );
 }
@@ -171,7 +178,6 @@ export function UnitSummaryCard({ title, form, assumed, href, testId, reserveEnd
   const result = computeScenario(parsed.input);
   const view = scenarioView(parsed.input, result);
   const isManaged = form.operatingModel === "managed_for_owner";
-  const usesExamples = visibleAssumed(form, [...assumed]).length > 0;
   const booked = new Decimal(parsed.input.bookedNights).toNumber();
   const be = view.breakEven;
   const progress = breakEvenProgress(booked, result.breakEven.includingDepreciation);
@@ -190,7 +196,6 @@ export function UnitSummaryCard({ title, form, assumed, href, testId, reserveEnd
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="flex min-w-0 items-center gap-2">
             <span className="truncate text-base font-semibold">{title}</span>
-            {usesExamples && <SampleBadge />}
           </span>
           <span className="text-xs text-muted">{tModel(form.operatingModel)}</span>
         </span>

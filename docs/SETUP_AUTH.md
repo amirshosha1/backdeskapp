@@ -197,5 +197,6 @@ where m.org_id = e.org_id
 Until Phase 7 builds the trial clock and the gating, `plan`, `trial_*` and
 `paid_until` are recorded but nothing reads them: every account works with
 everything open, and `max_units` (5 by default) is the only limit enforced.
-The app shows it read-only ("3 من 5 شقق") and never blocks an add itself: the
+The app does not show it (the Units header says "شققك" and the count) and
+never blocks an add itself: the
 database refuses the 6th apartment and the app shows the custom-plan contact.
