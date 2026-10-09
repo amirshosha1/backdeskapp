@@ -36,7 +36,7 @@ export const PLANS: PlanFixture[] = [
     name: { ar: "مجاني", en: "Free" },
     priceMonthly: null,
     features: [
-      { ar: "إدخال الحجوزات والمصروفات بلا حدود", en: "Unlimited booking and expense entries" },
+      // Hotfix 2026-10-09: "unlimited booking and expense entries" is listed again once that entry exists.
       { ar: "حاسبة الجدوى كاملة", en: "The full feasibility calculator" },
       { ar: "نتيجة الشهر الحالي: مكسب أو خسارة", en: "This month's result: profit or loss" },
       // Decided 2026-10-08: occupancy and the average nightly rate (from actual figures) are free.
