@@ -40,9 +40,16 @@ describe("<UnitsScreen />", () => {
     expect(screen.getByText("لا توجد وحدات بعد")).toBeInTheDocument();
   });
 
-  it("lists the sample units under أمثلة تجريبية", () => {
+  it("with no apartment: the samples under «أمثلة توضيحية (ليست بياناتك)», and the screen's example chip", () => {
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة تجريبية");
+    expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة توضيحية (ليست بياناتك)");
+    expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+  });
+
+  it("with the person's apartment: no example chip", () => {
+    saveOwnUnit(CALCULATOR_PRESETS[0]!.form, []);
+    renderWithIntl(<UnitsScreen units={UNITS} />);
+    expect(screen.queryByTestId("example-chip")).toBeNull();
   });
 });
 
@@ -58,14 +65,15 @@ describe("<UnitsScreen /> — the visitor's own unit", () => {
     expect(screen.queryByRole("button", { name: /أضف شقة/ })).toBeNull();
   });
 
-  it("own unit: shown first with occupancy, nightly rate, net after depreciation and the break-even bar; opens the calculator", () => {
+  it("own unit: occupancy, nightly rate, net after depreciation and the break-even bar; opens the calculator; no samples", () => {
     saveOwnUnit(EXAMPLE, ["platformFeePercent"]);
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.getByTestId("units-hero-count")).toHaveTextContent("وحدة واحدةالأولى مجانية");
+    expect(screen.getByTestId("units-hero-count")).toHaveTextContent(/^شققكشقة واحدة$/);
     const card = screen.getByTestId("own-unit-card");
     expect(card).toHaveAttribute("href", "/demo/calculator");
     expect(plain(card)).toContain("شقتك الأولى");
-    expect(plain(card)).toContain("تجريبي");
+    // The person's own apartment never carries the تجريبي / SAMPLE badge.
+    expect(plain(card)).not.toContain("تجريبي");
     expect(plain(card)).toContain("60%");
     expect(plain(card)).toContain("2,500");
     expect(plain(card)).toContain("الصافي بعد الإهلاك");
@@ -73,14 +81,18 @@ describe("<UnitsScreen /> — the visitor's own unit", () => {
     expect(screen.getByRole("meter", { name: "الليالي المحجوزة مقارنةً بليالي التعادل" })).toBeInTheDocument();
     expect(plain(card)).toContain("18 ليلة محجوزة");
     expect(plain(card)).toContain("التعادل عند 21.41 ليلة");
-    // The own card comes before the samples.
-    expect(card.compareDocumentPosition(screen.getByTestId("examples-heading")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // With an apartment of their own, the samples are gone.
+    expect(screen.queryByTestId("examples-heading")).toBeNull();
+    expect(screen.queryAllByTestId("unit-card")).toHaveLength(0);
   });
 
-  it("no تجريبي tag once every input the visitor can see is their own (hidden inputs don't count)", () => {
-    saveOwnUnit({ ...EXAMPLE, operatingModel: "owner_operated" }, ["rent", "deposit", "commissionBasis"]);
-    renderWithIntl(<UnitsScreen units={UNITS} />);
+  it("no تجريبي / SAMPLE badge on the own card, even while inputs still hold the example's values (AR and EN)", () => {
+    saveOwnUnit(EXAMPLE, ["adr", "bookedNights", "rent"]);
+    const { unmount } = renderWithIntl(<UnitsScreen units={UNITS} />);
     expect(within(screen.getByTestId("own-unit-card")).queryByText("تجريبي")).toBeNull();
+    unmount();
+    renderWithIntl(<UnitsScreen units={UNITS} />, { locale: "en" });
+    expect(within(screen.getByTestId("own-unit-card")).queryByText("SAMPLE")).toBeNull();
   });
 
   it("a managed own unit follows the managed card: management profit and the commission, no break-even bar", () => {
@@ -132,11 +144,17 @@ describe("<OwnerStatement />", () => {
     expect(fees).toHaveAttribute("dir", "ltr");
   });
 
-  it("PDF and share-link explain they come in the full version (no disabled buttons)", () => {
+  it("is labelled an example: the title, the chip, and no PDF or owner-link actions", () => {
     renderWithIntl(<OwnerStatement statement={STATEMENT} />);
-    const pdf = screen.getByRole("button", { name: /تنزيل PDF/ });
-    expect(pdf).toBeEnabled();
-    fireEvent.click(pdf);
-    expect(screen.getByTestId("toast")).toHaveTextContent("تنزيل الكشف PDF متاح في النسخة الكاملة");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("مثال: كشف حساب مالك");
+    expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+    expect(screen.queryByText(/تنزيل PDF/)).toBeNull();
+    expect(screen.queryByText(/رابط للمالك/)).toBeNull();
+  });
+
+  it("in English: «Example: owner statement» and «Example · illustrative numbers»", () => {
+    renderWithIntl(<OwnerStatement statement={STATEMENT} />, { locale: "en" });
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Example: owner statement");
+    expect(screen.getByTestId("example-chip")).toHaveTextContent("Example · illustrative numbers");
   });
 });

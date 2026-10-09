@@ -86,58 +86,71 @@ afterEach(() => {
   setUserAgent(realUserAgent);
 });
 
-describe("the top line: real data is never labelled sample", () => {
-  it("a visitor sees «بيانات تجريبية» on Units", () => {
+describe("the top line: one rule on every screen", () => {
+  const GUEST_LINE = "محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك";
+
+  it("a visitor: «محفوظ على هذا الجهاز · سجّل الدخول…», and tapping it starts Google sign-in", async () => {
     resetAccountForTests({ status: "guest" });
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.getByTestId("demo-banner")).toHaveTextContent("بيانات تجريبية");
-    expect(screen.queryByTestId("account-banner")).toBeNull();
+    const line = screen.getByTestId("guest-banner");
+    expect(line).toHaveTextContent(GUEST_LINE);
+    expect(screen.queryByText("بيانات تجريبية")).toBeNull();
+    fireEvent.click(line);
+    await waitFor(() => expect(oauth).toHaveBeenCalledTimes(1));
   });
 
-  it("signed in on Units: «شققك محفوظة في حسابك»; the samples stay under «أمثلة تجريبية»", () => {
-    resetAccountForTests(signedIn([unit("u1", "شقة التجمع")]));
+  it("a visitor in Facebook's browser: the line opens the «open in your browser» sheet instead", () => {
+    setUserAgent(FACEBOOK_ANDROID);
+    resetAccountForTests({ status: "guest" });
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.getByTestId("account-banner")).toHaveTextContent("شققك محفوظة في حسابك");
-    expect(screen.queryByTestId("demo-banner")).toBeNull();
-    expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة تجريبية");
+    fireEvent.click(screen.getByTestId("guest-banner"));
+    expect(screen.getByTestId("in-app-sheet")).toBeInTheDocument();
+    expect(oauth).not.toHaveBeenCalled();
   });
 
-  it("signed in, the calculator on an own apartment says so and shows its name", () => {
+  it("signed in: no line on Units, the calculator, More or a sample-only screen (Pricing)", () => {
+    resetAccountForTests(signedIn([unit("u1", "شقة التجمع"), unit("u2", "شاليه الساحل")]));
+    const screens = [
+      <UnitsScreen key="u" units={UNITS} />,
+      <CalculatorScreen key="c" presets={CALCULATOR_PRESETS} />,
+      <MoreScreen key="m" />,
+      <PricingScreen key="p" plans={PLANS} apartmentTotals={PRO_APARTMENT_TOTALS} maxListedApartments={MAX_LISTED_APARTMENTS} setupKit={SETUP_KIT} foundingOffer={FOUNDING_OFFER} />,
+    ];
+    for (const el of screens) {
+      const { unmount } = renderWithIntl(el);
+      expect(screen.queryByTestId("guest-banner")).toBeNull();
+      expect(screen.queryByTestId("device-banner")).toBeNull();
+      expect(screen.queryByText("بيانات تجريبية")).toBeNull();
+      expect(screen.queryByText("شققك محفوظة في حسابك")).toBeNull();
+      // The account's own apartments are never labelled an example.
+      expect(screen.queryByTestId("example-chip")).toBeNull();
+      unmount();
+    }
+  });
+
+  it("signed in, the calculator on an own apartment shows its name", () => {
     resetAccountForTests(signedIn([unit("u1", "شقة التجمع"), unit("u2", "شاليه الساحل")]));
     window.history.replaceState(null, "", "/?unit=u2");
     renderWithIntl(<CalculatorScreen presets={CALCULATOR_PRESETS} />);
-    expect(screen.getByTestId("account-banner")).toBeInTheDocument();
-    expect(screen.queryByTestId("demo-banner")).toBeNull();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("شاليه الساحل");
   });
 
-  it("signed in with no apartments, the calculator shows the example under «بيانات تجريبية»", () => {
-    resetAccountForTests(signedIn([]));
-    renderWithIntl(<CalculatorScreen presets={CALCULATOR_PRESETS} />);
-    expect(screen.getByTestId("demo-banner")).toBeInTheDocument();
-  });
-
-  it("signed in, a sample-only screen keeps «بيانات تجريبية»", () => {
-    resetAccountForTests(signedIn([unit("u1", "شقة التجمع")]));
-    renderWithIntl(
-      <PricingScreen plans={PLANS} apartmentTotals={PRO_APARTMENT_TOTALS} maxListedApartments={MAX_LISTED_APARTMENTS} setupKit={SETUP_KIT} foundingOffer={FOUNDING_OFFER} />,
-    );
-    expect(screen.getByTestId("demo-banner")).toBeInTheDocument();
-  });
-
-  it("before it is known whether someone is signed in, neither label shows", () => {
+  it("before it is known whether someone is signed in, no line shows", () => {
     resetAccountForTests({ status: "loading" });
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.queryByTestId("demo-banner")).toBeNull();
-    expect(screen.queryByTestId("account-banner")).toBeNull();
+    expect(screen.queryByTestId("guest-banner")).toBeNull();
+    expect(screen.queryByTestId("device-banner")).toBeNull();
   });
 });
 
 describe("Units, signed in", () => {
-  it("lists the account's apartments with the read-only count «2 من 5 شقق»", () => {
+  it("lists the account's apartments under «شققك» and the count, without the samples or a limit", () => {
     resetAccountForTests(signedIn([unit("u1", "شقة التجمع"), unit("u2", "شاليه الساحل")]));
     renderWithIntl(<UnitsScreen units={UNITS} />);
-    expect(screen.getByTestId("units-hero-count")).toHaveTextContent("2 من 5 شقق");
+    expect(screen.getByTestId("units-hero-count")).toHaveTextContent(/^شققكشقتان$/);
+    expect(screen.queryByText(/من 5/)).toBeNull();
+    expect(screen.queryByTestId("examples-heading")).toBeNull();
+    expect(screen.queryAllByTestId("unit-card")).toHaveLength(0);
     const cards = screen.getAllByTestId("account-unit-card");
     expect(cards.map((c) => c.textContent)).toEqual([expect.stringContaining("شقة التجمع"), expect.stringContaining("شاليه الساحل")]);
     expect(cards[1]).toHaveAttribute("href", "/demo/calculator?unit=u2");

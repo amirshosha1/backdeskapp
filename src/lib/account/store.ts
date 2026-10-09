@@ -29,7 +29,7 @@ export type AccountState =
       status: "signed_in";
       email: string | null;
       units: AccountUnit[];
-      /** org_entitlements.max_units, shown read-only ("3 من 5"); null if it could not be read. */
+      /** org_entitlements.max_units (not shown since the 2026-10-09 hotfix); null if it could not be read. */
       maxUnits: number | null;
       apartmentCount: ApartmentCount | null;
       /** The apartments could not be loaded (the screen offers a retry). */

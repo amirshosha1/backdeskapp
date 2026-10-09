@@ -3,12 +3,15 @@ import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { DemoBanner } from "@/components/demo/demo-banner";
+import { ExampleChip } from "@/components/common/example-chip";
 import { LanguageSwitch } from "./language-switch";
 
 export interface PageHeaderProps {
   title: string;
   backHref?: string;
   action?: ReactNode;
+  /** The screen shows sample data: "مثال · أرقام توضيحية" under the title. */
+  example?: boolean;
 }
 
 /**
@@ -17,7 +20,7 @@ export interface PageHeaderProps {
  * in LTR, right in RTL — `ChevronLeft` flipped by `rtl:rotate-180`, never a
  * hardcoded left or right (CLAUDE.md §7).
  */
-export function PageHeader({ title, backHref, action }: PageHeaderProps) {
+export function PageHeader({ title, backHref, action, example }: PageHeaderProps) {
   const t = useTranslations("common");
 
   return (
@@ -39,6 +42,7 @@ export function PageHeader({ title, backHref, action }: PageHeaderProps) {
         {action}
         <LanguageSwitch tone="soft" />
       </div>
+      {example && <ExampleChip className="mt-2" />}
     </header>
   );
 }

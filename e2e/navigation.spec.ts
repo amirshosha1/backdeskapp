@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { resetGuestOnEveryLoad, withOwnUnit } from "./guest";
 import { ALL_SCREENS, TAB_SCREENS } from "./screens";
 
 /**
@@ -35,33 +36,23 @@ test.describe("bottom navigation", () => {
 });
 
 test.describe("deeper screens", () => {
-  test("Home → a unit card in the carousel → Units", async ({ page }) => {
+  test("Home with no apartment → its one call to action → the first-run flow", async ({ page }) => {
     await page.goto("/demo");
-    await page.getByTestId("unit-card").first().click();
+    await expect(page.getByTestId("home-apartment")).toHaveCount(0);
+    await page.getByTestId("home-start").click();
+    await expect(page).toHaveURL(/\/demo\/start$/);
+  });
+
+  test("Home with the visitor's apartment → its row → the calculator; عرض الكل → Units", async ({ page }) => {
+    await resetGuestOnEveryLoad(page, withOwnUnit());
+    await page.goto("/demo");
+    await expect(page.getByText("سبتمبر 2026")).toHaveCount(0);
+    await expect(page.getByRole("radio", { name: "أدير لملاك" })).toHaveCount(0);
+    await page.getByTestId("home-apartment").click();
+    await expect(page).toHaveURL(/\/demo\/calculator$/);
+    await page.goto("/demo");
+    await page.getByRole("link", { name: "عرض الكل" }).click();
     await expect(page).toHaveURL(/\/demo\/units$/);
-  });
-
-  test("Home → التفاصيل → expense details, and back", async ({ page }) => {
-    await page.goto("/demo");
-    await page.getByRole("link", { name: "التفاصيل" }).click();
-    await expect(page).toHaveURL(/\/demo\/expenses$/);
-    await expect(page.getByTestId("expense-bubble").first()).toBeVisible();
-    await page.getByRole("link", { name: "رجوع" }).click();
-    await expect(page).toHaveURL(/\/demo$/);
-  });
-
-  test("Home, co-host view → كشف حساب → Downtown statement", async ({ page }) => {
-    await page.goto("/demo");
-    await page.getByRole("radio", { name: "أدير لملاك" }).click();
-    await page.getByRole("link", { name: "كشف حساب" }).click();
-    await expect(page).toHaveURL(/\/demo\/units\/downtown-cairo\/statement$/);
-    await expect(page.getByRole("heading", { name: "كشف حساب المالك" })).toBeVisible();
-  });
-
-  test("Home, owner view → تقرير الشهر explains it's coming", async ({ page }) => {
-    await page.goto("/demo");
-    await page.getByRole("button", { name: "تقرير الشهر" }).click();
-    await expect(page.getByTestId("toast")).toHaveText("تقرير الشهر لكل وحدة متاح قريبًا");
   });
 
   test("Units → owner statement", async ({ page }) => {

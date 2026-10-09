@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { BrandMark } from "@/components/common/brand-mark";
-import { DemoBanner, type BannerMode } from "@/components/demo/demo-banner";
+import { ExampleChip } from "@/components/common/example-chip";
+import { DemoBanner } from "@/components/demo/demo-banner";
 import { LanguageSwitch } from "./language-switch";
 import { cn } from "@/lib/utils";
 
@@ -13,18 +14,18 @@ export interface RoyalHeroProps {
   center?: ReactNode;
   children?: ReactNode;
   className?: string;
-  /** What the top line says (DemoBanner): sample data unless the screen shows the account's own apartments. */
-  banner?: BannerMode;
   /** Shown after the top line's text (the calculator's save status). */
   bannerTrailing?: ReactNode;
+  /** The screen shows sample data: "مثال · أرقام توضيحية" under the top bar. */
+  example?: boolean;
 }
 
 /**
- * The royal-blue panel every tab screen opens with: sample-data banner,
+ * The royal-blue panel every tab screen opens with: the top line (DemoBanner),
  * top bar (leading · centre · language switch), then the screen's key
  * figure. Rounded at the bottom; the light page continues underneath.
  */
-export function RoyalHero({ leading, center, children, className, banner = "sample", bannerTrailing }: RoyalHeroProps) {
+export function RoyalHero({ leading, center, children, className, bannerTrailing, example }: RoyalHeroProps) {
   return (
     <section
       className={cn(
@@ -32,12 +33,13 @@ export function RoyalHero({ leading, center, children, className, banner = "samp
         className,
       )}
     >
-      <DemoBanner onHero mode={banner} trailing={bannerTrailing} />
+      <DemoBanner onHero trailing={bannerTrailing} />
       <div className="mt-2 flex items-center gap-2">
         {leading ?? <span className="h-11 w-11 shrink-0" aria-hidden="true" />}
         <div className="min-w-0 flex-1">{center}</div>
         <LanguageSwitch />
       </div>
+      {example && <ExampleChip onDark className="mt-2" />}
       {children}
     </section>
   );

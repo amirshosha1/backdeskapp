@@ -5,8 +5,10 @@
   },
   "common": {
     "brandName": "Backdesk",
-    "sampleDataBanner": "Sample data",
+    "bannerGuest": "Saved on this device · Sign in to save it to your account",
+    "bannerDevice": "Saved on this device",
     "sampleBadge": "SAMPLE",
+    "exampleChip": "Example · illustrative numbers",
     "dataWarningOccupancy": "Booked nights exceed available nights. Check the blocked nights.",
     "unlockWithPro": "See plans",
     "lockedTeaserBody": "Available on the paid plan",
@@ -153,7 +155,16 @@
     "shareOfMonth": "{share} of spending",
     "overheadTitle": "Management costs",
     "overheadLabel": "Portfolio overhead",
-    "overheadNote": "Never charged to owners"
+    "overheadNote": "Never charged to owners",
+    "totalTitle": "Your apartments' monthly net",
+    "totalNote": "From your figures in the calculator",
+    "listTitle": "Your apartments",
+    "listAll": "View all",
+    "status": "{outcome, select, loss {Loss} other {Profit}}",
+    "unreadable": "Its figures can't be opened",
+    "emptyTitle": "Start with your first apartment",
+    "emptyBody": "Answer a few questions to see what your apartment makes in a month.",
+    "emptyCta": "Add your first apartment"
   },
   "expenses": {
     "title": "Expenses",
@@ -165,6 +176,7 @@
   "units": {
     "title": "Units",
     "count": "{count, plural, one {# unit} other {# units}}",
+    "yours": "Your apartments",
     "operatingModel": {
       "owner_operated": "Owner-operated",
       "rental_arbitrage": "Rental arbitrage",
@@ -183,8 +195,7 @@
     "noManagedBody": "When you add a unit you manage for an owner, its management profit shows here.",
     "ownTitle": "Your first apartment",
     "ownHeroNone": "No apartment added yet",
-    "firstFree": "The first one is free",
-    "examplesHeading": "Sample units",
+    "examplesHeading": "Illustrative examples (not your data)",
     "ownNetLabel": "Net after depreciation",
     "ownOpen": "{name}, {model}: open the calculator",
     "nightsBooked": "{booked, plural, one {# night booked} other {# nights booked}}",
@@ -385,7 +396,7 @@
     "backHome": "Back to Home"
   },
   "statement": {
-    "title": "Owner statement",
+    "title": "Example: owner statement",
     "number": "Statement no. {number}",
     "statusFinalized": "Finalized",
     "basisCash": "Cash basis",
@@ -460,8 +471,6 @@
     "deleteConfirm": "Delete for good",
     "deleting": "Deleting…",
     "deleted": "Your account and all its data are deleted.",
-    "bannerAccount": "Your apartments are saved to your account",
-    "unitsOfMax": "{count} of {max} apartments",
     "firstUnitName": "My first apartment",
     "newUnitName": "Apartment {n}",
     "loadFailed": "Your apartments couldn't be loaded.",

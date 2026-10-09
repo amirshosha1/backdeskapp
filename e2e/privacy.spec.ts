@@ -20,7 +20,8 @@ for (const { path, lang, dir, heading } of [
       await expect(page.locator("html")).toHaveAttribute("dir", dir);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
       await expect(page.getByRole("link", { name: "support@backdeskapp.com" })).toHaveAttribute("href", "mailto:support@backdeskapp.com");
-      await expect(page.getByTestId("demo-banner")).toHaveCount(0);
+      await expect(page.getByTestId("device-banner")).toHaveCount(0);
+      await expect(page.getByTestId("guest-banner")).toHaveCount(0);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(0);
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { LimitNotice } from "@/components/account/limit-notice";
@@ -16,6 +16,7 @@ import type { AccountUnit } from "@/lib/account/units";
 import { ASSUMED_FIELDS, OPERATING_MODELS } from "@/lib/calculator/stored-inputs";
 import type { OperatingModel } from "@/lib/finance";
 import { cn } from "@/lib/utils";
+import { useMyApartments } from "./my-apartments";
 import { OwnUnitsCount, OwnUnitSection, UnitSummaryCard } from "./own-unit";
 
 /**
@@ -23,33 +24,25 @@ import { OwnUnitsCount, OwnUnitSection, UnitSummaryCard } from "./own-unit";
  * database's limit), add, rename and delete. A visitor keeps the browser
  * apartment exactly as before (own-unit.tsx). The app never blocks an add:
  * the database refuses the 6th (P0001) and the limit notice says why
- * (Batch 3 PR B, Q3); the "3 من 5" count is shown read-only.
+ * (Batch 3 PR B, Q3). The hero shows "شققك" and how many.
  */
 
 export function UnitsHero() {
   const t = useTranslations("units");
-  const tAccount = useTranslations("account");
-  const tPricing = useTranslations("pricing");
-  const account = useAccount();
-  const signedIn = account?.status === "signed_in" ? account : null;
-  const banner = account === null || account.status === "loading" ? "pending" : signedIn ? "account" : "sample";
+  const mine = useMyApartments();
+  // The samples show only while the person has no apartment: then the screen is labelled an example.
   return (
-    <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} banner={banner}>
-      {signedIn ? (
-        <div className="mt-6 flex min-h-[4.25rem] flex-col items-center justify-center gap-1 text-center" data-testid="units-hero-count">
-          <p className="text-3xl font-semibold tracking-tight">
-            {signedIn.maxUnits !== null
-              ? tAccount("unitsOfMax", { count: signedIn.units.length, max: signedIn.maxUnits })
-              : tPricing("apartmentCount", { count: signedIn.units.length })}
-          </p>
-        </div>
-      ) : account?.status === "loading" ? (
-        <div className="mt-6 h-[4.25rem]" aria-hidden="true" />
-      ) : (
-        <OwnUnitsCount />
-      )}
+    <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} example={mine !== null && mine.length === 0}>
+      <OwnUnitsCount />
     </RoyalHero>
   );
+}
+
+/** The sample units under "أمثلة تجريبية", only while the person has no apartment of their own. */
+export function UnitsExamples({ children }: { children: ReactNode }) {
+  const mine = useMyApartments();
+  if (mine === null || mine.length > 0) return null;
+  return <>{children}</>;
 }
 
 /** The visitor's browser apartment, or the account's apartments. */

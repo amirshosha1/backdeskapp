@@ -25,7 +25,7 @@ async function answerArbitrage(page: Page) {
 test("a first visit to the app entry opens the flow; a returning one never does", async ({ page }) => {
   await page.goto("/demo");
   await expect(page).toHaveURL(/\/demo\/start$/);
-  await expect(page.getByTestId("demo-banner")).toHaveText("بيانات تجريبية");
+  await expect(page.getByTestId("device-banner")).toHaveText("محفوظ على هذا الجهاز");
   await page.getByRole("link", { name: "تخطَّ" }).click();
   await expect(page).toHaveURL(/\/demo\/units$/);
   await expect(page.getByRole("link", { name: /أضف شقتك الأولى/ })).toBeVisible();

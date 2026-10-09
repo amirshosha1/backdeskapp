@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { resetGuestOnEveryLoad, withOwnUnit } from "./guest";
 
 /**
  * Phase P acceptance: IBM Plex Sans Arabic, as served, shows tabular
@@ -8,6 +9,7 @@ import { expect, test } from "@playwright/test";
  * requested.
  */
 test("the home figure uses IBM Plex Sans Arabic with tabular numerals", async ({ page }) => {
+  await resetGuestOnEveryLoad(page, withOwnUnit());
   await page.goto("/demo");
   const money = page.locator(".tabular-nums-money").first();
   await expect(money).toBeVisible();

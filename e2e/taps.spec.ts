@@ -17,7 +17,7 @@ import { ALL_SCREENS } from "./screens";
  */
 const CRAWLS: { path: string; state: GuestState; label: string }[] = [
   ...ALL_SCREENS.map((path) => ({ path, state: SEEN, label: path })),
-  ...["/demo/units", "/demo/calculator", "/demo/calculator?tab=all", "/demo/more"].map((path) => ({
+  ...["/demo", "/demo/units", "/demo/calculator", "/demo/calculator?tab=all", "/demo/more"].map((path) => ({
     path,
     state: withOwnUnit(),
     label: `${path} (with the visitor's own unit)`,

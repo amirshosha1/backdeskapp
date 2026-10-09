@@ -1,30 +1,40 @@
 import { expect, test, type Locator } from "@playwright/test";
+import { resetGuestOnEveryLoad, withOwnUnit } from "./guest";
+import { ALL_SCREENS } from "./screens";
 
 /**
- * CLAUDE.md §7 / BUILD_PLAN.md Phase P: add expense in ≤ 4 taps from Home,
- * not counting the amount digits. Typing the amount uses `fill`, which is
- * not counted; only `tap()` calls are, and there are exactly 3: Home's
- * "إضافة مصروف" pill, a category, and Save.
+ * The add-expense screen does not save yet, so since the 2026-10-09 hotfix
+ * nothing links to it (Home's "إضافة مصروف", "إضافة دخل" and "تقرير الشهر"
+ * are gone). The screen's code stays, reachable only by its URL, and keeps
+ * its form tests until it saves for real; then the ≤ 4-taps-from-Home test
+ * (CLAUDE.md §7) comes back.
  */
-test("add expense completes in 3 taps, excluding the amount digits", async ({ page }) => {
+test("no screen links to the add-expense screen", async ({ page }) => {
+  await resetGuestOnEveryLoad(page, withOwnUnit());
+  for (const path of ALL_SCREENS.filter((p) => p !== "/demo/expenses/new")) {
+    await page.goto(path);
+    await expect(page.locator('a[href$="/demo/expenses/new"]'), path).toHaveCount(0);
+    for (const name of ["إضافة مصروف", "إضافة دخل", "تقرير الشهر"]) {
+      await expect(page.getByRole("link", { name }), path).toHaveCount(0);
+      await expect(page.getByRole("button", { name }), path).toHaveCount(0);
+    }
+  }
+});
+
+test("by its URL, add expense still completes in 2 taps, excluding the amount digits", async ({ page }) => {
   let taps = 0;
   async function tap(locator: Locator) {
     await locator.click();
     taps += 1;
   }
 
-  await page.goto("/demo");
-
-  await tap(page.getByRole("link", { name: "إضافة مصروف" }));
-  await expect(page).toHaveURL(/\/demo\/expenses\/new$/);
-
+  await page.goto("/demo/expenses/new");
   await page.locator('input[inputmode="decimal"]').fill("500");
-
   await tap(page.getByRole("radio", { name: "التنظيف" }));
   await tap(page.getByRole("button", { name: "حفظ المصروف" }));
 
   await expect(page.getByRole("heading", { name: "تم حفظ المصروف (تجريبيًا)" })).toBeVisible();
-  expect(taps).toBe(3);
+  expect(taps).toBe(2);
 });
 
 test("Save explains what is missing instead of doing nothing", async ({ page }) => {

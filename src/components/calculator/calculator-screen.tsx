@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Decimal from "decimal.js";
 import { useLocale, useTranslations } from "next-intl";
 import { DataWarning } from "@/components/common/data-warning";
+import { ExampleChip } from "@/components/common/example-chip";
 import { HeroFigure } from "@/components/common/hero-figure";
 import { LockedTeaser } from "@/components/common/locked-teaser";
 import { Money } from "@/components/common/money";
@@ -29,7 +30,6 @@ import { formatTypedAmount } from "@/lib/format/amount";
 import { currencyLabel, formatNumber } from "@/lib/format/money";
 import { formatNights } from "@/lib/format/nights";
 import { formatPercent } from "@/lib/format/percent";
-import type { BannerMode } from "@/components/demo/demo-banner";
 import { createAutosave, type SaveStatus } from "@/lib/account/autosave";
 import { saveUnitInputs, useAccount } from "@/lib/account/store";
 import type { AccountUnit } from "@/lib/account/units";
@@ -104,11 +104,11 @@ export function CalculatorScreen({ presets }: CalculatorScreenProps) {
   return <CalculatorBody key={own ? "own" : "example"} presets={presets} own={own} onSave={own ? saveOwnUnit : undefined} />;
 }
 
-function CalculatorFrame({ banner = "pending" }: { banner?: BannerMode }) {
+function CalculatorFrame() {
   const t = useTranslations("calculator");
   return (
     <div aria-busy="true">
-      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} banner={banner}>
+      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>}>
         <div className="mt-4 h-[18rem]" />
       </RoyalHero>
     </div>
@@ -120,7 +120,7 @@ function UnreadableUnit({ name }: { name: string }) {
   const tUnits = useTranslations("units");
   return (
     <div>
-      <RoyalHero center={<HeroTitle>{name}</HeroTitle>} banner="account" />
+      <RoyalHero center={<HeroTitle>{name}</HeroTitle>} />
       <div className="flex flex-col gap-3 px-4 pt-6">
         <p role="alert" className="rounded-card bg-loss-soft p-4 text-[0.8125rem] leading-relaxed text-loss">
           {t("unreadable")}
@@ -171,13 +171,12 @@ function AccountCalculator({ presets, unit, inputs }: { presets: CalculatorPrese
       own={inputs}
       onSave={(form, assumed: AssumedField[]) => autosave.schedule({ form, assumed })}
       title={unit.name}
-      banner="account"
       bannerTrailing={<SaveStatusLine status={status} onRetry={() => void autosave.flush()} />}
     />
   );
 }
 
-/** "· محفوظ" / "· جارٍ الحفظ…" beside the top line; a failure is a retry button, never silent. */
+/** "محفوظ" / "جارٍ الحفظ…" in the top line; a failure is a retry button, never silent. */
 function SaveStatusLine({ status, onRetry }: { status: SaveStatus; onRetry: () => void }) {
   const t = useTranslations("account.save");
   if (status === "failed") {
@@ -189,7 +188,7 @@ function SaveStatusLine({ status, onRetry }: { status: SaveStatus; onRetry: () =
   }
   return (
     <span aria-live="polite" data-testid="save-status" data-status={status}>
-      {status === "pending" || status === "saving" ? ` · ${t("saving")}` : status === "saved" ? ` · ${t("saved")}` : ""}
+      {status === "pending" || status === "saving" ? t("saving") : status === "saved" ? t("saved") : ""}
     </span>
   );
 }
@@ -199,11 +198,10 @@ interface CalculatorBodyProps {
   own: StoredInputs | null;
   onSave?: (form: CalculatorForm, assumed: AssumedField[]) => void;
   title?: string;
-  banner?: BannerMode;
   bannerTrailing?: ReactNode;
 }
 
-function CalculatorBody({ presets, own, onSave, title, banner = "sample", bannerTrailing }: CalculatorBodyProps) {
+function CalculatorBody({ presets, own, onSave, title, bannerTrailing }: CalculatorBodyProps) {
   const t = useTranslations("calculator");
   const s = useCalculator(presets, own, onSave);
   const tab: Tab = useQueryParam("tab") === "all" ? "all" : "summary";
@@ -220,7 +218,7 @@ function CalculatorBody({ presets, own, onSave, title, banner = "sample", banner
 
   return (
     <div>
-      <CalculatorHero s={s} tab={tab} onTab={showTab} title={title} banner={banner} bannerTrailing={bannerTrailing} />
+      <CalculatorHero s={s} tab={tab} onTab={showTab} title={title} bannerTrailing={bannerTrailing} example={own === null} />
       <div role="tabpanel" id={`calc-panel-${tab}`} aria-labelledby={`calc-tab-${tab}`} className="flex flex-col gap-2.5 px-4 pt-2">
         {tab === "summary" ? (
           <SummaryTab s={s} onFixStale={openFirstInvalid} />
@@ -260,15 +258,16 @@ function CalculatorHero({
   tab,
   onTab,
   title,
-  banner,
   bannerTrailing,
+  example,
 }: {
   s: CalculatorState;
   tab: Tab;
   onTab: (tab: Tab) => void;
   title?: string;
-  banner: BannerMode;
   bannerTrailing?: ReactNode;
+  /** The example's numbers, not the person's own apartment. */
+  example?: boolean;
 }) {
   const t = useTranslations("calculator");
   const tCommon = useTranslations("common");
@@ -281,7 +280,20 @@ function CalculatorHero({
   const be = s.view.breakEven;
 
   return (
-    <RoyalHero center={<HeroTitle>{title ?? t("title")}</HeroTitle>} className="pb-3" banner={banner} bannerTrailing={bannerTrailing}>
+    <RoyalHero
+      center={
+        example ? (
+          <div className="flex flex-col items-center">
+            <HeroTitle>{title ?? t("title")}</HeroTitle>
+            <ExampleChip onDark compact />
+          </div>
+        ) : (
+          <HeroTitle>{title ?? t("title")}</HeroTitle>
+        )
+      }
+      className="pb-3"
+      bannerTrailing={bannerTrailing}
+    >
       <div role="tablist" aria-label={t("tabsLabel")} className="mt-2 grid grid-cols-2 gap-1 rounded-full border border-white/18 bg-navy-950/35 p-1">
         {(["summary", "all"] as const).map((id) => (
           <button

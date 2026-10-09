@@ -6,7 +6,8 @@ import { expect, test, type Page } from "@playwright/test";
  * -7,013.67 and 21.41 nights, the figures the old screen showed as
  * "صافي الربح بعد الإهلاك" and "التعادل شاملًا الإهلاك"); it fits one phone
  * screen above the bottom navigation; everything recalculates in the
- * browser and nothing typed leaves it. The "بيانات تجريبية" banner stays.
+ * browser and nothing typed leaves it. The top line says it is kept on this
+ * device (accounts are off in this build).
  */
 
 /** Text without the LRI/PDI isolates that wrap numbers inside sentences. */
@@ -15,7 +16,7 @@ const plain = async (page: Page, testId: string) => ((await page.getByTestId(tes
 test.describe("calculator", () => {
   test("Example B: net after depreciation -7,013.67, break-even 21.41 nights", async ({ page }) => {
     await page.goto("/demo/calculator");
-    await expect(page.getByTestId("demo-banner")).toHaveText("بيانات تجريبية");
+    await expect(page.getByTestId("device-banner")).toHaveText("محفوظ على هذا الجهاز");
     await expect(page.getByTestId("hero-figure")).toContainText("-7,013.67");
     expect(await plain(page, "break-even-pill")).toBe("التعادل عند 21.41 ليلة");
     expect(await plain(page, "hero-sentence")).toBe("ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.");

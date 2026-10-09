@@ -4,8 +4,9 @@ import { ALL_SCREENS } from "./screens";
 /**
  * Phase P acceptance: `/demo` responses carry noindex, via both the
  * response header (next.config.ts) and the page's robots meta
- * (demo/layout.tsx), in both locales; every screen shows the sample-data
- * banner, and every price is labelled as a sample.
+ * (demo/layout.tsx), in both locales; every screen has the same top line
+ * (never "بيانات تجريبية", since the 2026-10-09 hotfix), and every price is
+ * labelled as a sample.
  */
 test.describe("/demo stays out of search results", () => {
   for (const path of ["/demo", "/en/demo", "/demo/expenses", "/en/demo/pricing"]) {
@@ -18,11 +19,12 @@ test.describe("/demo stays out of search results", () => {
   }
 });
 
-test.describe("sample data is always labelled", () => {
-  test('the "بيانات تجريبية" banner appears on every screen', async ({ page }) => {
+test.describe("one top line, and prices labelled", () => {
+  test('every screen says "محفوظ على هذا الجهاز" (accounts off), never "بيانات تجريبية"', async ({ page }) => {
     for (const path of ALL_SCREENS) {
       await page.goto(path);
-      await expect(page.getByTestId("demo-banner"), path).toHaveText("بيانات تجريبية");
+      await expect(page.getByTestId("device-banner"), path).toHaveText("محفوظ على هذا الجهاز");
+      await expect(page.getByText("بيانات تجريبية", { exact: true }), path).toHaveCount(0);
     }
   });
 

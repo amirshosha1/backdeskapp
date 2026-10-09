@@ -17,7 +17,7 @@ export function StageList({ stages }: { stages: GuideStage[] }) {
 
   return (
     <div>
-      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>}>
+      <RoyalHero center={<HeroTitle>{t("title")}</HeroTitle>} example>
         <p className="mt-6 text-center text-[0.9375rem] text-white/80">{t("subtitle")}</p>
         {/* Quick jump: stage 3 opens its page, the others explain on tap. */}
         <ol className="mt-5 flex justify-center gap-2">

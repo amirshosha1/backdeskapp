@@ -10,6 +10,8 @@ export interface HeroFigureProps {
    * tall) and "sm" (40px) where the screen's controls need the height.
    */
   size?: "lg" | "md" | "sm";
+  /** Decimals shown (default 2); 0 for whole pounds. Presentation only (half-up). */
+  decimals?: number;
   className?: string;
 }
 
@@ -17,9 +19,9 @@ export interface HeroFigureProps {
  * The one number a screen leads with (≥ 48px, same sans as everything else):
  * whole units in full weight, decimals dimmed, currency small.
  */
-export function HeroFigure({ amount, size = "lg", className }: HeroFigureProps) {
+export function HeroFigure({ amount, size = "lg", decimals, className }: HeroFigureProps) {
   const locale = useLocale() as AppLocale;
-  const parts = formatMoneyParts(amount, { locale });
+  const parts = formatMoneyParts(amount, { locale, decimals });
   const number = (
     <bdi
       dir="ltr"

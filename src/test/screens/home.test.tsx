@@ -1,87 +1,140 @@
-import { fireEvent, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import Decimal from "decimal.js";
+import { act, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
 import { HomeScreen } from "@/components/home/home-screen";
-import { HOME_COHOST_VIEW, HOME_OWNER_VIEW, HOME_PERIOD } from "@/demo/fixtures/home";
+import { apartmentNet } from "@/components/units/my-apartments";
+import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { resetAccountForTests, type AccountState } from "@/lib/account/store";
+import type { AccountUnit } from "@/lib/account/units";
+import type { CalculatorForm } from "@/lib/calculator/form";
+import { formatMoneyParts } from "@/lib/format/money";
+import { saveOwnUnit } from "@/lib/guest/store";
+
+/**
+ * Home after the 2026-10-09 hotfix: only the person's own apartments (the
+ * browser's for a visitor, the account's when signed in), the total in
+ * whole pounds, each apartment's net and status; no sample data, no month,
+ * no owner/co-host switch, no add-expense, add-income or month-report
+ * entry; with none, one call to action into the first-run flow.
+ */
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
+vi.mock("@/lib/account/actions", () => ({}));
 
-function renderHome() {
-  return renderWithIntl(<HomeScreen period={HOME_PERIOD} ownerView={HOME_OWNER_VIEW} coHostView={HOME_COHOST_VIEW} />);
+const presetForm = (model: CalculatorForm["operatingModel"]) =>
+  CALCULATOR_PRESETS.find((p) => p.form.operatingModel === model)!.form;
+
+const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎‏]/g, "");
+const whole = (amount: { toString(): string }) => {
+  const p = formatMoneyParts(amount.toString(), { locale: "ar", decimals: 0 });
+  return `${p.sign}${p.integer}`;
+};
+
+const unit = (id: string, name: string, form: CalculatorForm): AccountUnit => ({
+  id,
+  name,
+  operatingModel: form.operatingModel,
+  inputs: { form, assumed: [] },
+  engineVersion: "1.0.0",
+  updatedAt: "2026-10-08T10:00:00Z",
+});
+const signedIn = (units: AccountUnit[]): AccountState => ({
+  status: "signed_in",
+  email: "host@example.com",
+  units,
+  maxUnits: 5,
+  apartmentCount: null,
+  loadError: null,
+});
+
+afterEach(() => {
+  act(() => resetAccountForTests());
+  vi.unstubAllEnvs();
+});
+
+function expectNoSample() {
+  expect(screen.queryByText(/سبتمبر 2026/)).toBeNull();
+  expect(screen.queryByRole("radiogroup")).toBeNull();
+  expect(screen.queryByText("أنا المالك")).toBeNull();
+  expect(screen.queryByText("شقة مدينتي")).toBeNull();
+  expect(screen.queryByText(/إضافة مصروف/)).toBeNull();
+  expect(screen.queryByText(/إضافة دخل/)).toBeNull();
+  expect(screen.queryByText(/تقرير الشهر/)).toBeNull();
+  expect(screen.queryByText("بيانات تجريبية")).toBeNull();
+  for (const link of screen.queryAllByRole("link")) expect(link.getAttribute("href")).not.toBe("/demo/expenses/new");
 }
 
-describe("<HomeScreen />", () => {
-  it("answers the hero question with the owner-view total, decimals separate", () => {
-    renderHome();
-    expect(screen.getByRole("heading", { level: 1, name: "كم ربحت فعلاً هذا الشهر؟" })).toBeInTheDocument();
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("15,744.33");
+describe("<HomeScreen />: a visitor", () => {
+  it("with no apartment: one call to action into the first-run flow, nothing else", () => {
+    renderWithIntl(<HomeScreen />);
+    expect(screen.getByTestId("home-start")).toHaveAttribute("href", "/demo/start");
+    expect(screen.queryByTestId("hero-figure")).toBeNull();
+    expect(screen.queryByTestId("home-apartments")).toBeNull();
+    expectNoSample();
   });
 
-  it("shows one swipeable glass card per unit, each opening Units — and no separate units list", () => {
-    renderHome();
-    const cards = screen.getAllByTestId("unit-card");
-    expect(cards).toHaveLength(HOME_OWNER_VIEW.units.length);
-    expect(cards[0]).toHaveTextContent("شقة مدينتي");
-    expect(cards[0]).toHaveTextContent("يديرها المالك");
-    expect(cards[0]).toHaveAttribute("href", "/demo/units");
-    expect(screen.queryByRole("heading", { name: "وحداتك" })).toBeNull();
+  it("with the browser apartment: its net in whole pounds as the total, and one row with its status", () => {
+    const form = presetForm("rental_arbitrage");
+    saveOwnUnit(form, []);
+    renderWithIntl(<HomeScreen />);
+    const net = apartmentNet(form)!;
+    expect(plain(screen.getByTestId("hero-figure"))).toContain(whole(net));
+    expect(plain(screen.getByTestId("hero-figure"))).not.toMatch(/\.\d\d/);
+    const rows = screen.getAllByTestId("home-apartment");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent("شقتك الأولى");
+    expect(rows[0]).toHaveAttribute("href", "/demo/calculator");
+    expect(within(rows[0]!).getByTestId("home-apartment-status")).toHaveTextContent(net.toDecimalPlaces(0, Decimal.ROUND_HALF_UP).lessThan(0) ? "خسارة" : "مكسب");
+    expectNoSample();
+  });
+});
+
+describe("<HomeScreen />: signed in", () => {
+  it("lists the account's apartments with their nets; the total is their sum (managed: the manager's profit)", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abcd.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    const a = presetForm("rental_arbitrage");
+    const b = presetForm("managed_for_owner");
+    resetAccountForTests(signedIn([unit("u1", "شقة التجمع", a), unit("u2", "شاليه الساحل", b)]));
+    renderWithIntl(<HomeScreen />);
+
+    const rows = screen.getAllByTestId("home-apartment");
+    expect(rows.map((r) => r.getAttribute("href"))).toEqual(["/demo/calculator?unit=u1", "/demo/calculator?unit=u2"]);
+    expect(rows[0]).toHaveTextContent("شقة التجمع");
+    expect(rows[1]).toHaveTextContent("شاليه الساحل");
+    expect(plain(rows[0]!)).toContain(whole(apartmentNet(a)!));
+    expect(plain(rows[1]!)).toContain(whole(apartmentNet(b)!));
+    expect(plain(screen.getByTestId("hero-figure"))).toContain(whole(apartmentNet(a)!.plus(apartmentNet(b)!)));
+    expect(screen.getByRole("link", { name: "عرض الكل" })).toHaveAttribute("href", "/demo/units");
+    expectNoSample();
   });
 
-  it("owner view: the third quick action is the month report and explains it arrives later", () => {
-    renderHome();
-    fireEvent.click(screen.getByRole("button", { name: /تقرير الشهر/ }));
-    expect(screen.getByTestId("toast")).toHaveTextContent("تقرير الشهر لكل وحدة متاح قريبًا");
+  it("a loss shows the خسارة status", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abcd.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    const base = presetForm("rental_arbitrage");
+    const losing: CalculatorForm = { ...base, values: { ...base.values, bookedNights: "1" } };
+    expect(apartmentNet(losing)!.lessThan(0)).toBe(true);
+    resetAccountForTests(signedIn([unit("u1", "شقة خاسرة", losing)]));
+    renderWithIntl(<HomeScreen />);
+    expect(screen.getByTestId("home-apartment-status")).toHaveTextContent("خسارة");
   });
 
-  it("co-host view: the total, the managed units, and a statement action to Downtown", () => {
-    renderHome();
-    fireEvent.click(screen.getByRole("radio", { name: "أدير لملاك" }));
-    expect(screen.getByTestId("hero-figure")).toHaveTextContent("8,790.60");
-    expect(screen.getAllByTestId("unit-card")).toHaveLength(HOME_COHOST_VIEW.units.length);
-    expect(screen.getByRole("link", { name: /كشف حساب/ })).toHaveAttribute(
-      "href",
-      "/demo/units/downtown-cairo/statement",
-    );
-    expect(screen.getByText("تكاليف إدارية عامة")).toBeInTheDocument();
+  it("with no apartments: the first-run call to action", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abcd.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    resetAccountForTests(signedIn([]));
+    renderWithIntl(<HomeScreen />);
+    expect(screen.getByTestId("home-start")).toHaveAttribute("href", "/demo/start");
   });
 
-  it("links 'التفاصيل' to the expense breakdown and 'إضافة مصروف' to add expense", () => {
-    renderHome();
-    expect(screen.getByRole("link", { name: "التفاصيل" })).toHaveAttribute("href", "/demo/expenses");
-    expect(screen.getByRole("link", { name: /إضافة مصروف/ })).toHaveAttribute("href", "/demo/expenses/new");
-  });
-
-  it("the month-over-month chips are computed from the sample August: +8.5% owner, +4.4% co-host", () => {
-    renderHome();
-    expect(screen.getByTestId("change-chip")).toHaveTextContent("+8.5%");
-    fireEvent.click(screen.getByRole("radio", { name: "أدير لملاك" }));
-    expect(screen.getByTestId("change-chip")).toHaveTextContent("+4.4%");
-  });
-
-  it("hides the chip when last month gives no meaningful base, and shows a fall as a fall", () => {
-    renderWithIntl(
-      <HomeScreen period={HOME_PERIOD} ownerView={{ ...HOME_OWNER_VIEW, change: null }} coHostView={HOME_COHOST_VIEW} />,
-    );
-    expect(screen.queryByTestId("change-chip")).toBeNull();
-  });
-
-  it("shows a negative change with its minus sign and uncapped", () => {
-    renderWithIntl(
-      <HomeScreen period={HOME_PERIOD} ownerView={{ ...HOME_OWNER_VIEW, change: -1.25 }} coHostView={HOME_COHOST_VIEW} />,
-    );
-    expect(screen.getByTestId("change-chip")).toHaveTextContent("-125.0%");
-  });
-
-  it("the break-even tile states its cost basis — the same costs as net profit — and the nights needed", () => {
-    renderHome();
-    expect(screen.getByText("شقة الشيخ زايد تحت نقطة التعادل")).toBeInTheDocument();
-    expect(screen.getByText("التعادل عند 23 ليلة")).toBeInTheDocument();
-    expect(screen.getByTestId("break-even-basis")).toHaveTextContent("حساب التعادل يشمل الصيانة وإهلاك التجهيز، مثل صافي الربح");
-  });
-
-  it("'إضافة دخل' explains that it arrives in the full version", () => {
-    renderHome();
-    fireEvent.click(screen.getByRole("button", { name: /إضافة دخل/ }));
-    expect(screen.getByTestId("toast")).toHaveTextContent("تسجيل الدخل متاح في النسخة الكاملة");
+  it("while the session is being read: neither the list nor the call to action", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abcd.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
+    resetAccountForTests({ status: "loading" });
+    renderWithIntl(<HomeScreen />);
+    expect(screen.queryByTestId("home-start")).toBeNull();
+    expect(screen.queryByTestId("home-apartment")).toBeNull();
   });
 });
