@@ -22,7 +22,8 @@ describe("<MoreScreen />", () => {
     fireEvent.click(screen.getByRole("button", { name: "عن النسخة التجريبية" }));
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveTextContent("الوحدات تحت «أمثلة تجريبية» وأرقامها أمثلة");
-    expect(dialog).toHaveTextContent("تُحفظ على هذا الجهاز فقط ولا تُرسل إلى أي مكان");
+    expect(dialog).toHaveTextContent("بدون حساب تُحفظ شقتك على هذا الجهاز فقط ولا تُرسل إلى أي مكان");
+    expect(dialog).toHaveTextContent("عند تسجيل الدخول بحساب Google تُحفظ شققك في حسابك");
   });
 
   it("re-runs the starting questions straight away when no unit is saved", () => {

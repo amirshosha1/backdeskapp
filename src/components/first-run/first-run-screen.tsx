@@ -37,6 +37,7 @@ import { currencyLabel, formatMoney } from "@/lib/format/money";
 import { formatNights } from "@/lib/format/nights";
 import { formatPercent } from "@/lib/format/percent";
 import { useFirstRunAnswers, writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
+import { readAccount, saveCount } from "@/lib/account/store";
 import { APARTMENT_COUNTS, saveOwnUnit, setApartmentCount, setFirstRunSeen, useGuest, type ApartmentCount } from "@/lib/guest/store";
 import { setQueryParam, useQueryParam } from "@/lib/url-state";
 import { cn } from "@/lib/utils";
@@ -405,7 +406,11 @@ function CountStep() {
             type="button"
             role="radio"
             aria-checked={count === c}
-            onClick={() => setApartmentCount(c)}
+            onClick={() => {
+              setApartmentCount(c);
+              // Signed in: the answer also goes to the account's profile (the browser keeps its copy).
+              if (readAccount().status === "signed_in") void saveCount(c);
+            }}
             className={cn("glass tap min-h-14 rounded-[1.25rem] px-[1.125rem] text-start text-[0.9375rem] font-semibold", count === c && "ring-2 ring-white/90")}
           >
             {t(`counts.${c}`)}

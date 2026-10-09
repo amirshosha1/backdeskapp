@@ -16,12 +16,15 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:db": "bash scripts/test-db.sh",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:types": "UPDATE_DB_TYPES=1 bash scripts/test-db.sh tests/db/types.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-direction": "^1.1.4",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "decimal.js": "^10.6.0",

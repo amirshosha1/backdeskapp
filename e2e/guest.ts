@@ -57,10 +57,10 @@ export function withOwnUnit(model = "rental_arbitrage", assumed: string[] = ["pl
 }
 
 /** For `test.use({ storageState })`: the guest state already in the browser when a test starts. */
-export function storageStateFor(state: GuestState | null) {
+export function storageStateFor(state: GuestState | null, origin = BASE_URL) {
   return {
     cookies: [],
-    origins: state === null ? [] : [{ origin: BASE_URL, localStorage: [{ name: GUEST_KEY, value: JSON.stringify(state) }] }],
+    origins: state === null ? [] : [{ origin, localStorage: [{ name: GUEST_KEY, value: JSON.stringify(state) }] }],
   };
 }
 

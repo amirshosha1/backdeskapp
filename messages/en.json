@@ -16,7 +16,8 @@
     "switchLanguage": "التبديل إلى العربية",
     "back": "Back",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "done": "Done"
   },
   "nav": {
     "home": "Home",
@@ -200,7 +201,9 @@
     "gateTitle": "A second apartment comes with a subscription",
     "gateBody": "Your first apartment stays free.",
     "gatePlans": "See the plans",
-    "gateLater": "Not now"
+    "gateLater": "Not now",
+    "gateSignInTitle": "Save your apartment and add more with Google",
+    "gateSignInBody": "Your apartment is saved to your account, you can add your others, and open them on any device."
   },
   "calculator": {
     "title": "Feasibility calculator",
@@ -426,17 +429,176 @@
     "language": "Language",
     "languageValue": "English",
     "about": "About this prototype",
-    "aboutBody": "This is a Backdesk prototype. The units under “Sample units” and their numbers are examples. Your first apartment, if you add one, is saved on this device only and is not sent anywhere. Real books start with the full version.",
-    "feedback": "Send feedback on WhatsApp",
+    "aboutBody": "This is a Backdesk prototype. The units under “Sample units” and their numbers are examples. Without an account, your apartment is saved on this device only and is not sent anywhere. Signed in with Google, your apartments are saved to your account and open on any device.",
+    "feedback": "Send feedback by email",
     "rerun": "Redo the starting questions",
     "rerunTitle": "Redo the starting questions?",
     "rerunBody": "When you reach the result, your new answers replace the numbers saved for “Your first apartment”. If you skip the questions, your numbers stay as they are.",
-    "rerunConfirm": "Start the questions"
+    "rerunConfirm": "Start the questions",
+    "rerunBodyAccount": "The questions start again. At the end we ask whether to add the apartment to your account; your saved apartments don't change."
   },
   "notFound": {
     "title": "Page not found",
     "heading": "We couldn't find this page",
     "body": "The link may have changed, or this screen isn't built yet in the prototype.",
     "backHome": "Back to Home"
+  },
+  "account": {
+    "signIn": "Sign in with Google",
+    "signInSub": "Keep your apartments in your account, on any device",
+    "signingIn": "Opening Google…",
+    "signInFailed": "Sign-in didn't complete. Please try again.",
+    "privacyNote": "By continuing you agree to the <link>privacy policy</link>.",
+    "signedInAs": "Signed in: {email}",
+    "signedIn": "Signed in with Google",
+    "signOut": "Sign out",
+    "signedOut": "You're signed out on this device.",
+    "privacy": "Privacy policy",
+    "deleteAccount": "Delete my account and data",
+    "deleteTitle": "Delete your account for good?",
+    "deleteBody": "Your account, every apartment and its numbers, and your apartment-count answer are deleted and can't be recovered. Backdesk's data in this browser is removed too.",
+    "deleteConfirm": "Delete for good",
+    "deleting": "Deleting…",
+    "deleted": "Your account and all its data are deleted.",
+    "bannerAccount": "Your apartments are saved to your account",
+    "unitsOfMax": "{count} of {max} apartments",
+    "firstUnitName": "My first apartment",
+    "newUnitName": "Apartment {n}",
+    "loadFailed": "Your apartments couldn't be loaded.",
+    "retry": "Try again",
+    "unreadable": "This apartment's numbers can't be opened. You can delete it and add it again.",
+    "save": {
+      "pending": "Changes not saved yet",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "failed": "Not saved — retry"
+    },
+    "adopt": {
+      "title": "An apartment on this device",
+      "body": "This device has an apartment that isn't in your account yet. Add it to your account?",
+      "add": "Add it to my account",
+      "adding": "Adding…",
+      "remove": "Delete it from this device",
+      "added": "Your apartment was added to your account.",
+      "removed": "The apartment was deleted from this device."
+    },
+    "limit": {
+      "title": "You've reached the limit",
+      "body": "You've reached your account's apartment limit. For more than 5 apartments, we agree a custom plan with you.",
+      "contact": "Contact us",
+      "prefill": "Hello, I've reached the apartment limit on my Backdesk account and I'm asking about a custom plan for more than 5 apartments.",
+      "emailSubject": "Custom plan for more than 5 apartments"
+    },
+    "add": {
+      "button": "Add an apartment",
+      "sub": "Its name and operating model, then edit its numbers",
+      "title": "New apartment",
+      "nameLabel": "Apartment name",
+      "modelLabel": "Operating model",
+      "note": "It starts with the example’s numbers, each tagged “SAMPLE” until you change it.",
+      "submit": "Add the apartment",
+      "adding": "Adding…",
+      "added": "“{name}” was added."
+    },
+    "name": {
+      "missing": "Enter a name for the apartment",
+      "tooLong": "The name is longer than 60 characters",
+      "invalid": "The name has characters that aren't allowed"
+    },
+    "edit": {
+      "button": "Edit",
+      "label": "Edit “{name}”",
+      "title": "Edit apartment",
+      "saveName": "Save the name",
+      "saving": "Saving…",
+      "renamed": "Name saved.",
+      "unchanged": "The name hasn't changed",
+      "delete": "Delete the apartment",
+      "deleteTitle": "Delete “{name}”?",
+      "deleteBody": "This apartment and its numbers are deleted from your account. This can't be undone.",
+      "deleteConfirm": "Delete for good",
+      "deleting": "Deleting…",
+      "deleted": "The apartment was deleted."
+    },
+    "errors": {
+      "not_configured": "Sign-in isn't available right now.",
+      "not_signed_in": "Your session ended. Please sign in again.",
+      "session_expired": "Your session ended. Please sign in again.",
+      "unit_limit_reached": "You've reached your account's apartment limit. For more than 5 apartments, we agree a custom plan with you.",
+      "forbidden": "You don't have permission to do this.",
+      "invalid": "Some of the data isn't valid. Please check it and try again.",
+      "not_found": "This apartment wasn't found. It may have been deleted on another device.",
+      "network": "Couldn't connect. Check your internet and try again.",
+      "unknown": "Something unexpected went wrong. Please try again."
+    },
+    "inApp": {
+      "title": "Open this page in your browser to sign in",
+      "body": "Google doesn't allow sign-in inside Facebook, Messenger, Instagram and similar apps. Open this page in Chrome or Safari, then sign in there.",
+      "guestNote": "You can keep using Backdesk here without an account.",
+      "openChrome": "Open in Chrome",
+      "androidSteps": "If Chrome doesn’t open: tap ⋮ at the top and choose “Open in browser”.",
+      "iosSteps": "Tap ⋯ or the share button at the top or bottom of the screen, then choose “Open in browser” or “Open in Safari”.",
+      "copy": "Copy link",
+      "copied": "Link copied. Paste it into Chrome or Safari.",
+      "copyFailed": "The link wasn't copied. Press and hold it to copy.",
+      "linkLabel": "This page's link"
+    }
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "updated": "Last updated: 8 October 2026",
+    "intro": "Backdesk is a bookkeeping tool for short-term rental hosts. This page explains what we keep about you, where it is kept, who processes it, and how to delete it.",
+    "guest": {
+      "title": "Without an account",
+      "body": "You can use Backdesk without signing in. Your apartment's numbers and your answers then stay in your browser on this device only (local storage) and are not sent to our servers."
+    },
+    "account": {
+      "title": "When you sign in with Google",
+      "google": "From Google: your name, email address, Google account ID and the link to your profile picture. We ask for no other permission and never access your email, files or contacts.",
+      "entered": "What you enter: your apartments (name, operating model and the feasibility calculator's numbers) and your answer about how many apartments you have.",
+      "auth": "Sign-in: Supabase keeps when your account was created and when you signed in, your sign-in sessions, and sign-in logs that include your IP address and your browser and device type.",
+      "purpose": "We use this data only to run your account."
+    },
+    "requests": {
+      "title": "Request logs",
+      "body": "When any page is opened, with or without an account, Vercel (our host) logs the request, including the IP address, the browser type, the page and the time, to run and protect the site."
+    },
+    "analytics": {
+      "title": "Analytics and ads",
+      "body": "We use no analytics or tracking tool yet, show no ads, and sell your data to no one. We will update this page before adding any analytics tool."
+    },
+    "cookies": {
+      "title": "Cookies and browser storage",
+      "body": "We use only necessary cookies: Supabase's sign-in session cookies, and short-lived cookies during sign-in that protect it and remember the page you started from. Without an account, your numbers are kept in the browser's local storage."
+    },
+    "processors": {
+      "title": "Who processes your data",
+      "supabase": "Supabase: the database and sign-in, in the European Union (Ireland).",
+      "vercel": "Vercel: hosting. The servers that run requests are in the European Union (Dublin, Ireland); pages are delivered from Vercel's global network, from the location nearest to you.",
+      "google": "Google: sign-in with your Google account, under Google's privacy policy."
+    },
+    "delete": {
+      "title": "Deleting your account",
+      "body": "In the app: More → “Delete my account and data”. Your account, apartments and answer are deleted from the database at once and for good, Backdesk’s data is removed from that browser, and any existing sign-in stops within an hour at most.",
+      "logs": "Supabase's sign-in logs and Vercel's request logs are not deleted with the account; they remain until each provider deletes them automatically under its retention period. You can write to us to ask for their deletion.",
+      "google": "To remove Backdesk's access from your Google account: <link>your Google account settings</link>."
+    },
+    "contact": {
+      "title": "Contact us",
+      "body": "For any question or request about your data: <mail>{email}</mail>"
+    },
+    "changes": {
+      "title": "Changes to this page",
+      "body": "We update this page before any change to what we collect; the date of the last update is shown at the top."
+    },
+    "back": "Back to the app"
+  },
+  "contact": {
+    "fallbackTitle": "Email us",
+    "fallbackBody": "No mail app opened. Copy the address and write to us from your mail app.",
+    "addressLabel": "Email address",
+    "copy": "Copy address",
+    "copied": "Copied",
+    "copyFailed": "The address wasn’t copied. Press and hold it to copy."
   }
 }
