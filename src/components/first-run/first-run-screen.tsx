@@ -34,9 +34,9 @@ import {
 } from "@/lib/first-run/flow";
 import { formatTypedAmount } from "@/lib/format/amount";
 import { currencyLabel, formatMoney } from "@/lib/format/money";
-import { formatNights } from "@/lib/format/nights";
 import { formatPercent } from "@/lib/format/percent";
 import { readFirstRunAnswers, useFirstRunAnswers, writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
+import { flowSentence } from "@/lib/first-run/sentence";
 import { firstRunEntry, trackFirstRunStarted, trackVerdictShown } from "@/lib/analytics/flow-events";
 import { readAccount, saveCount } from "@/lib/account/store";
 import { APARTMENT_COUNTS, saveOwnUnit, setApartmentCount, setFirstRunSeen, useGuest, type ApartmentCount } from "@/lib/guest/store";
@@ -281,20 +281,8 @@ function useFlowSentence() {
   const t = useTranslations("firstRun");
   const locale = useLocale() as AppLocale;
   return (sentence: ScenarioSentence, booked: number, available: number) => {
-    switch (sentence.kind) {
-      case "no_available_nights":
-        return t("sentence.noNights");
-      case "no_break_even":
-        return t("sentence.noBreakEven");
-      case "beyond_month":
-        return t("sentence.beyond", { breakEven: formatNights(sentence.nights, locale), available });
-      case "short":
-        return t("sentence.short", { breakEven: formatNights(sentence.nights, locale), booked, short: sentence.nightsShort });
-      case "at_first_profitable_night":
-        return t("sentence.atFirst", { breakEven: formatNights(sentence.nights, locale), booked });
-      case "above":
-        return t("sentence.above", { breakEven: formatNights(sentence.nights, locale), booked, above: sentence.nightsAbove });
-    }
+    const { key, values } = flowSentence(sentence, booked, available, locale);
+    return t(key, values);
   };
 }
 
