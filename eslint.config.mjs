@@ -34,7 +34,7 @@ const config = [
     // imports it; this rule catches it earlier, in UI and demo code.
     // Zod (and the engine's schemas) stay out of client code too: they
     // validate server boundaries (§6.6) and cost ~97 KB gzipped in a bundle.
-    files: ["src/components/**", "src/demo/**", "src/lib/format/**", "src/lib/calculator/**", "src/lib/guest/**", "src/lib/first-run/**"],
+    files: ["src/components/**", "src/demo/**", "src/lib/format/**", "src/lib/calculator/**", "src/lib/guest/**", "src/lib/first-run/**", "src/lib/analytics/**"],
     ignores: ["**/*.test.ts", "**/*.test.tsx"],
     rules: {
       "no-restricted-imports": [

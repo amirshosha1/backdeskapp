@@ -36,7 +36,8 @@ import { formatTypedAmount } from "@/lib/format/amount";
 import { currencyLabel, formatMoney } from "@/lib/format/money";
 import { formatNights } from "@/lib/format/nights";
 import { formatPercent } from "@/lib/format/percent";
-import { useFirstRunAnswers, writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
+import { readFirstRunAnswers, useFirstRunAnswers, writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
+import { firstRunEntry, trackFirstRunStarted, trackVerdictShown } from "@/lib/analytics/flow-events";
 import { readAccount, saveCount } from "@/lib/account/store";
 import { APARTMENT_COUNTS, saveOwnUnit, setApartmentCount, setFirstRunSeen, useGuest, type ApartmentCount } from "@/lib/guest/store";
 import { setQueryParam, useQueryParam } from "@/lib/url-state";
@@ -66,6 +67,14 @@ export function FirstRunScreen({ example }: { example: CalculatorForm }) {
   const setAnswers = (patch: Partial<FirstRunAnswers>) => writeFirstRunAnswers({ ...answers, ...patch });
   const goNext = () => setStep(nextStep(step, answers.model));
   const goBack = () => setStep(previousStep(step, answers.model));
+
+  // Anonymous counting (docs/ANALYTICS.md): the flow has started when its
+  // first question is on screen with nothing answered yet. Read straight
+  // from storage: the hook reports null until hydration ends.
+  useEffect(() => {
+    if (step === "model" && readFirstRunAnswers() === null) trackFirstRunStarted();
+    else firstRunEntry();
+  }, [step]);
 
   if (step === "verdict" && answers.model) {
     return <VerdictStep example={example} answers={{ ...answers, model: answers.model }} onBack={goBack} onNext={goNext} onRestart={() => {
@@ -316,9 +325,15 @@ function VerdictStep({
     if (parseCalculatorForm(form).ok) saveOwnUnit(form, assumedAfterFlow(model));
   }, [form, model]);
 
-  if (!parsed.ok) return null;
-  const result = computeScenario(parsed.input);
-  const view = scenarioView(parsed.input, result);
+  const result = parsed.ok ? computeScenario(parsed.input) : null;
+  const view = parsed.ok && result ? scenarioView(parsed.input, result) : null;
+  const outcome = view?.outcome ?? null;
+  // Counted once per page view: profit or loss only, never the amount.
+  useEffect(() => {
+    if (outcome) trackVerdictShown(outcome);
+  }, [outcome]);
+
+  if (!parsed.ok || !result || !view) return null;
   const owner = model === "managed_for_owner" ? "yes" : "no";
   const v = example.values;
   const money = (raw: string) => formatMoney(raw, { locale, decimals: 0 });
