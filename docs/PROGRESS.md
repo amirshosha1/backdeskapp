@@ -206,6 +206,12 @@ The app side of slice 1, on `claude/busy-curie-y0si27`. Plan approved by Amir wi
 - **e2e with accounts on** (`playwright.accounts.config.ts`, port 3020): a production build with placeholder values on a `.invalid` host; every browser request to it is intercepted. It proves redirect_to is exactly `<origin>/auth/callback`, PKCE (`code_challenge_method=s256`), `prompt=select_account`, the `bd_next` cookie, the callback outside the locales with no error in the URL and the failure toast, a hostile return page ignored, and the in-app sheet with no request to Supabase.
 - **Not testable here:** the real Google round trip and Supabase's Data API (no local PostgREST). They are on Amir's phone checklist.
 
+### Batch 4: the 404 fix (2026-10-09)
+- `src/app/[locale]/not-found.tsx` is the [locale] segment's not-found boundary, and Next.js ships its client code with every page under [locale]. It rendered PageHeader → the top line, so every public page downloaded the guest and account stores, the finance engine with decimal.js and a Radix dialog. It is now server-only: a plain header, no top line, no language switch, and a plain link home (`/demo`, `/en/demo`).
+- Measured on the CI-style build (gzip level 9 of the files each page loads): `/` 197.5 → 144.0 KB, `/privacy` 197.8 → 153.9 KB.
+- `pnpm check:bundle` (`scripts/check-public-bundle.mjs`) runs in CI after the build. It fails if "backdesk:guest", "signInWithGoogle" or "DecimalError" appears in any JS that `/` or `/privacy` loads, and prints each page's JS size. The landing PR adds a 160 KB gzip cap for `/` (Amir, 2026-10-09).
+- CLAUDE.md §7: one top line on every `/demo` screen; the 404 has none.
+
 ### Batch 3 decisions — Phase 0a/0b slice 1 (2026-10-08)
 
 Accounts with Google sign-in, apartments saved to the account. Plan approved by Amir with every default. Recorded in `docs/BUILD_PLAN.md` (§0, §3, Phase 0b "0a/0b slice 1", Phase 3, Phase 10, §6 question 19) and `CLAUDE.md` §4 and §5.
