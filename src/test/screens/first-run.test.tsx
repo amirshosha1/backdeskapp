@@ -1,11 +1,12 @@
 import { act, fireEvent, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
 import { router } from "@/test/mocks/navigation";
 import { FirstRunScreen } from "@/components/first-run/first-run-screen";
 import { FirstRunGate } from "@/components/first-run/first-run-gate";
 import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
 import { readFirstRunAnswers } from "@/lib/guest/first-run-answers";
+import { resetFlowEventsForTests } from "@/lib/analytics/flow-events";
 import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "@/lib/guest/store";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
@@ -178,5 +179,51 @@ describe("<FirstRunGate /> on the app entry", () => {
     expect(readGuest().firstRun.seen).toBe(false);
     renderWithIntl(<FirstRunGate />);
     expect(router.replace).not.toHaveBeenCalled();
+  });
+});
+
+describe("first-run flow: anonymous counting (docs/ANALYTICS.md)", () => {
+  const beacon = vi.fn((_url: string, _data?: BodyInit | null) => true);
+  const events = () =>
+    Promise.all(
+      beacon.mock.calls.map(
+        ([, data]) =>
+          new Promise<{ event: string; properties: Record<string, unknown> }>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(JSON.parse(String(reader.result)));
+            reader.readAsText(data as Blob);
+          }),
+      ),
+    );
+
+  // One page view per test: earlier tests already "used" this module's once-per-page state.
+  beforeEach(() => resetFlowEventsForTests());
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("from the landing button: first_run_started then verdict_shown (outcome only), each once", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true, writable: true });
+    window.history.replaceState(null, "", "/demo/start?from=landing");
+    const { rerender } = renderFlow();
+    expect(window.location.search).toBe("");
+    pick("أستأجرها وأعيد تأجيرها");
+    tap("التالي");
+    tap("التالي");
+    tap("اعرض النتيجة");
+    rerender(<FirstRunScreen example={EXAMPLE} />);
+    expect(await events()).toEqual([
+      { event: "first_run_started", properties: { entry: "landing", locale: "ar", display_mode: "browser" } },
+      { event: "verdict_shown", properties: { entry: "landing", outcome: "loss", locale: "ar", display_mode: "browser" } },
+    ]);
+  });
+
+  it("nothing is sent without the key", () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
+    Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true, writable: true });
+    renderFlow();
+    pick("أملكها وأديرها");
+    tap("التالي");
+    tap("اعرض النتيجة");
+    expect(beacon).not.toHaveBeenCalled();
   });
 });
