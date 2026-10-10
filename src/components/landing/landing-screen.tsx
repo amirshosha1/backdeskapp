@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Calculator, CalendarDays, CircleHelp, House } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { BrandMark } from "@/components/common/brand-mark";
 import { ExampleChip } from "@/components/common/example-chip";
@@ -10,7 +11,12 @@ import { formatMoney } from "@/lib/format/money";
 import type { LandingExample } from "@/lib/landing/example";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["1", "2", "3", "4"] as const;
+const STEPS = [
+  { number: "1", Icon: CircleHelp },
+  { number: "2", Icon: House },
+  { number: "3", Icon: CalendarDays },
+  { number: "4", Icon: Calculator },
+] as const;
 
 /** Paths for this page's language: Arabic has no prefix, English lives under /en. */
 export function landingPaths(locale: AppLocale) {
@@ -123,19 +129,21 @@ export function LandingScreen({ example }: { example: LandingExample }) {
             <h2 id="landing-how" className="text-lg font-semibold">
               {t("howTitle")}
             </h2>
-            <p className="text-[0.9375rem] text-ink-2">{t("howIntro")}</p>
-            <ol className="flex flex-col divide-y divide-line rounded-card bg-fill px-4 py-1">
-              {STEPS.map((step) => (
-                <li key={step} className="flex min-h-12 items-center gap-3 py-1.5">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand" aria-hidden="true">
-                    {step}
-                  </span>
-                  <span className="text-[0.9375rem]">{t(`steps.${step}`)}</span>
+            <ol className="flex flex-col gap-3">
+              {STEPS.map(({ number, Icon }) => (
+                <li key={number} className="landing-step-card flex min-h-28 items-center gap-4 rounded-card p-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="mb-1 text-xs font-medium text-white/50">
+                      {t("station", { number })}
+                    </p>
+                    <h3 className="text-base font-semibold text-white">{t(`steps.${number}.title`)}</h3>
+                    <p className="mt-1 text-sm leading-relaxed font-normal text-white/70">{t(`steps.${number}.description`)}</p>
+                  </div>
+                  <Icon className="h-4 w-4 shrink-0 text-white/70" aria-hidden="true" />
                 </li>
               ))}
             </ol>
-            <p className="text-[0.9375rem] font-semibold">{t("result")}</p>
-            <p className="text-[0.8125rem] leading-relaxed text-muted">{t("ownerNote")}</p>
+            <p className="text-[0.8125rem] leading-relaxed text-white/50">{t("ownerNote")}</p>
           </section>
         </main>
 

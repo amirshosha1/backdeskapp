@@ -31,15 +31,26 @@
     "cta": "Check your apartment, free",
     "ctaNote": "No account needed",
     "howTitle": "How it works",
-    "howIntro": "Four questions at most, then the result:",
+    "station": "Step {number}",
     "steps": {
-      "1": "How you run the apartment",
-      "2": "The nightly price",
-      "3": "Booked nights a month",
-      "4": "The rent or the management commission"
+      "1": {
+        "title": "See your apartment's net",
+        "description": "The result depends on whether you own, sublet or manage the apartment."
+      },
+      "2": {
+        "title": "Estimate nightly income",
+        "description": "Your nightly rate shows the revenue you could earn in a month."
+      },
+      "3": {
+        "title": "Understand occupancy",
+        "description": "Booked nights show the difference between a quiet month and a full one."
+      },
+      "4": {
+        "title": "Compare rent with commission",
+        "description": "See how rent or a management commission changes your monthly net."
+      }
     },
-    "result": "The result: profit or loss, in numbers",
-    "ownerNote": "If you own the apartment and run it yourself, there is no fourth question: no rent and no commission.",
+    "ownerNote": "If you own and run the apartment yourself, skip step four.",
     "privacy": "Privacy policy",
     "contact": "Contact:",
     "metaTitle": "Backdesk — Is your apartment a profit or a loss?",

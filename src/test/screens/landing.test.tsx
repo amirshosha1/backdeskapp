@@ -50,8 +50,8 @@ describe("<LandingScreen /> in Arabic", () => {
     renderWithIntl(<LandingScreen example={example} />);
     const how = screen.getByTestId("landing-how");
     expect(within(how).getAllByRole("listitem")).toHaveLength(4);
-    expect(how).toHaveTextContent("الإيجار أو عمولة الإدارة");
-    expect(how).toHaveTextContent("فلا سؤال رابع");
+    expect(how).toHaveTextContent("قارن الإيجار بالعمولة");
+    expect(how).toHaveTextContent("فتخطَّ المحطة الرابعة");
   });
 
   it("links the privacy policy and the support address; the language switch is a plain link to /en", () => {
