@@ -3,10 +3,10 @@ import { expect, test, type Page } from "@playwright/test";
 /**
  * Anonymous counting in a production build with the key set
  * (playwright.analytics.config.ts). Proves in a real browser what the unit
- * tests can't: the flow sends exactly first_run_started then
- * verdict_shown to this site's own /api/e, carrying fixed values only (no
- * amount, no identifier), sets no cookie and no new storage, and never
- * talks to another host. The real route answers too.
+ * tests can't: the funnel sends exactly landing_view, landing_cta_click,
+ * first_run_started then verdict_shown to this site's own /api/e, carrying
+ * fixed values only (no amount, no identifier), sets no cookie and no new
+ * storage, and never talks to another host. The real route answers too.
  */
 
 const ANDROID_CHROME = "Mozilla/5.0 (Linux; Android 14; SM-A546E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36";
@@ -23,6 +23,53 @@ async function record(page: Page) {
   });
   return { sent, hosts };
 }
+
+test("the whole funnel from the landing page: four events, fixed values only, and the route accepts each", async ({ page, context, request, baseURL }) => {
+  const { sent, hosts } = await record(page);
+  await page.goto("/?utm_source=Facebook&utm_medium=social&utm_campaign=Oct%20post");
+  await expect.poll(() => sent.length).toBe(1);
+  await page.getByTestId("landing-cta").click();
+  await expect(page).toHaveURL(/\/demo\/start$/);
+  await page.getByRole("radio", { name: /أستأجرها وأعيد تأجيرها/ }).click();
+  await page.getByRole("button", { name: "التالي" }).click();
+  await page.getByRole("button", { name: "التالي" }).click();
+  await page.getByRole("button", { name: "اعرض النتيجة" }).click();
+  await expect(page.getByTestId("verdict-word")).toHaveText("خسارة");
+
+  await expect.poll(() => sent.length).toBe(4);
+  const common = { locale: "ar", display_mode: "browser" };
+  expect(sent).toEqual([
+    { event: "landing_view", properties: { utm_source: "facebook", utm_medium: "social", utm_campaign: "other", ...common } },
+    { event: "landing_cta_click", properties: common },
+    { event: "first_run_started", properties: { entry: "landing", ...common } },
+    { event: "verdict_shown", properties: { entry: "landing", outcome: "loss", ...common } },
+  ]);
+  expect(await context.cookies()).toEqual([]);
+  expect([...hosts]).toEqual(["127.0.0.1:3030"]);
+  for (const event of sent) {
+    const res = await request.post("/api/e", { data: JSON.stringify(event), headers: { origin: baseURL!, "user-agent": ANDROID_CHROME, "content-type": "text/plain" } });
+    expect(res.status(), event.event).toBe(204);
+  }
+});
+
+test("switching the landing's language is not a second view", async ({ page }) => {
+  const { sent } = await record(page);
+  await page.goto("/");
+  await expect.poll(() => sent.length).toBe(1);
+  await page.getByTestId("landing-language").click();
+  await expect(page).toHaveURL(/\/en$/);
+  await page.waitForLoadState("networkidle");
+  expect(sent.map((e) => e.event)).toEqual(["landing_view"]);
+});
+
+test("a returning visitor sent on to the app is not counted as a landing view", async ({ page }) => {
+  const { sent } = await record(page);
+  await page.addInitScript(() => localStorage.setItem("backdesk:guest", JSON.stringify({ v: 1, firstRun: { seen: true, count: "1" }, units: [{ id: "own-1" }] })));
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/demo$/);
+  await page.waitForLoadState("networkidle");
+  expect(sent.map((e) => e.event)).not.toContain("landing_view");
+});
 
 test("Arabic, from the landing button: first_run_started then verdict_shown, fixed values only", async ({ page, context }) => {
   const { sent, hosts } = await record(page);

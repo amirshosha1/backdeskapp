@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { resetGuestOnEveryLoad, SEEN, withOwnUnit, type GuestState } from "./guest";
-import { ALL_SCREENS } from "./screens";
+import { ALL_SCREENS, PUBLIC_PAGES } from "./screens";
 
 /**
  * Phase P.1 tap audit: no silent taps. On every screen, every visible
@@ -14,9 +14,11 @@ import { ALL_SCREENS } from "./screens";
  * the selected calculator tab are exempt: tapping them is a no-op by design.
  *
  * Screens that change with the visitor's own unit are crawled in both states.
+ * A mailto: link whose text is the address itself counts as external: if no
+ * mail app opens, the address is already on screen (the landing's footer).
  */
 const CRAWLS: { path: string; state: GuestState; label: string }[] = [
-  ...ALL_SCREENS.map((path) => ({ path, state: SEEN, label: path })),
+  ...[...PUBLIC_PAGES, ...ALL_SCREENS].map((path) => ({ path, state: SEEN, label: path })),
   ...["/demo", "/demo/units", "/demo/calculator", "/demo/calculator?tab=all", "/demo/more"].map((path) => ({
     path,
     state: withOwnUnit(),
@@ -52,7 +54,10 @@ async function visibleTappables(page: Page) {
           el.getAttribute("aria-current") === "page" ||
           el.getAttribute("aria-checked") === "true" ||
           el.getAttribute("aria-selected") === "true",
-        external: el instanceof HTMLAnchorElement && /^https?:/.test(el.getAttribute("href") ?? ""),
+        external:
+          el instanceof HTMLAnchorElement &&
+          (/^https?:/.test(el.getAttribute("href") ?? "") ||
+            (el.href.startsWith("mailto:") && (el.textContent ?? "").trim() === decodeURIComponent(el.href.slice(7).split("?")[0] ?? ""))),
         disabled: (el as HTMLButtonElement).disabled === true || el.getAttribute("aria-disabled") === "true",
       })),
   );

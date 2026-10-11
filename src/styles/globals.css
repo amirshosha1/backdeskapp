@@ -24,6 +24,13 @@
   .tabular-nums-money {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Every number in the subtree tabular (the landing page sets it on its
+     root): only figures change, Arabic letters are untouched. */
+  .tnum {
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 @layer components {
@@ -53,6 +60,14 @@
     backdrop-filter: blur(18px) saturate(150%);
   }
 
+  /* The landing's numbered stations use a quieter glass treatment than the example card. */
+  .landing-step-card {
+    border: 1px solid rgb(255 255 255 / 0.08);
+    background: rgb(255 255 255 / 0.04);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+
   .nav-pill {
     background: rgb(10 16 34 / 0.9);
     box-shadow:
@@ -65,6 +80,9 @@
   /* Solid fallback where backdrop blur isn't supported. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass {
+      background: #2f5bc4;
+    }
+    .landing-step-card {
       background: #2f5bc4;
     }
     .nav-pill {

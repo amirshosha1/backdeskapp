@@ -5,7 +5,9 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { DirectionProvider } from "@radix-ui/react-direction";
-import { routing } from "@/i18n/routing";
+import { routing, type AppLocale } from "@/i18n/routing";
+import { siteShareMetadata } from "@/lib/seo/landing-meta";
+import { metadataBase } from "@/lib/site";
 import "@/styles/globals.css";
 
 const plexArabic = IBM_Plex_Sans_Arabic({
@@ -36,8 +38,11 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
   return {
+    // Relative URLs in metadata (canonical, alternates, share images) resolve against production (a preview: itself).
+    metadataBase: metadataBase(),
     title: t("siteName"),
     description: t("description"),
+    ...(await siteShareMetadata(locale as AppLocale)),
   };
 }
 

@@ -99,3 +99,18 @@ test.describe("inside Facebook's in-app browser", () => {
     await expect(page.getByTestId("add-first-unit")).toBeVisible();
   });
 });
+
+test.describe("the landing page with accounts on", () => {
+  const cookie = (name: string, baseURL: string) => ({ name, value: "base64-e30", url: baseURL });
+
+  test("a signed-in person skips it: / → /demo; the sign-in's code verifier alone does not count", async ({ page, context, baseURL }) => {
+    await interceptSupabase(page);
+    await context.addCookies([cookie("sb-e2e-ref-auth-token-code-verifier", baseURL!)]);
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("شقتك مكسب ولا خسارة؟");
+
+    await context.addCookies([cookie("sb-e2e-ref-auth-token.0", baseURL!)]);
+    await page.goto("/en?utm_source=facebook");
+    await expect(page).toHaveURL(/\/en\/demo\?utm_source=facebook$/);
+  });
+});

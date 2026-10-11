@@ -58,14 +58,20 @@ Every event carries `locale` (`ar` | `en`) and `display_mode`
 
 | Event | When | Own properties | Status |
 |---|---|---|---|
-| `landing_view` | The landing page is shown to a new visitor (not to one sent on to the app) | `utm_source`, `utm_medium`, `utm_campaign`: lowercased, `[a-z0-9_-]{1,40}`, otherwise `other`; absent when the link has none | Accepted by the route; sent from PR 2 |
-| `landing_cta_click` | Tap on the landing page's one button | none | Accepted by the route; sent from PR 2 |
+| `landing_view` | The landing page is shown to a new visitor (not to one sent on to the app) | `utm_source`, `utm_medium`, `utm_campaign`: lowercased, `[a-z0-9_-]{1,40}`, otherwise `other`; absent when the link has none. Not sent when the visitor arrives from the other language's landing (a language switch) | Sent from PR 2 |
+| `landing_cta_click` | Tap on the landing page's one button | none | Sent from PR 2 |
 | `first_run_started` | `/demo/start` shows its first question with nothing answered yet | `entry`: `landing` (opened from the landing button, `?from=landing`) or `other` | Sent from PR 1 |
 | `verdict_shown` | The flow's result (مكسب / خسارة) is on screen | `entry` (as above, for this page view); `outcome`: `profit` or `loss` (never the amount) | Sent from PR 1 |
 
 `entry` is read once per page view from `?from=landing` and removed from
 the address bar at once. A verdict reached in a later page view (after a
 reload) counts with `entry: other`.
+
+The landing page's two events are not sent by `track()` but by a small
+inline script in the page's HTML (`src/lib/analytics/landing-events-script.ts`),
+so the landing ships no client JavaScript of its own. It builds the same
+body as `track()` (a unit test compares them) and is rendered only when
+`NEXT_PUBLIC_POSTHOG_KEY` is set at build time.
 
 ## Setup (Amir, by hand)
 

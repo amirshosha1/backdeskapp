@@ -499,6 +499,12 @@ The first part of Phases 0a and 0b, not a separate phase. Everything stays open:
   - Google brand verification or a Supabase custom domain, after the domain is live.
   - Removing the preview wildcard redirect (Phase 10).
 
+#### Batch 4 — the public landing page and anonymous counting (2026-10-09)
+Not a separate phase: the first public page, built between Phase 0b slice 1 and PR C so the Facebook link can be measured. Approved by Amir on 2026-10-09 (decisions in PROGRESS.md, "Batch 4 decisions").
+- **PR 1:** anonymous counting through `/api/e` (`docs/ANALYTICS.md`). **The 404 fix:** the [locale] not-found boundary stops shipping app code to public pages.
+- **PR 2, the landing at `/` and `/en`:** one phone screen with the question "شقتك مكسب ولا خسارة؟", the engine's verdict for the `arbitrage` preset labelled as an example, and one button into the first-run flow (`/demo/start?from=landing`); below it, how it works (four questions, owner-operated skips the fourth) and a footer with the privacy policy and `support@backdeskapp.com`. It sells only the free verdict, no account needed: no Free vs Pro table, no price, no setup guide or accounts as promises. New visitors only: an apartment saved in the browser or a signed-in session goes straight to `/demo`. Indexable with canonical and hreflang; `sitemap.xml` lists `/` and `/en`; `robots.txt` disallows `/demo`. Events `landing_view` (utm buckets) and `landing_cta_click`. Share images 1200×630 per language, drawn by `pnpm og:render` and guarded by a unit test. A JS cap on `/` in CI (`pnpm check:bundle`). **Merge gate:** PR 1 merged, the PostHog values set in Production, and all four events seen in PostHog Live events from PR 2's preview.
+- **PR 3:** in-app browser hardening and the fix for a signed-in person bounced from `/demo` to `/demo/start`.
+
 ### Phase 2 — Free feasibility and profit calculator
 **Scope**
 - `/calculator`: reuses the calculator built in P.2 slice 1 — the first-run guided flow, then "الملخص" (summary) and "كل الأرقام" (every input, grouped as below) on one state, with the headline after depreciation. It runs entirely in the browser, works without login and autosaves the draft in the browser (P.2 slice 1 already does this for the visitor's first unit).
@@ -666,7 +672,7 @@ The first part of Phases 0a and 0b, not a separate phase. Everything stays open:
 - Reliability: verified daily backups, error monitoring, uptime check.
 - Quality: Lighthouse mobile ≥ 90, WCAG AA contrast.
 - Onboarding emails (day 0, 2, 7) and in-app empty-state guidance.
-- Launch checklist in `docs/LAUNCH.md`, including removing `noindex` from `/demo`, confirming the benchmark feature is hidden unless sourced figures exist, and **removing the Vercel preview wildcard from Supabase's redirect URLs, or moving previews to a separate Supabase project** (the wildcard was accepted on 2026-10-08 while this project is the only one; `docs/SETUP_AUTH.md` step 4).
+- Launch checklist in `docs/LAUNCH.md`, including the landing page (its claims still match what the free flow does; the share images re-scraped in Facebook's Sharing Debugger; Search Console verified with the sitemap submitted; `robots.txt` revisited together with `/demo`'s `noindex`), removing `noindex` from `/demo`, confirming the benchmark feature is hidden unless sourced figures exist, and **removing the Vercel preview wildcard from Supabase's redirect URLs, or moving previews to a separate Supabase project** (the wildcard was accepted on 2026-10-08 while this project is the only one; `docs/SETUP_AUTH.md` step 4).
 
 ### 🚀 LAUNCH
 Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms. Everything after this point is post-launch.

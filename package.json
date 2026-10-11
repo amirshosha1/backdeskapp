@@ -18,7 +18,8 @@
     "test:db": "bash scripts/test-db.sh",
     "check:bundle": "node scripts/check-public-bundle.mjs",
     "test:e2e": "playwright test",
-    "db:types": "UPDATE_DB_TYPES=1 bash scripts/test-db.sh tests/db/types.test.ts"
+    "db:types": "UPDATE_DB_TYPES=1 bash scripts/test-db.sh tests/db/types.test.ts",
+    "og:render": "vitest run --config vitest.og.config.mts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3.3.1",
+    "@fontsource/ibm-plex-sans-arabic": "5.3.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
