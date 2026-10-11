@@ -125,7 +125,7 @@ export function LandingScreen({ example }: { example: LandingExample }) {
             </div>
           </div>
 
-          <section aria-labelledby="landing-how" className="flex flex-col gap-3 px-4 pt-7" data-testid="landing-how">
+          <section aria-labelledby="landing-how" className="royal-hero flex flex-col gap-3 px-4 pt-7 pb-8 text-white" data-testid="landing-how">
             <h2 id="landing-how" className="text-lg font-semibold">
               {t("howTitle")}
             </h2>
