@@ -256,7 +256,8 @@
     "title": "حاسبة الجدوى",
     "presetsLabel": "أمثلة جاهزة",
     "presets": {
-      "arbitrage": "مثال: إعادة تأجير",
+      "arbitrage": "مثال: شقة مفروشة بالإيجار",
+      "arbitrage-empty": "مثال: شقة فارغة بالإيجار",
       "managed": "إدارة لمالك — وسط البلد"
     },
     "unitDetails": {

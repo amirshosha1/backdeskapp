@@ -256,7 +256,8 @@
     "title": "Feasibility calculator",
     "presetsLabel": "Examples",
     "presets": {
-      "arbitrage": "Example: rental arbitrage",
+      "arbitrage": "Example: furnished rental",
+      "arbitrage-empty": "Example: empty rental",
       "managed": "Managed — Downtown Cairo"
     },
     "unitDetails": {
