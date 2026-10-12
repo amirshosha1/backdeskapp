@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { scenarioInputSchema } from "@/lib/finance/schemas";
 import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
 import { FIELD_KIND, parseCalculatorForm, sameForm, visibleFields, type CalculatorForm, type NumberField } from "./form";
+import { parseStoredForm } from "./stored-inputs";
+import { computeScenario, scenarioView, toMoneyString } from "@/lib/finance";
 
 const base = CALCULATOR_PRESETS[0]!.form;
 const withValue = (field: NumberField, value: string, form: CalculatorForm = base): CalculatorForm => ({
@@ -18,6 +20,28 @@ const errorOf = (form: CalculatorForm, field: NumberField) => {
 describe("calculator form", () => {
   it("every preset parses", () => {
     for (const preset of CALCULATOR_PRESETS) expect(parseCalculatorForm(preset.form).ok).toBe(true);
+  });
+
+  it("matches the furnished and empty 3BR examples in the financial baseline", () => {
+    for (const [id, expectedNet, expectedNights] of [
+      ["arbitrage", "-12215.30", 21],
+      ["arbitrage-empty", "-781.97", 15],
+    ] as const) {
+      const preset = CALCULATOR_PRESETS.find((p) => p.id === id)!;
+      const parsed = parseCalculatorForm(preset.form);
+      if (!parsed.ok) throw new Error(`${id} must parse`);
+      const view = scenarioView(parsed.input, computeScenario(parsed.input));
+      expect(toMoneyString(view.netAfterDepreciation)).toBe(expectedNet);
+      expect(view.breakEven.status).toBe("within_month");
+      if (view.breakEven.status === "within_month") expect(view.breakEven.wholeNights).toBe(expectedNights);
+    }
+  });
+
+  it("opens saved pre-laundry forms with zero laundry and preserves their result", () => {
+    const legacy = structuredClone(base) as unknown as { values: Record<string, string> };
+    delete legacy.values.laundryCost;
+    const parsed = parseStoredForm(legacy);
+    expect(parsed?.values.laundryCost).toBe("0");
   });
 
   it("types each error on its own field", () => {

@@ -282,6 +282,7 @@
       "internet": "Internet (fixed)",
       "compoundFees": "Compound fees (fixed)",
       "cleaningCost": "Cleaning (per stay)",
+      "laundryCost": "Laundry (per stay)",
       "consumables": "Guest supplies (per stay)",
       "repairs": "Repairs (irregular, included in break-even by default)",
       "setupCost": "Setup cost (quick total)",

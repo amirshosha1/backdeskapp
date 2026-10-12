@@ -63,6 +63,7 @@ const SECTION_OF: Record<NumberField, SectionId> = {
   internet: "opex",
   compoundFees: "opex",
   cleaningCost: "opex",
+  laundryCost: "opex",
   consumables: "opex",
   repairs: "opex",
   rent: "rent",
@@ -569,6 +570,7 @@ function AllNumbersTab({
           {field("internet", "money")}
           {field("compoundFees", "money")}
           {field("cleaningCost", "money")}
+          {field("laundryCost", "money")}
           {field("consumables", "money")}
           {field("repairs", "money")}
         </CollapsibleSection>

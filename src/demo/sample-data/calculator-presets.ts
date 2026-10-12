@@ -26,7 +26,8 @@ const SHARED_VALUES = {
   utilities: "2150", // Electricity 2,000 + water 150 (§§4.2, 11).
   internet: "600",
   compoundFees: "0", // Owner pays by default unless the lease shifts it (§13).
-  cleaningCost: "550", // 3BR turnover; laundry is not yet an input (§13).
+  cleaningCost: "550", // 3BR turnover (§13).
+  laundryCost: "250", // 3BR turnover (§13).
   consumables: "180",
   repairs: "800",
   setupCost: "0",
@@ -57,7 +58,7 @@ export const CALCULATOR_PRESETS: CalculatorPreset[] = [
       values: { ...SHARED_VALUES, rent: "35000", deposit: "35000", commissionPercent: "20", fixedFee: "0" },
       commission: DEFAULT_COMMISSION_FORM,
     },
-    sampleFields: ["bookedNights", "avgLengthOfStay", "cleaningFeePerStay", "cleaningCost", "consumables", "repairs"],
+    sampleFields: ["bookedNights", "avgLengthOfStay", "cleaningFeePerStay", "cleaningCost", "laundryCost", "consumables", "repairs"],
   },
   {
     id: "arbitrage-empty",
@@ -73,7 +74,7 @@ export const CALCULATOR_PRESETS: CalculatorPreset[] = [
       values: { ...SHARED_VALUES, rent: "18000", deposit: "18000", setupCost: "334000", commissionPercent: "20", fixedFee: "0" },
       commission: DEFAULT_COMMISSION_FORM,
     },
-    sampleFields: ["deposit", "bookedNights", "avgLengthOfStay", "cleaningFeePerStay", "cleaningCost", "consumables", "repairs", "setupCost", "usefulLifeMonths"],
+    sampleFields: ["deposit", "bookedNights", "avgLengthOfStay", "cleaningFeePerStay", "cleaningCost", "laundryCost", "consumables", "repairs", "setupCost", "usefulLifeMonths"],
   },
   {
     id: "managed",
@@ -86,7 +87,7 @@ export const CALCULATOR_PRESETS: CalculatorPreset[] = [
     },
     form: {
       operatingModel: "managed_for_owner",
-      values: { ...SHARED_VALUES, adr: "2500", bookedNights: "18", avgLengthOfStay: "3", cleaningFeePerStay: "400", utilities: "2500", compoundFees: "1000", cleaningCost: "350", consumables: "150", setupCost: "250000", rent: "0", deposit: "0", commissionPercent: "20", fixedFee: "0" },
+      values: { ...SHARED_VALUES, adr: "2500", bookedNights: "18", avgLengthOfStay: "3", cleaningFeePerStay: "400", utilities: "2500", compoundFees: "1000", cleaningCost: "350", laundryCost: "0", consumables: "150", setupCost: "250000", rent: "0", deposit: "0", commissionPercent: "20", fixedFee: "0" },
       commission: { basis: "net_payout", hybridMode: "max", hybridBasis: "gross_revenue", includeCleaningFees: true },
     },
     sampleFields: ["setupCost", "usefulLifeMonths"],
