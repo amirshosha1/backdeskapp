@@ -28,6 +28,7 @@
     "subline": "أجب عن أسئلة قليلة، ويقدّر باك ديسك صافي شقتك الشهري بعد عمولة المنصة والمصاريف والإهلاك، بتكاليف مثال يمكنك تغييرها.",
     "cardTitle": "{model, select, rental_arbitrage {إعادة تأجير} managed_for_owner {إدارة لحساب مالك} other {يملكها ويديرها}} · {area}",
     "cardInputs": "{adr} لليلة · {booked} من {available, plural, one {ليلة واحدة} two {ليلتين} few {# ليالٍ} many {# ليلة} other {# ليلة}} · إيجار {rent}",
+    "cardRevenueNote": "الإيراد يشمل رسوم تنظيف مفترضة لكل حجز.",
     "cta": "احسب شقتك مجانًا",
     "ctaNote": "بدون حساب",
     "howTitle": "كيف تعمل",
@@ -99,6 +100,8 @@
     },
     "next": "التالي",
     "showResult": "اعرض النتيجة",
+    "directInputLabel": "اكتب {label} مباشرة",
+    "directInputError": "اكتب عددًا صحيحًا بين {min} و{max}.",
     "price": {
       "title": "كم تتوقع سعر الليلة؟",
       "caption": "المتوسط على مدار الشهر، قبل عمولة المنصة",
@@ -433,6 +436,7 @@
   },
   "statement": {
     "title": "مثال: كشف حساب مالك",
+    "exampleNotReal": "بيانات توضيحية — ليس كشفًا فعليًا",
     "number": "كشف رقم {number}",
     "statusFinalized": "معتمد",
     "basisCash": "أساس نقدي",

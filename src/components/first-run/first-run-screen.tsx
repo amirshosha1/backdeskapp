@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Building2, ChevronLeft, House, KeyRound, Minus, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { BrandMark } from "@/components/common/brand-mark";
@@ -32,7 +32,7 @@ import {
   type FirstRunAnswers,
   type FirstRunStep,
 } from "@/lib/first-run/flow";
-import { formatTypedAmount } from "@/lib/format/amount";
+import { formatTypedAmount, parseAmount } from "@/lib/format/amount";
 import { currencyLabel, formatMoney } from "@/lib/format/money";
 import { formatPercent } from "@/lib/format/percent";
 import { readFirstRunAnswers, useFirstRunAnswers, writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
@@ -227,6 +227,7 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
   const tCalc = useTranslations("calculator");
   const locale = useLocale() as AppLocale;
   const { show } = useToast();
+  const [draft, setDraft] = useState<string | null>(null);
   const label = kind === "price" ? tCalc("stepper.adr") : kind === "nights" ? tCalc("fields.bookedNights") : kind === "rent" ? tCalc("stepper.rent") : tCalc("stepper.commission");
   const shown = (n: number) => `${formatTypedAmount(String(n), locale)}${kind === "commission" ? "%" : ""}`;
   const step = shown(range.button);
@@ -235,7 +236,20 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
     const next = value + direction * range.button;
     if (next < range.min) return show(tCalc("stepper.atMin", { label, limit: shown(range.min) }));
     if (next > range.max) return show(tCalc("stepper.atMax", { label, limit: shown(range.max) }));
+    setDraft(null);
     onChange(clampToRange(next, range));
+  }
+
+  function commitDraft(): boolean {
+    if (draft === null) return true;
+    const parsed = parseAmount(draft, { allowZero: true, maxDecimals: 0 });
+    if (!parsed.ok || parsed.value.lessThan(range.min) || parsed.value.greaterThan(range.max)) {
+      show(t("directInputError", { min: shown(range.min), max: shown(range.max) }));
+      return false;
+    }
+    onChange(parsed.value.toNumber());
+    setDraft(null);
+    return true;
   }
 
   const unit = kind === "nights" ? t("nights.unit", { count: value }) : kind === "commission" ? null : currencyLabel("EGP", locale);
@@ -258,11 +272,23 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
           {unit && <span className="text-[0.9375rem] text-white/80">{unit}</span>}
         </p>
         <p className="min-h-[1.375rem] text-center text-sm text-white/85">{caption}</p>
+        <label className="mx-auto flex w-full max-w-56 flex-col gap-1.5 text-sm text-white/90">
+          <span>{t("directInputLabel", { label })}</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={draft ?? String(value)}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={commitDraft}
+            className="h-11 w-full rounded-xl bg-white px-3 text-center text-base font-semibold text-navy-900 tabular-nums-money"
+            data-testid="dial-direct-input"
+          />
+        </label>
         <div className="flex items-center gap-3.5">
           <GlassButton onClick={() => nudge(-1)} label={t(`${kind}.dec`, { step })} className="h-[3.25rem] w-[3.25rem]">
             <Minus className="h-5 w-5" aria-hidden="true" />
           </GlassButton>
-          <RangeSlider label={t(`${kind}.title`)} value={value} min={range.min} max={range.max} step={range.step} onChange={onChange} className="min-w-0 flex-1" testId="dial-slider">
+          <RangeSlider label={t(`${kind}.title`)} value={value} min={range.min} max={range.max} step={range.step} onChange={(next) => { setDraft(null); onChange(next); }} className="min-w-0 flex-1" testId="dial-slider">
             <SliderTrack ratio={(value - range.min) / (range.max - range.min)} />
           </RangeSlider>
           <GlassButton onClick={() => nudge(1)} label={t(`${kind}.inc`, { step })} className="h-[3.25rem] w-[3.25rem]">
@@ -270,7 +296,7 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
           </GlassButton>
         </div>
       </div>
-      <button type="button" onClick={onNext} className="tap h-[3.25rem] rounded-full bg-white text-[0.9375rem] font-semibold text-navy-900">
+      <button type="button" onClick={() => { if (commitDraft()) onNext(); }} className="tap h-[3.25rem] rounded-full bg-white text-[0.9375rem] font-semibold text-navy-900">
         {last ? t("showResult") : t("next")}
       </button>
     </div>

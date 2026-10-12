@@ -28,6 +28,7 @@
     "subline": "Answer a few questions and Backdesk estimates your monthly net after platform fees, running costs and depreciation, using example costs you can change.",
     "cardTitle": "{model, select, rental_arbitrage {Rental arbitrage} managed_for_owner {Managed for an owner} other {Owner-operated}} · {area}",
     "cardInputs": "{adr} a night · {booked} of {available, plural, one {# night} other {# nights}} · rent {rent}",
+    "cardRevenueNote": "Revenue includes an assumed cleaning fee per booking.",
     "cta": "Check your apartment, free",
     "ctaNote": "No account needed",
     "howTitle": "How it works",
@@ -99,6 +100,8 @@
     },
     "next": "Next",
     "showResult": "Show the result",
+    "directInputLabel": "Type {label} directly",
+    "directInputError": "Enter a whole number from {min} to {max}.",
     "price": {
       "title": "What nightly rate do you expect?",
       "caption": "The month's average, before the platform fee",
@@ -433,6 +436,7 @@
   },
   "statement": {
     "title": "Example: owner statement",
+    "exampleNotReal": "Illustrative data — not a real statement",
     "number": "Statement no. {number}",
     "statusFinalized": "Finalized",
     "basisCash": "Cash basis",

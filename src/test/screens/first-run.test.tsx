@@ -86,6 +86,24 @@ describe("first-run flow: answers, verdict and saving", () => {
     expect(screen.getByTestId("toast")).toHaveTextContent("سعر الليلة لا يزيد على 10,000");
   });
 
+  it("accepts a typed rent and blocks an invalid value before the verdict", () => {
+    renderFlow();
+    pick("أستأجرها وأعيد تأجيرها");
+    tap("التالي");
+    tap("التالي");
+    const input = screen.getByRole("textbox", { name: "اكتب الإيجار الشهري مباشرة" });
+    fireEvent.change(input, { target: { value: "20000" } });
+    tap("اعرض النتيجة");
+    expect(stored().units[0]!.form.values.rent).toBe("20000");
+
+    tap("رجوع");
+    const rent = screen.getByRole("textbox", { name: "اكتب الإيجار الشهري مباشرة" });
+    fireEvent.change(rent, { target: { value: "abc" } });
+    tap("اعرض النتيجة");
+    expect(heading()).toBe("كم تدفع إيجارًا في الشهر؟");
+    expect(screen.getByTestId("toast")).toHaveTextContent("اكتب عددًا صحيحًا");
+  });
+
   it("keeps the answers out of the URL: only the step is in the query string", () => {
     renderFlow();
     pick("أستأجرها وأعيد تأجيرها");

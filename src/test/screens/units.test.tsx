@@ -44,6 +44,7 @@ describe("<UnitsScreen />", () => {
     renderWithIntl(<UnitsScreen units={UNITS} />);
     expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة توضيحية (ليست بياناتك)");
     expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+    expect(screen.getByTestId("statement-example-warning")).toHaveTextContent("بيانات توضيحية — ليس كشفًا فعليًا");
   });
 
   it("with the person's apartment: no example chip", () => {
@@ -156,5 +157,6 @@ describe("<OwnerStatement />", () => {
     renderWithIntl(<OwnerStatement statement={STATEMENT} />, { locale: "en" });
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Example: owner statement");
     expect(screen.getByTestId("example-chip")).toHaveTextContent("Example · illustrative numbers");
+    expect(screen.getByTestId("statement-example-warning")).toHaveTextContent("Illustrative data — not a real statement");
   });
 });

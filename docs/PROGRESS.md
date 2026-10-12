@@ -1,5 +1,11 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: UX and private beta gate (draft, 2026-10-12)
+
+- Added direct numeric input to first-run dials, a clear example warning inside the owner statement, and a cleaning-fee note under the landing example. Arabic and English screen tests cover these paths.
+- Recorded the full regression matrix and the private-beta decision in `docs/STABILIZATION_BETA_GATE.md`.
+- Decision: the calculator remains suitable for clearly labelled early access; private beta as an operating ledger is blocked by real expense persistence and the pending two-account Google test.
+
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
 > Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
 
