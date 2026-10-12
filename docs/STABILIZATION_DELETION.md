@@ -9,3 +9,5 @@ Use a disposable Google test account on the PR Preview. Do not delete a real cus
 5. Sign in with the second test account. Its data must be unchanged.
 
 Record the Preview URL, date, and pass/fail for each step in the PR. CI's disposable database tests in `tests/db/rls.test.ts` prove the SQL behavior, including shared-org preservation and a stale token. They cannot prove Supabase Auth and Google behavior on the hosted project. Keep the PR draft and block private beta until both checks pass.
+
+The shared-org test also guards `created_by`: deleting the original author must leave the apartment with a null author, as its foreign key specifies. Migration `20261012100000_preserve_fk_set_null.sql` permits that internal referential action while keeping ordinary client edits to `created_by` blocked.
