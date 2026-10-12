@@ -1,5 +1,11 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: account persistence (draft, 2026-10-12)
+
+- Done on `stabilization/account-persistence`: prevent an in-flight account read from restoring data after sign-out; reload on a new Google sign-in event; add a regression test and a two-account Preview checklist.
+- Decision: do not run account or RLS tests against the hosted Supabase project. CI uses a disposable database; Amir will complete the live two-account Google checks on Preview.
+- Open: the manual Preview results and green CI are required before calling persistence and isolation verified for private beta.
+
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
 > Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
 

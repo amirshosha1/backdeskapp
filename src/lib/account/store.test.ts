@@ -130,6 +130,19 @@ describe("account store: sign-in and sign-out", () => {
     expect(store.readAccount()).toEqual({ status: "guest" });
   });
 
+  it("does not restore a signed-out account when an older load finishes late", async () => {
+    let finishSession!: (value: { data: { session: { user: { email: string } } } }) => void;
+    fake.getSession.mockImplementationOnce(
+      () => new Promise((resolve) => { finishSession = resolve; }),
+    );
+    const loading = store.load();
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    await store.signOut();
+    finishSession({ data: { session: { user: { email: "old-account@example.com" } } } });
+    await loading;
+    expect(store.readAccount()).toEqual({ status: "guest" });
+  });
+
   it("reads the callback's one-shot notice once", () => {
     document.cookie = "bd_flash=signin_failed; Path=/";
     expect(store.takeFlash()).toBe("signin_failed");

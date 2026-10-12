@@ -39,6 +39,7 @@ export type AccountState =
 const listeners = new Set<() => void>();
 let state: AccountState | null = null;
 let authSubscribed = false;
+let loadVersion = 0;
 
 function emit(next: AccountState) {
   state = next;
@@ -90,8 +91,12 @@ async function client(): Promise<BrowserSupabase | null> {
     authSubscribed = true;
     // Another tab signing out (or a session that can no longer refresh) signs this page out too.
     sb.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT" && state?.status !== "guest") emit({ status: "guest" });
-      if (event === "SIGNED_IN" && state?.status === "guest") void load();
+      if (event === "SIGNED_OUT") {
+        loadVersion++;
+        if (state?.status !== "guest") emit({ status: "guest" });
+      }
+      // A different Google account can replace an existing session in this tab.
+      if (event === "SIGNED_IN") void load();
     });
   }
   return sb;
@@ -99,10 +104,13 @@ async function client(): Promise<BrowserSupabase | null> {
 
 /** Reads the session, then the apartments, the profile answer and the limit, in parallel. */
 export async function load(): Promise<void> {
+  const version = ++loadVersion;
   const sb = await client();
+  if (version !== loadVersion) return;
   if (!sb) return emit({ status: "off" });
   if (state?.status !== "signed_in") emit({ status: "loading" });
   const { data } = await sb.auth.getSession();
+  if (version !== loadVersion) return;
   const session = data.session;
   if (!session) return emit({ status: "guest" });
   const [units, profile, entitlements] = await Promise.all([
@@ -110,6 +118,7 @@ export async function load(): Promise<void> {
     sb.from("profiles").select("apartment_count_answer").maybeSingle(),
     sb.from("org_entitlements").select("max_units").maybeSingle(),
   ]);
+  if (version !== loadVersion) return;
   const answer = profile.data?.apartment_count_answer;
   emit({
     status: "signed_in",
@@ -218,6 +227,7 @@ export async function signInWithGoogle(pathname: string): Promise<ActionResult> 
 
 /** Signs this device out (other devices stay signed in). */
 export async function signOut(): Promise<void> {
+  loadVersion++;
   const sb = await client();
   await sb?.auth.signOut({ scope: "local" });
   emit({ status: "guest" });
@@ -228,6 +238,7 @@ export async function deleteAccount(): Promise<ActionResult> {
   await freshSession();
   const result = await deleteMyAccount();
   if (!result.ok) return afterError(result);
+  loadVersion++;
   const sb = await client();
   // The server already cleared the session cookies; this clears the client's memory of it.
   await sb?.auth.signOut({ scope: "local" });
@@ -250,6 +261,7 @@ export function takeFlash(): string | null {
 
 /** Tests only: forget the module's state between tests. */
 export function resetAccountForTests(next: AccountState | null = null): void {
+  loadVersion++;
   state = next;
   authSubscribed = false;
   listeners.forEach((l) => l());
