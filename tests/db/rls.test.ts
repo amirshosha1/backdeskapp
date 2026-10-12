@@ -428,6 +428,32 @@ describe("delete_my_account (no service-role key: a SECURITY DEFINER function ac
     expect(kept.rows[0]).toEqual({ users: 1, entitlements: 1, units: 1 });
   });
 
+  it("keeps a shared org and its apartment for the surviving member", async () => {
+    const leaving = await signUp("shared-leaving");
+    const staying = await signUp("shared-staying");
+    const unitId = await addUnit(leaving, "shared apartment");
+    await owner.query(
+      "insert into public.org_members (org_id, user_id, role) values ($1, $2, 'member')",
+      [leaving.orgId, staying.id],
+    );
+
+    await run(user(leaving.id), "select public.delete_my_account()");
+
+    expect((await admin.query("select count(*)::int as n from auth.users where id = $1", [leaving.id])).rows[0].n).toBe(0);
+    expect((await admin.query("select count(*)::int as n from public.orgs where id = $1", [leaving.orgId])).rows[0].n).toBe(1);
+    expect((await admin.query("select created_by from public.units where id = $1", [unitId])).rows).toEqual([{ created_by: null }]);
+    expect((await run(user(staying.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([{ id: unitId }]);
+    expect((await run(user(leaving.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([]);
+  });
+
+  it("an access token left after deletion cannot read the deleted user's rows", async () => {
+    const deleted = await signUp("stale-token");
+    const unitId = await addUnit(deleted);
+    await run(user(deleted.id), "select public.delete_my_account()");
+    expect((await run(user(deleted.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([]);
+    expect((await run(user(deleted.id), "select user_id from public.profiles where user_id = $1", [deleted.id])).rows).toEqual([]);
+  });
+
   it("takes no argument: there is no way to name another user", async () => {
     const { rows } = await admin.query(
       "select pronargs from pg_proc where oid = 'public.delete_my_account'::regproc",

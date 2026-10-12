@@ -1,5 +1,11 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: account deletion security (draft, 2026-10-12)
+
+- Added database regression cases for a shared org surviving its creator's account deletion, and for the deleted user's still-valid JWT seeing no rows. Existing cases cover anonymous denial, zero-argument scope, full owned-data deletion and another user's data preservation.
+- No migration or production database operation. The disposable CI RLS job is the acceptance check; manual Preview deletion uses a disposable test account only.
+- Open: green CI and a completed Preview deletion result are required before private beta.
+
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
 > Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
 
