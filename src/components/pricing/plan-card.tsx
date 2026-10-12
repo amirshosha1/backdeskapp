@@ -39,9 +39,10 @@ export function PlanCard({ plan, children }: { plan: PlanFixture; children?: Rea
 
       <ul className="mt-4 flex flex-col gap-2 text-sm">
         {plan.features.map((feature) => (
-          <li key={feature.en} className="flex items-start gap-2">
+          <li key={feature.label.en} className="flex items-start gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
-            <span>{feature[locale]}</span>
+            <span>{feature.label[locale]}</span>
+            <span className="ms-auto shrink-0 rounded-full bg-page px-2 py-0.5 text-xs text-muted">{t(`availability.${feature.availability}`)}</span>
           </li>
         ))}
       </ul>

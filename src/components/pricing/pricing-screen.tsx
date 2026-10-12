@@ -53,12 +53,12 @@ export function PricingScreen({ plans, apartmentTotals, maxListedApartments, set
         <article className="rounded-card bg-fill p-5">
           <h2 className="text-lg font-semibold">{setupKit.name[locale]}</h2>
           <p className="mt-1 text-sm leading-relaxed text-muted">{setupKit.description[locale]}</p>
+          <p className="mt-2 text-xs text-muted">{t("availability.planned")}</p>
           <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
             <Money amount={setupKit.price} decimals={0} className="text-3xl font-semibold" />
             <span className="text-sm text-muted">{t("oneTime")}</span>
             <SampleBadge />
           </div>
-          <PreorderAction className="mt-5 bg-ink text-white">{t("orderSetupKit")}</PreorderAction>
         </article>
       </div>
     </div>

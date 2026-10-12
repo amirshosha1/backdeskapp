@@ -450,6 +450,7 @@
   },
   "pricing": {
     "title": "Plans",
+    "availability": { "available": "Available now", "planned": "In development" },
     "perMonth": "per month",
     "scope": {
       "free": "One apartment",
@@ -461,8 +462,8 @@
     "customPlans": "More than {count, plural, one {# apartment} other {# apartments}}: custom plans",
     "contactUs": "Contact us",
     "customPlansPrefill": "Hello, I'd like to ask about a custom Backdesk plan for more than {count, plural, one {# apartment} other {# apartments}}.",
-    "firstMonthOpen": "Your first month after creating an account: everything is unlocked.",
-    "monthToMonth": "Pay month to month, with no automatic renewal.",
+    "firstMonthOpen": "Planned: the first month after sign-up will be fully open.",
+    "monthToMonth": "Planned: monthly payments without automatic renewal.",
     "preorderCta": "Reserve your place",
     "choosePlan": "Choose {plan}",
     "startFree": "Start free",

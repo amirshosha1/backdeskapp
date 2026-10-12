@@ -1,5 +1,12 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: pricing truth (draft, 2026-10-12)
+
+- Done on `stabilization/pricing-truth`: each Free and Pro feature now states whether it is available or in development; the free result is described as an estimate from user inputs. Setup Kit is labelled in development and has no order action. First-month access and monthly payment terms are labelled planned.
+- Decision: keep the existing sample prices visible with their SAMPLE badges; do not treat the page as proof that paid access or payment works.
+- Verification: TypeScript and `git diff --check` passed locally. Vitest could not start on this Windows runtime (`ERR_PACKAGE_IMPORT_NOT_DEFINED`); require green CI on the PR before any merge.
+- Open: confirm each planned feature with a live end-to-end check before changing its badge to available.
+
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
 > Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
 

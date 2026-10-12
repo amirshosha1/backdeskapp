@@ -48,9 +48,9 @@ describe("<PricingScreen />", () => {
     expect(within(free).getByText("شقة واحدة")).toBeInTheDocument();
     expect(within(free).getByText("مجانًا")).toBeInTheDocument();
     expect(bullets(free)).toEqual([
-      "حاسبة الجدوى كاملة",
-      "نتيجة الشهر الحالي: مكسب أو خسارة",
-      "نسبة الإشغال ومتوسط سعر الليلة",
+      "حاسبة الجدوى كاملةمتاح الآن",
+      "نتيجة تقديرية للشهر: مكسب أو خسارةمتاح الآن",
+      "نسبة الإشغال ومتوسط سعر الليلة من مدخلاتكمتاح الآن",
     ]);
     expect(screen.queryByText("حسابات كاملة لوحدة واحدة")).toBeNull();
     expect(screen.queryByText("إدخال الحجوزات والمصروفات بلا حدود")).toBeNull();
@@ -62,11 +62,11 @@ describe("<PricingScreen />", () => {
     expect(screen.queryByText("الأكثر اختيارًا")).toBeNull();
     expect(pro).toHaveTextContent("249ج.م.شهريًاتجريبي");
     expect(bullets(pro)).toEqual([
-      "كل ما في المجاني",
-      "تفصيل الشهر كاملًا وكل الشهور السابقة",
-      "تقرير الشهر PDF وكشف حساب المالك",
-      "استيراد تقارير Airbnb",
-      "كل شقة إضافية بنصف سعر الباقة",
+      "كل ما في المجانيمتاح الآن",
+      "تفصيل الشهر كاملًا وكل الشهور السابقةقيد التطوير",
+      "تقرير الشهر PDF وكشف حساب المالكقيد التطوير",
+      "استيراد تقارير Airbnbقيد التطوير",
+      "كل شقة إضافية بنصف سعر الباقةقيد التطوير",
     ]);
   });
 
@@ -115,8 +115,8 @@ describe("<PricingScreen />", () => {
   it("two lines under the cards: the first month is open, and payment is month to month", () => {
     renderPricing();
     const terms = screen.getByTestId("plan-terms");
-    expect(terms).toHaveTextContent("أول شهر بعد إنشاء الحساب: كل شيء مفتوح.");
-    expect(terms).toHaveTextContent("الدفع شهر بشهر، بلا تجديد تلقائي.");
+    expect(terms).toHaveTextContent("مخطط: أول شهر بعد إنشاء الحساب سيكون مفتوحًا بالكامل.");
+    expect(terms).toHaveTextContent("مخطط: الدفع شهر بشهر، بلا تجديد تلقائي.");
     // Under the cards: after Pro, before the setup kit.
     expect(card("برو").compareDocumentPosition(terms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(terms.compareDocumentPosition(card("باقة تجهيز الشقة")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -134,7 +134,9 @@ describe("<PricingScreen />", () => {
     expect(new URLSearchParams(href.slice(href.indexOf("?") + 1)).get("body")).toBe(
       "Hello, I'd like to ask about a custom Backdesk plan for more than 5 apartments.",
     );
-    expect(screen.getByText("Pay month to month, with no automatic renewal.")).toBeInTheDocument();
+    expect(screen.getByText("Planned: monthly payments without automatic renewal.")).toBeInTheDocument();
+    expect(within(card("Pro")).getByText("Airbnb report import").closest("li")).toHaveTextContent("In development");
+    expect(within(card("Setup Kit")).queryByRole("button", { name: "Order the kit" })).toBeNull();
   });
 
   it("pre-order buttons explain that pre-orders open soon until a link is set", () => {

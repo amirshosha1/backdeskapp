@@ -450,6 +450,7 @@
   },
   "pricing": {
     "title": "الباقات",
+    "availability": { "available": "متاح الآن", "planned": "قيد التطوير" },
     "perMonth": "شهريًا",
     "scope": {
       "free": "شقة واحدة",
@@ -461,8 +462,8 @@
     "customPlans": "أكثر من {count, plural, one {شقة واحدة} two {شقتين} few {# شقق} many {# شقة} other {# شقة}}: باقات خاصة",
     "contactUs": "تواصل معنا",
     "customPlansPrefill": "مرحبًا، أسأل عن باقة خاصة في باك ديسك لأكثر من {count, plural, one {شقة واحدة} two {شقتين} few {# شقق} many {# شقة} other {# شقة}}.",
-    "firstMonthOpen": "أول شهر بعد إنشاء الحساب: كل شيء مفتوح.",
-    "monthToMonth": "الدفع شهر بشهر، بلا تجديد تلقائي.",
+    "firstMonthOpen": "مخطط: أول شهر بعد إنشاء الحساب سيكون مفتوحًا بالكامل.",
+    "monthToMonth": "مخطط: الدفع شهر بشهر، بلا تجديد تلقائي.",
     "preorderCta": "احجز مكانك",
     "choosePlan": "اختر {plan}",
     "startFree": "ابدأ مجانًا",
