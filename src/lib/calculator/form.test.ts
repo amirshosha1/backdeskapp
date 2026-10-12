@@ -55,7 +55,7 @@ describe("calculator form", () => {
     expect(errorOf(withValue("bookedNights", "1000"), "bookedNights")).toBe("too_large");
     expect(errorOf(withValue("usefulLifeMonths", "601"), "usefulLifeMonths")).toBe("too_large");
     expect(errorOf(withValue("blockedNights", "31"), "blockedNights")).toBe("blocked_too_many");
-    expect(errorOf(withValue("usefulLifeMonths", "0"), "usefulLifeMonths")).toBe("life_required");
+    expect(errorOf(withValue("usefulLifeMonths", "0", withValue("setupCost", "250000")), "usefulLifeMonths")).toBe("life_required");
     expect(parseCalculatorForm(withValue("setupCost", "0", withValue("usefulLifeMonths", "0"))).ok).toBe(true);
   });
 

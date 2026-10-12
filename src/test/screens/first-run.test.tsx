@@ -4,7 +4,7 @@ import { renderWithIntl } from "@/test/render";
 import { router } from "@/test/mocks/navigation";
 import { FirstRunScreen } from "@/components/first-run/first-run-screen";
 import { FirstRunGate } from "@/components/first-run/first-run-gate";
-import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM } from "@/test/legacy-calculator-example";
 import { readFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { resetFlowEventsForTests } from "@/lib/analytics/flow-events";
 import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "@/lib/guest/store";
@@ -12,7 +12,7 @@ import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 afterEach(() => vi.clearAllMocks());
 
-const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
+const EXAMPLE = LEGACY_EXAMPLE_FORM;
 const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎]/g, "");
 const renderFlow = (locale: "ar" | "en" = "ar") => renderWithIntl(<FirstRunScreen example={EXAMPLE} />, { locale });
 const heading = () => screen.getByRole("heading", { level: 1 }).textContent;
