@@ -44,7 +44,6 @@ describe("<UnitsScreen />", () => {
     renderWithIntl(<UnitsScreen units={UNITS} />);
     expect(screen.getByTestId("examples-heading")).toHaveTextContent("أمثلة توضيحية (ليست بياناتك)");
     expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
-    expect(screen.getByTestId("statement-example-warning")).toHaveTextContent("بيانات توضيحية — ليس كشفًا فعليًا");
   });
 
   it("with the person's apartment: no example chip", () => {
@@ -149,6 +148,7 @@ describe("<OwnerStatement />", () => {
     renderWithIntl(<OwnerStatement statement={STATEMENT} />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("مثال: كشف حساب مالك");
     expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+    expect(screen.getByTestId("statement-example-warning")).toHaveTextContent("بيانات توضيحية — ليس كشفًا فعليًا");
     expect(screen.queryByText(/تنزيل PDF/)).toBeNull();
     expect(screen.queryByText(/رابط للمالك/)).toBeNull();
   });
