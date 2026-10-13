@@ -2,14 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { detectInAppBrowser } from "@/lib/browser/in-app";
 import { DISPLAY_MODES, ENTRIES, LOCALES, OUTCOMES, UTM_PATTERN } from "@/lib/analytics/events";
+import { consentSessionId } from "@/lib/analytics/consent-token";
 
 /**
  * The first-party analytics endpoint (docs/ANALYTICS.md). The browser
- * sends one anonymous event (src/lib/analytics/track.ts); this route
+ * sends one catalogued event (src/lib/analytics/track.ts); this route
  * accepts only the catalogue, adds three server-side facts and forwards it
- * to PostHog EU. Anonymous by construction: a new random distinct_id per
- * event (no visitor identifier), no person profile, no IP lookup; the
- * country comes from Vercel's header, and the IP itself is never sent
+ * to PostHog EU. Without verified consent each event gets a fresh random
+ * distinct_id. Accepted events share a short-lived server-derived id.
+ * No person profile or IP lookup; the country comes from Vercel's header, and the IP itself is never sent
  * (PostHog sees only Vercel's server). Without NEXT_PUBLIC_POSTHOG_KEY it
  * does nothing.
  */
@@ -42,11 +43,12 @@ const refuse = (status: number) => new NextResponse(null, { status, headers: { "
 /** Sent by this site's own pages only. */
 function sameOrigin(request: NextRequest): boolean {
   const site = request.headers.get("sec-fetch-site");
-  if (site) return site === "same-origin";
+  if (site && site !== "same-origin") return false;
   const origin = request.headers.get("origin");
-  if (!origin) return false;
+  if (!origin) return site === "same-origin";
   try {
-    return new URL(origin).host === request.headers.get("host");
+    const supplied = new URL(origin);
+    return supplied.host === (request.headers.get("host") ?? request.nextUrl.host) && supplied.protocol === request.nextUrl.protocol;
   } catch {
     return false;
   }
@@ -93,7 +95,7 @@ export async function POST(request: NextRequest) {
   const payload = {
     api_key: key,
     event: parsed.data.event,
-    distinct_id: crypto.randomUUID(),
+    distinct_id: consentSessionId(request) ?? crypto.randomUUID(),
     timestamp: new Date().toISOString(),
     properties: {
       ...parsed.data.properties,

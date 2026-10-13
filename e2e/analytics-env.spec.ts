@@ -52,6 +52,47 @@ test("the whole funnel from the landing page: four events, fixed values only, an
   }
 });
 
+test("acceptance persists through reload, navigation and tabs; withdrawal returns to count-only", async ({ page, context, baseURL }) => {
+  const { sent } = await record(page);
+  await page.goto("/");
+  await expect.poll(() => sent.length).toBe(1);
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeVisible();
+  expect(await context.cookies()).toEqual([]);
+  await page.getByRole("button", { name: "أوافق" }).click();
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeHidden();
+  const cookie = (await context.cookies()).find((c) => c.name === "backdesk-analytics-consent-local");
+  expect(cookie).toMatchObject({ httpOnly: true, sameSite: "Lax" });
+  await page.reload();
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeHidden();
+  const other = await context.newPage();
+  await other.goto("/en/privacy");
+  await expect(other.getByRole("button", { name: "Change analytics choice" })).toBeVisible();
+  await other.getByRole("button", { name: "Change analytics choice" }).click();
+  await other.getByRole("button", { name: "Reject" }).click();
+  await expect(other.getByRole("region", { name: "Analytics choice" })).toBeHidden();
+  expect((await context.cookies()).find((c) => c.name === "backdesk-analytics-consent-local")).toBeUndefined();
+  await page.reload();
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem("backdesk:analytics-rejected"))).toBe("1");
+  const status = await page.request.get(`${baseURL}/api/analytics-consent`);
+  expect(await status.json()).toEqual({ accepted: false });
+});
+
+test("rejection keeps counting but sets no consent identifier, and preferences can reopen", async ({ page, context }) => {
+  const { sent } = await record(page);
+  await page.goto("/");
+  await expect.poll(() => sent.length).toBe(1);
+  await page.getByRole("button", { name: "أرفض" }).click();
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeHidden();
+  expect(await context.cookies()).toEqual([]);
+  await page.reload();
+  await expect.poll(() => sent.length).toBe(2);
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeHidden();
+  await page.goto("/privacy");
+  await page.getByRole("button", { name: "غيّر اختيار التحليلات" }).click();
+  await expect(page.getByRole("region", { name: "اختيار التحليلات" })).toBeVisible();
+});
+
 test("switching the landing's language is not a second view", async ({ page }) => {
   const { sent } = await record(page);
   await page.goto("/");

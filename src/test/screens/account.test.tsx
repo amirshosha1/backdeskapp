@@ -354,12 +354,14 @@ describe("the privacy page", () => {
     expect(screen.queryByTestId("demo-banner")).toBeNull();
   });
 
-  it.each(["ar", "en"] as const)("describes the anonymous counting before it ships: what, where, what never (%s)", (locale) => {
+  it.each(["ar", "en"] as const)("describes count-only and accepted-session analytics accurately (%s)", (locale) => {
     renderWithIntl(<PrivacyScreen />, { locale });
     const text = screen.getByTestId("privacy").textContent ?? "";
     expect(text).toContain("PostHog");
     expect(text).toMatch(locale === "ar" ? /فرانكفورت/ : /Frankfurt/);
-    expect(text).toMatch(locale === "ar" ? /لا كوكيز، ولا تخزين في متصفحك، ولا معرّف/ : /no cookies, no browser storage, and no identifier/);
+    expect(text).toMatch(locale === "ar" ? /قبل قبول التحليلات، وبعد رفضها أو سحب الموافقة/ : /Before you accept analytics, and after you reject or withdraw/);
+    expect(text).toMatch(locale === "ar" ? /تبقى الأحداث السابقة مجهولة/ : /Earlier events stay anonymous/);
+    expect(text).toMatch(locale === "ar" ? /كوكي موافقة موقّعة/ : /signed, HttpOnly consent cookie/);
     expect(text).toMatch(locale === "ar" ? /مكسب أو خسارة فقط، بدون أي رقم/ : /profit or loss only, never a number/);
     expect(text).toMatch(locale === "ar" ? /لا نرسل عنوان IP نفسه/ : /never send the IP address itself/);
     expect(text).not.toMatch(locale === "ar" ? /لا نستخدم أي أداة تحليلات/ : /use no analytics/);

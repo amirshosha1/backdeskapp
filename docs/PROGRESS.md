@@ -1,7 +1,18 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
+> Last updated: 2026-10-14 (analytics consent session fix in draft; earlier status entries are historical).
+
+## 2026-10-14 — Analytics consent session fix (draft PR)
+
+The consent choice adds a six-hour signed HttpOnly cookie only after explicit
+acceptance. `/api/e` keeps fresh per-event IDs for count-only traffic and
+derives one server-side ID from valid accepted consent across landing,
+calculator, navigation and tabs. Rejection and withdrawal return to
+count-only. The Privacy page and `docs/ANALYTICS.md` describe the behavior and
+the stateless copied-cookie replay limitation. This is the scoped consent
+fix only; the rest of the old PR C ideas are still pending. Deployment and
+merge require Amir's separate approval.
 
 ## Current status
 

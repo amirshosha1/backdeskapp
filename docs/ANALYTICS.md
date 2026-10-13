@@ -1,4 +1,4 @@
-# ANALYTICS.md — anonymous counting (Backdesk · باك ديسك)
+# ANALYTICS.md — count-only and consented session analytics (Backdesk · باك ديسك)
 
 Batch 4, PR 1 ("C1: anonymous counting", 2026-10-09). Decided by Amir on
 2026-10-08 (consent model) and 2026-10-09 (counts only, no identifier,
@@ -6,10 +6,19 @@ Batch 4, PR 1 ("C1: anonymous counting", 2026-10-09). Decided by Amir on
 
 ## The rule
 
-- **Before any consent choice (and, once PR C adds the bar, after "reject"):
-  anonymous counting only.** No cookie, no localStorage or sessionStorage
-  written by analytics, no identifier for a person or a device, no person
-  profile, no IP address sent or stored, no session replay.
+- **Before any consent choice, after rejection, and after withdrawal:
+  anonymous counting only.** No analytics identifier or consent cookie is
+  created before acceptance. Every count-only event uses a fresh random
+  `distinct_id`. A fixed localStorage value `backdesk:analytics-rejected=1`
+  remembers a rejection or withdrawal; it contains no identifier. No person
+  profile, IP address sent to PostHog, or session replay.
+- **After explicit acceptance:** a six-hour signed, HttpOnly, SameSite=Lax
+  consent cookie lets the server derive one `distinct_id` for that consent
+  session. The browser never sees the ID or signing secret. The ID is shared
+  across landing and calculator, navigation, reload, and tabs. Earlier
+  count-only events remain separate. Withdrawal clears the cookie; later
+  events return to count-only. There is no posthog-js, autocapture, user
+  identification, or replay in this change.
 - **Nothing is sent without `NEXT_PUBLIC_POSTHOG_KEY`** (local dev, CI, the
   main e2e build).
 - **Never** an amount, an apartment name, an email, or free text. Every
@@ -17,10 +26,8 @@ Batch 4, PR 1 ("C1: anonymous counting", 2026-10-09). Decided by Amir on
   the route refuses anything else.
 - The privacy page (`/privacy`) describes exactly this, and is updated in
   the same pull request as any change to it (BUILD_PLAN.md Phase 0b).
-- PR C (still queued) adds the consent bar and, after "accept", the full
-  PostHog library for signed-in identification, replay (everything masked)
-  and error tracking. Nothing in this file changes for visitors who make no
-  choice.
+- The consent bar offers equal accept and reject actions. The Privacy page
+  can reopen the choice. Other PR C ideas remain out of scope.
 
 ## How an event travels
 
@@ -40,15 +47,34 @@ Batch 4, PR 1 ("C1: anonymous counting", 2026-10-09). Decided by Amir on
      development) and `country` (Vercel's `x-vercel-ip-country`, two
      letters);
    - forwards to `${NEXT_PUBLIC_POSTHOG_HOST}/i/v0/e/` with a **new random
-     `distinct_id` for every event**, `$process_person_profile: false` and
+     `distinct_id` for every count-only event**, or a server-derived session
+     ID only with valid consent, `$process_person_profile: false` and
      `$geoip_disable: true`. PostHog only ever sees Vercel's server, never
      the visitor's IP or user agent.
 3. One page view counts each flow event at most once
    (`src/lib/analytics/flow-events.ts`). A language switch or a remount
    does not count again; a reload is a new page view and can.
 
-Because no event links to another, every funnel is read **by counts**,
-step over step, not by person.
+Unconsented funnels are read **by counts**, step over step. Accepted events
+can be grouped within the six-hour consent session, including across the
+landing and calculator flow; never join them to earlier events.
+
+## Consent proof and limitation
+
+`POST /api/analytics-consent` accepts only strict JSON from the exact same
+origin (Origin and Fetch Metadata checks). Acceptance requires the server-only
+`ANALYTICS_CONSENT_SECRET` to be set to at least 32 UTF-8 bytes; otherwise it
+returns 503 and linking fails closed. Its HMAC-signed cookie uses `Secure` and
+the `__Host-` prefix on HTTPS. `GET` verifies it without caching. Neither
+endpoint sets a session ID in browser storage. Consent does not change the
+strict event-property allowlist.
+
+**Stateless revocation limitation:** withdrawal deletes the browser's cookie,
+but a copy of a still-valid cookie retained elsewhere can be replayed until
+its six-hour expiry. A request already in flight at withdrawal can also be
+processed with that cookie. No revocation database or extra infrastructure is
+used in this PR. Rotating `ANALYTICS_CONSENT_SECRET` invalidates all existing
+consent cookies. Do not log, share, or expose cookie values.
 
 ## Event catalogue
 
@@ -83,12 +109,17 @@ body as `track()` (a unit test compares them) and is rendered only when
    - `NEXT_PUBLIC_POSTHOG_KEY` = the project API key (`phc_…`; public by
      design, like the Supabase publishable key);
    - `NEXT_PUBLIC_POSTHOG_HOST` = `https://eu.i.posthog.com`.
+   - `ANALYTICS_CONSENT_SECRET` = a unique random server-only value of at
+     least 32 bytes in each environment. Never prefix it with `NEXT_PUBLIC_`.
    Values are inlined at build time: **redeploy** after adding or changing
    them.
-3. Check: open the preview on your phone, start the questions, reach a
-   verdict. PostHog → Activity → **Live events** shows `first_run_started`
-   then `verdict_shown`, each with `env = preview`. The two landing events
-   appear on PR 2's preview (its merge gate).
+3. Check Preview with a fresh browser: before choice, events have different
+   IDs. Accept, reload and navigate landing → calculator; those later events
+   share one ID. Reject or withdraw and verify subsequent events have fresh,
+   different IDs. Confirm no prior event acquired the accepted ID. Repeat in
+   two tabs and on a phone. Check `env = preview`, and verify PostHog project
+   settings (EU Cloud, discard IP, replay/autocapture off) manually before
+   production promotion.
 
 ## Funnels and insights to build in PostHog
 
@@ -108,24 +139,25 @@ Filter every insight to `env = production`.
    `utm_source`, `in_app_browser`, `locale`.
 
 Counts are approximate in both directions: a reload can count a step
-twice, and an ad blocker or a closed tab can drop one. With no identifier
-there is no way to deduplicate, by design.
+twice, and an ad blocker or a closed tab can drop one. Count-only events
+cannot be deduplicated across page views, by design.
 
 ## Tests
 
 - `src/lib/analytics/*.test.ts`: the catalogue, `utmValue`, the sender (no
-  key → nothing; one text/plain beacon; never a cookie or storage write;
+  key → nothing; one text/plain beacon; no storage write from the sender;
   never throws), once-per-page-view flow events, and a guard that no other
   source file sends a beacon, names `/api/e` or talks to PostHog.
-- `src/app/api/e/route.test.ts`: forwards one anonymous event with a fresh
-  id, no IP and no user agent; refuses other sites, robots, extra fields,
+- `src/app/api/e/route.test.ts`: forwards count-only events with fresh IDs
+  and accepted events with a shared ID, no IP and no user agent; refuses other sites, robots, extra fields,
   unknown events, bad utm values and oversized bodies; 204 without the key
   or when PostHog is unreachable.
 - `src/test/screens/first-run.test.tsx`: the flow sends the two events once,
   with `entry` and `outcome`, and nothing without the key.
 - `e2e/analytics-env.spec.ts` (`playwright.analytics.config.ts`, a build
   with a placeholder key and a `.invalid` host): the real flow in Chromium
-  sends exactly the two events in order, with no run of three digits, no
-  cookie, no new storage and no other host; the real route answers 204,
+  sends events in order, with no amount or extra host; before consent it
+  sets no cookie or new storage. Consent tests cover choices, reload and tabs;
+  the real route answers 204,
   403 and 400. The main e2e build has no key, and `e2e/first-run.spec.ts`
   and `e2e/calculator.spec.ts` fail on any non-GET request there.

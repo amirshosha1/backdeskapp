@@ -4,6 +4,13 @@
     "shareName": "Backdesk · باك ديسك",
     "description": "Backdesk: work out your short-term rental's monthly net and whether it makes a profit or a loss."
   },
+  "analyticsConsent": {
+    "title": "Analytics choice",
+    "body": "Allow us to link the next six hours of anonymous usage steps to measure the path through Backdesk? Rejection keeps anonymous counts only. Change this later in Privacy.",
+    "accept": "Accept",
+    "reject": "Reject",
+    "error": "Your choice could not be saved. Please try again."
+  },
   "common": {
     "brandName": "Backdesk",
     "bannerGuest": "Saved on this device · Sign in to save it to your account",
@@ -591,11 +598,11 @@
   },
   "privacy": {
     "title": "Privacy policy",
-    "updated": "Last updated: 9 October 2026",
+    "updated": "Last updated: 14 October 2026",
     "intro": "Backdesk is a bookkeeping tool for short-term rental hosts. This page explains what we keep about you, where it is kept, who processes it, and how to delete it.",
     "guest": {
       "title": "Without an account",
-      "body": "You can use Backdesk without signing in. Your apartment's numbers and your answers then stay in your browser on this device only (local storage) and are not sent to our servers. The only thing sent is the anonymous counting described under “Analytics” below, without any of your numbers."
+      "body": "You can use Backdesk without signing in. Your apartment's numbers and your answers then stay in your browser on this device only (local storage) and are not sent to our servers. Only the events described under “Analytics” below are sent, without any of your numbers."
     },
     "account": {
       "title": "When you sign in with Google",
@@ -610,20 +617,21 @@
     },
     "analytics": {
       "title": "Analytics and ads",
-      "body": "We count how often a few steps happen, to see where visitors stop and improve Backdesk: opening the home page and tapping its button, starting the first questions, and seeing the result (profit or loss only, never a number). The counting is anonymous: no cookies, no browser storage, and no identifier for you or your device, so two events cannot be linked to each other or to you.",
+      "body": "We count a few steps to improve Backdesk: opening the home page and tapping its button, starting the first questions, and seeing the result (profit or loss only, never a number). Before you accept analytics, and after you reject or withdraw, each event is counted anonymously with a new random ID. These events cannot be linked to each other. If you accept, events for the next six hours share a session ID so we can measure the path from the landing page to the calculator. Earlier events stay anonymous.",
       "details": "With each event we send: the page's language, whether it was opened inside an app such as Facebook, whether Backdesk is installed on the home screen, the visit's source if the link carries one (such as utm_source), and the country our host derives from the IP address. We never send the IP address itself, your apartment's numbers or name, or anything you type. These events go to PostHog in the European Union.",
-      "noAds": "No ads, and we sell your data to no one. Because the counting is not linked to you, it cannot be shown to you or deleted individually."
+      "noAds": "No ads, and we sell your data to no one. Anonymous counts cannot be shown to you or deleted individually. You can change your analytics choice here at any time.",
+      "preferences": "Change analytics choice"
     },
     "cookies": {
       "title": "Cookies and browser storage",
-      "body": "We use only necessary cookies: Supabase's sign-in session cookies, and short-lived cookies during sign-in that protect it and remember the page you started from. Without an account, your numbers are kept in the browser's local storage."
+      "body": "Supabase uses sign-in session cookies and short-lived sign-in protection cookies. If you accept analytics, we use a signed, HttpOnly consent cookie for six hours; withdrawing clears it. A fixed, non-identifying browser setting remembers rejection or withdrawal. No analytics cookie or identifier is created before acceptance. Without an account, your numbers stay in the browser's local storage."
     },
     "processors": {
       "title": "Who processes your data",
       "supabase": "Supabase: the database and sign-in, in the European Union (Ireland).",
       "vercel": "Vercel: hosting. The servers that run requests are in the European Union (Dublin, Ireland); pages are delivered from Vercel's global network, from the location nearest to you.",
       "google": "Google: sign-in with your Google account, under Google's privacy policy.",
-      "posthog": "PostHog: the anonymous counting (analytics), in the European Union (Frankfurt, Germany)."
+      "posthog": "PostHog: anonymous counts and, only after consent, session-linked analytics, in the European Union (Frankfurt, Germany)."
     },
     "delete": {
       "title": "Deleting your account",

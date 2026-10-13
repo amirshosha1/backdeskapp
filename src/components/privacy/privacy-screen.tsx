@@ -70,6 +70,7 @@ export function PrivacyScreen() {
             <p>{t("analytics.body")}</p>
             <p>{t("analytics.details")}</p>
             <p>{t("analytics.noAds")}</p>
+            {process.env.NEXT_PUBLIC_POSTHOG_KEY ? <button type="button" data-analytics-preferences className="tap self-start font-medium text-brand underline underline-offset-2">{t("analytics.preferences")}</button> : null}
           </Section>
           <Section title={t("cookies.title")}>
             <p>{t("cookies.body")}</p>

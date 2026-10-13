@@ -23,7 +23,7 @@ function files(dir: string): string[] {
 describe("analytics leaves only through src/lib/analytics", () => {
   it("no other source file sends a beacon, names the route or talks to PostHog", () => {
     const offenders = files(ROOT)
-      .map((path) => ({ path: relative(ROOT, path), text: readFileSync(path, "utf8") }))
+      .map((path) => ({ path: relative(ROOT, path).replaceAll("\\", "/"), text: readFileSync(path, "utf8") }))
       .filter(({ path }) => !ALLOWED.some((allowed) => path.startsWith(allowed)))
       .filter(({ text }) => /sendBeacon|["'`]\/api\/e["'`]|posthog\.com/i.test(text))
       .map(({ path }) => path);

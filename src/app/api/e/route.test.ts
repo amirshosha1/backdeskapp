@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { MAX_BODY_BYTES, POST } from "./route";
+import { createConsentToken } from "@/lib/analytics/consent-token";
 
 /**
  * The analytics route: only the catalogue, only from this site, never from
@@ -83,6 +84,20 @@ describe("POST /api/e", () => {
     expect(ids[0]).not.toBe(ids[1]);
   });
 
+  it("links only events carrying a valid accepted cookie", async () => {
+    vi.stubEnv("ANALYTICS_CONSENT_SECRET", "0123456789abcdef0123456789abcdef");
+    const token = createConsentToken()!;
+    await POST(post(verdict));
+    await POST(post({ event: "landing_view", properties: { locale: "ar", display_mode: "browser" } }, { cookie: `__Host-backdesk-analytics-consent=${token}` }));
+    await POST(post(verdict, { cookie: `__Host-backdesk-analytics-consent=${token}` }));
+    await POST(post(verdict));
+    const ids = fetchMock.mock.calls.map(([, init]) => JSON.parse(String(init!.body)).distinct_id);
+    expect(ids[1]).toBe(ids[2]);
+    expect(ids[0]).not.toBe(ids[1]);
+    expect(ids[3]).not.toBe(ids[1]);
+    expect(JSON.stringify(fetchMock.mock.calls)).not.toContain(token);
+  });
+
   it("does nothing without the key", async () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
     expect((await POST(post(verdict))).status).toBe(204);
@@ -91,6 +106,7 @@ describe("POST /api/e", () => {
 
   it("refuses requests from other sites", async () => {
     expect((await POST(post(verdict, { "sec-fetch-site": "cross-site" }))).status).toBe(403);
+    expect((await POST(post(verdict, { origin: "https://evil.example" }))).status).toBe(403);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
