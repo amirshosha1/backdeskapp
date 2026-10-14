@@ -52,6 +52,21 @@ test("the whole funnel from the landing page: four events, fixed values only, an
   }
 });
 
+test("CTA reaches the real route during browser navigation", async ({ page }) => {
+  await page.goto("/");
+  const clickResponse = page.waitForResponse((response) => {
+    if (new URL(response.url()).pathname !== "/api/e") return false;
+    try {
+      return JSON.parse(response.request().postData() ?? "{}").event === "landing_cta_click";
+    } catch {
+      return false;
+    }
+  });
+  await page.getByTestId("landing-cta").click();
+  await expect(page).toHaveURL(/\/demo\/start$/);
+  expect((await clickResponse).status()).toBe(204);
+});
+
 test("acceptance persists through reload, navigation and tabs; withdrawal returns to count-only", async ({ page, context, baseURL }) => {
   const { sent } = await record(page);
   await page.goto("/");

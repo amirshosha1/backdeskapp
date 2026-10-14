@@ -51,6 +51,8 @@ afterEach(() => {
   for (const [type, fn, opts] of listeners.splice(0)) document.removeEventListener(type, fn, opts);
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+  vi.clearAllTimers();
+  vi.useRealTimers();
   vi.clearAllMocks();
   beacon.mockImplementation(() => true);
 });
@@ -89,17 +91,23 @@ describe("landingEventsScript()", () => {
     expect(view!.properties).toEqual({ locale: "en", display_mode: "browser" });
   });
 
-  it("a tap on the button (or inside it) sends landing_cta_click; other links send nothing", async () => {
+  it("a tap sends the CTA through a keepalive request before navigation; other links send nothing", () => {
     load();
     beacon.mockClear();
+    vi.useFakeTimers();
+    fetchMock.mockImplementationOnce(() => new Promise<Response>(() => {}));
     document.querySelector("a[href='/privacy']")!.addEventListener("click", (e) => e.preventDefault());
     (document.querySelector("a[href='/privacy']") as HTMLElement).click();
     expect(beacon).not.toHaveBeenCalled();
     const cta = document.querySelector("[data-cta]") as HTMLElement;
-    cta.addEventListener("click", (e) => e.preventDefault());
-    (cta.querySelector("span") as HTMLElement).click();
-    expect(beacon).toHaveBeenCalledTimes(1);
-    const [click] = await sentBodies();
+    const clicked = (cta.querySelector("span") as HTMLElement).dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(clicked).toBe(false);
+    expect(beacon).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0]!;
+    expect(url).toBe("/api/e");
+    expect(init).toMatchObject({ method: "POST", keepalive: true, credentials: "same-origin" });
+    const click = JSON.parse(String(init?.body));
     expect(click).toEqual({ event: "landing_cta_click", properties: { locale: "ar", display_mode: "browser" } });
   });
 
