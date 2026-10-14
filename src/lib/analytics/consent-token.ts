@@ -40,7 +40,9 @@ export function consentSessionId(request: NextRequest, now = Date.now()): string
   const payload = token.slice(0, token.lastIndexOf("."));
   const expected = createHmac("sha256", secret).update(payload).digest();
   const received = Buffer.from(match[3]!, "base64url");
-  if (received.length !== expected.length || !timingSafeEqual(received, expected)) return null;
+  // A 43-character base64url digest has unused trailing bits. Require the
+  // canonical spelling so altered cookie strings cannot verify as aliases.
+  if (received.toString("base64url") !== match[3] || received.length !== expected.length || !timingSafeEqual(received, expected)) return null;
   // Domain separation keeps the bearer token itself out of PostHog.
   return createHmac("sha256", secret).update(`analytics-session:${match[2]}`).digest("hex");
 }
