@@ -1,7 +1,7 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
+> Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `.claude/context/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `.claude/context/SESSION_HANDOFF.md`.
 
 ## Current status
 
@@ -54,7 +54,7 @@
 
 - Local machine: Windows 11, Node 24.15, pnpm 9.15, Git 2.54. **No Docker, WSL, Supabase CLI or `gh`, by design.** Do not ask Amir to install anything.
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
-- Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
+- Repo: `github.com/amirshosha1/backdeskapp` (renamed from `str-money-finder`; older text here and in PR descriptions still uses the old name), branch `main`.
 - Supabase: the **Backdesk project exists** (created by Amir).
   - Ref `kmmfhaypqgzhoptmljki`, West EU / Ireland (`eu-west-1`), Free plan.
   - **It is production; there is no separate dev or prod project** (2026-10-08).
@@ -587,6 +587,6 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## How to resume in a fresh session (including Claude Code on the web)
 
-1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.
-2. Send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
-3. At the end of the phase, update this file: status, decisions, open issues, next step.
+1. Read `CLAUDE.md` and `.claude/context/SESSION_HANDOFF.md` (or run `/project-resume`). Open `docs/BUILD_PLAN.md` and this file only by section, with `grep -n '^#'`.
+2. For phase work, send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
+3. At the end of a session run `/project-sync`; at the end of a phase also update this file: status, decisions, open issues, next step.
