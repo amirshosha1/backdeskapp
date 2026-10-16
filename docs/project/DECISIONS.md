@@ -1,8 +1,8 @@
 # DECISIONS — active architectural and product decisions
 
-> Only decisions that constrain future work. Dated chronology and reasoning: `docs/PROGRESS.md` (search the date). Status: ACTIVE / SUPERSEDED / PENDING.
+> Only decisions that constrain future work. Dated chronology and reasoning: `docs/PROGRESS.md` (search the date). Status: ACTIVE / SUPERSEDED / PENDING. Superseded decisions stay in the table, marked, with the superseding ID. Owner = Amir (`amirshosha1`).
 
-| ID | Decision | Why | Date | Consequence | Status |
+| ID | Decision | Context / rationale | Date | Consequence | Status |
 |---|---|---|---|---|---|
 | D-01 | Cloud-first workflow: no Docker/WSL/local Supabase; Claude Code on the web + Vercel previews + hosted Supabase | Owner's machine is Node/pnpm/Git only | 2026-09-26 | DB tests run on a throwaway Postgres in CI/cloud (`pnpm test:db`); never against hosted | ACTIVE |
 | D-02 | Phase order P→P.1→1→P.2→0a→0b→2→3→⛔Gate→5→6→7→8→4→10→launch→9; Phase 5 starts only after 20 paid InstaPay pre-orders | Validate demand before building the ERP | 2026-09-26 | ERP is blocked until Amir gives the exact gate line | ACTIVE |
@@ -25,4 +25,5 @@
 | D-19 | Squash merge only, "CI / checks" and "Database tests / rls" green first; no merge/deploy to production without Amir's approval | GitHub Free cannot enforce required checks | 2026-10-08 | Manual discipline | ACTIVE |
 | D-20 | Analytics consent mechanism: PR C planned posthog-js "accepted tier" (identify by Supabase user id, masked replay); PR #24 instead implements a server-side HMAC consent cookie and a derived server session id | Open: PR C Q2–Q5 unanswered | 2026-10-13 (PR #24) | Reconcile before merging #24 or building PR C | PENDING |
 | D-21 | Stabilization posture: describe the product as calculator early access, not a working ERP, until real expense persistence and two-account isolation are proven | Evidence-based claims | 2026-10-12 (PR #22, unmerged) | Governs landing/pricing wording | PENDING (Amir) |
-| D-22 | Project memory layout (2026-10-16): `CLAUDE.md` (rules, always loaded) + `SESSION_HANDOFF.md` (always read) + on-demand `.claude/context/*`; code beats docs; `/project-resume` and `/project-sync` are the only entry/exit points; verification of freshness is by git (baseline commit, PR heads), not by date | Minimize startup reads without losing rules | 2026-10-16 | Context files must carry evidence; no auto-commits by `/project-sync` | ACTIVE |
+| D-22 | Project memory layout (2026-10-16), first version: `CLAUDE.md` + `.claude/context/*` + Claude-only commands | Minimize startup reads | 2026-10-16 | Replaced by D-23 | SUPERSEDED by D-23 |
+| D-23 | Vendor-neutral knowledge system: root `AGENTS.md` is the canonical entry for every coding agent; shared knowledge lives in `docs/project/` (indexed by `docs/project/INDEX.md`); `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md` are thin pointers; Claude-only commands stay in `.claude/commands/` and nothing depends on them. Source-of-truth precedence is in `AGENTS.md` §0. Freshness is checked with git (code baseline, PR heads), not dates | The repository, not an AI vendor, owns project knowledge | 2026-10-16 | Section numbers of the old `CLAUDE.md` are kept in `AGENTS.md`; legacy citations map via `AGENTS.md` | ACTIVE (pending merge of the follow-up PR) |
