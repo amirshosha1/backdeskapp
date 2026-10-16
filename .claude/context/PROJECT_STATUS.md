@@ -1,6 +1,7 @@
 # PROJECT_STATUS — verified snapshot
 
-> **Verified 2026-10-16 at `main` = `4e14ee2`** (PR #17, merged 2026-10-11). Work branch `claude/exciting-heisenberg-wvg7fl` was identical to `main` and clean at audit start.
+> **Verified 2026-10-16 against code baseline `main` = `4e14ee2`** (PR #17, merged 2026-10-11). Later commits on the work branch are documentation only (`git log -- .claude CLAUDE.md`).
+> **Stale check:** `git fetch -q origin && git log --oneline 4e14ee2..origin/main -- . ':!.claude' ':!CLAUDE.md'`. Any output means areas touched by those commits must be re-verified before relying on this file. The PR table below is also stale when `git ls-remote origin 'refs/heads/*'` shows different heads.
 > Update only with evidence. If this contradicts the code, the code wins: verify and fix this file.
 
 ## Evidence legend
@@ -31,15 +32,17 @@ Calculator-first prototype with a real account layer. A visitor can get a profit
 | CI/CD, deployment | PARTIAL | CODE `.github/workflows/{ci,db-tests}.yml`, `vercel.json` (`dub1`); CI green on `4e14ee2` | Required checks unenforceable (KI-07); production behaviour unverified |
 | Documentation / DX | PARTIAL | CODE `docs/*` (2,445 lines); stale in places (KI-08) | Compaction; Windows setup issues (KI-09) |
 
-## In progress — open draft PRs (all based on `4e14ee2`; CI "checks" + "rls" green at their heads; none merged)
-| PR | Purpose | Gate stated in PR |
-|---|---|---|
-| [#19](https://github.com/amirshosha1/backdeskapp/pull/19) pricing truth | Mark each plan feature "available / in development"; remove Setup Kit order action | Amir approval, Preview review |
-| [#20](https://github.com/amirshosha1/backdeskapp/pull/20) account persistence | Fix stale account data restored after sign-out; two-account Preview matrix | Amir's two-Google-account test |
-| [#21](https://github.com/amirshosha1/backdeskapp/pull/21) delete-account tests | RLS tests: shared-org safety, stale token reads nothing | Preview check with disposable account |
-| [#22](https://github.com/amirshosha1/backdeskapp/pull/22) UX + beta gate | Direct numeric entry in first-run; beta-gate doc ("not ready as operating ledger") | CI, 360/768/1440 AR/EN review |
-| [#23](https://github.com/amirshosha1/backdeskapp/pull/23) 3BR presets | Baseline-aligned examples, laundry input, new share images | User approval |
-| [#24](https://github.com/amirshosha1/backdeskapp/pull/24) analytics consent | HMAC-signed 6 h consent cookie; needs server env `ANALYTICS_CONSENT_SECRET` (≥32 bytes) in Preview and Production | Phone + two-tab validation; no production deploy without approval |
+## In progress — open draft PRs (all based on `4e14ee2`; CI "checks" + "rls" green at the heads below on 2026-10-12/14; none merged)
+| PR | Head | Purpose | Gate stated in PR |
+|---|---|---|---|
+| [#19](https://github.com/amirshosha1/backdeskapp/pull/19) pricing truth | `deb0c80` | Mark each plan feature "available / in development"; remove Setup Kit order action | Amir approval, Preview review |
+| [#20](https://github.com/amirshosha1/backdeskapp/pull/20) account persistence | `3a7ab87` | Fix stale account data restored after sign-out; two-account Preview matrix | Amir's two-Google-account test |
+| [#21](https://github.com/amirshosha1/backdeskapp/pull/21) delete-account tests | `3526b95` | RLS tests for shared-org safety and stale tokens **plus a production migration** `20261012100000_preserve_fk_set_null.sql` that its description does not mention (KI-19) | Preview check with disposable account |
+| [#22](https://github.com/amirshosha1/backdeskapp/pull/22) UX + beta gate | `64a009d` | Direct numeric entry in first-run; beta-gate doc ("not ready as operating ledger") | CI, 360/768/1440 AR/EN review |
+| [#23](https://github.com/amirshosha1/backdeskapp/pull/23) 3BR presets | `ffa2f1f` | Baseline-aligned examples, laundry input, new share images | User approval |
+| [#24](https://github.com/amirshosha1/backdeskapp/pull/24) analytics consent | `0ef9da6` | HMAC-signed 6 h consent cookie; new route `/api/analytics-consent`; needs server env `ANALYTICS_CONSENT_SECRET` (≥32 bytes) in Preview and Production; edits `CLAUDE.md` | Phone + two-tab validation; no production deploy without approval |
+
+Simulated merge conflicts (`git merge-tree`, pairwise, 2026-10-16): `docs/PROGRESS.md` between #19/#20/#21/#22 (and with #24); `src/test/screens/landing.test.tsx` between #22 and #23; `CLAUDE.md` between the memory-system commit and #24. All other pairs merge cleanly.
 
 ## Blockers
 - Validation Gate (20 paid InstaPay pre-orders, exact line `Gate passed: {number} paid pre-orders.`) blocks Phase 5 (`docs/BUILD_PLAN.md` §5).

@@ -44,5 +44,5 @@ Supabase (Auth, Postgres), Vercel (hosting, previews), PostHog EU (via `/api/e`,
 ## Deployment
 Vercel Git integration: PR → Preview, `main` → `backdeskapp.com`. Supabase GitHub integration applies `supabase/migrations/` on merge to `main` against the single production project. CI: `.github/workflows/ci.yml` (lint, typecheck, unit tests, build with placeholder public values, `check:bundle`) and `db-tests.yml` (`pnpm test:db`). e2e is not run in CI.
 
-## Constraints that shape changes
-Money via Decimal, half-up at presentation, leftover cent to last line; currency explicit; multi-tenant by `org_id`; server-side entitlements; closed periods immutable; no guest PII; `/demo` is `noindex`. Full list: `CLAUDE.md` §2, §6.
+## Constraints
+Binding rules: `CLAUDE.md` §2 and §6 (not repeated here).

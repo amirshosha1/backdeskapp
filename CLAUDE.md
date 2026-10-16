@@ -20,14 +20,13 @@ Arabic-first financial OS for short-term-rental hosts (Egypt, then GCC): "How mu
 - No tax, legal or investment advice. Tax rates are user-configured settings, never hardcoded claims.
 - No invented market data. Any default, preset, price or benchmark without a real source is labelled `SAMPLE` in data and UI. Paying users never see SAMPLE benchmarks: if there are no sourced benchmark figures, the benchmark feature is hidden.
 
-
 ## 3. Stack
 
 Next.js (App Router, latest stable) + TypeScript strict · Tailwind + shadcn/ui · Supabase hosted only (Ireland) · next-intl (`ar` default) · decimal.js · Zod · Vitest + fast-check + Playwright · pnpm · Vercel `dub1`. Planned, not yet installed: Serwist, Recharts, react-hook-form, Anthropic SDK, Resend, Paymob. Full list: `RULES_REFERENCE.md` §3.
 
 ## 4. Commands (created in Phases P, 0a and 0b)
 
-- `pnpm dev` — local Next.js server (uses the hosted dev Supabase project; there is no local database)
+- `pnpm dev` — local Next.js server. There is no local database and no dev project: with Supabase values in the environment it talks to the production project, with none accounts are off (visitor-only)
 - `pnpm build` — production build
 - `pnpm lint` / `pnpm typecheck`
 - `pnpm test` — Vitest unit and property tests (no network)
@@ -39,7 +38,6 @@ Next.js (App Router, latest stable) + TypeScript strict · Tailwind + shadcn/ui 
 - CI (`.github/workflows/ci.yml`, check "CI / checks"): lint, typecheck, test, build and `check:bundle` on every pull request, no secrets. "Database tests / rls" runs `pnpm test:db`. Both must be green before a merge (a manual rule: GitHub Free cannot enforce required checks on a private repo)
 - Migrations: no script. The Supabase GitHub integration applies new files in `supabase/migrations/` when they merge to `main`
 - `pnpm db:types` — regenerate `src/types/database.ts` from the local test database (Claude's Supabase connector cannot see the Backdesk project)
-
 
 ## 5. Environments — guardrails (full text: `RULES_REFERENCE.md` §5)
 
@@ -62,7 +60,6 @@ Next.js (App Router, latest stable) + TypeScript strict · Tailwind + shadcn/ui 
 10. **Owners are not org members.** Unit owners reach their statements only through the `owner_grants` table and signed, expiring statement links, never through `org_members`.
 11. **Timezone** is `Africa/Cairo` by default and stored per org.
 
-
 ## 7. i18n, RTL and UX — key rules (full text, 25 bullets: `RULES_REFERENCE.md` §7)
 
 - Arabic default, English complete; no hardcoded strings (`messages/*.json`); logical CSS properties only (`ms-`/`pe-`/`start`/`end`); Western digits, tabular numbers on money; mobile-first 360 px.
@@ -80,7 +77,6 @@ Next.js (App Router, latest stable) + TypeScript strict · Tailwind + shadcn/ui 
 - Small conventional commits (`feat:`, `fix:`, `test:`, `chore:`, `docs:`).
 - End of every phase: run `pnpm lint && pnpm typecheck && pnpm test` (plus `pnpm test:db` from Phase 0b), update `docs/PROGRESS.md` (done / decisions / open issues / next step), then stop.
 - Never start Phase 5 without the Validation Gate confirmation described in `docs/BUILD_PLAN.md`.
-
 
 ## 9. Glossary, context map and memory upkeep
 
