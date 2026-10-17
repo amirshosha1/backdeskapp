@@ -26,12 +26,17 @@ const fake = {
   signOut: vi.fn(async (_args: unknown) => ({ error: null })),
   getSession: vi.fn(async () => ({ data: { session: { user: { email: "host@example.com" } } as unknown } })),
   tables: {} as Record<string, { data: unknown; error: unknown; status: number }>,
+  unitResponse: null as Promise<{ data: unknown; error: unknown; status: number }> | null,
+  authCallback: null as ((event: string) => void) | null,
 };
 const loadBrowserSupabase = vi.fn(() =>
   Promise.resolve({
-    auth: { signInWithOAuth: fake.signInWithOAuth, signOut: fake.signOut, getSession: fake.getSession, onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }) },
+    auth: { signInWithOAuth: fake.signInWithOAuth, signOut: fake.signOut, getSession: fake.getSession, onAuthStateChange: (callback: (event: string) => void) => {
+      fake.authCallback = callback;
+      return { data: { subscription: { unsubscribe() {} } } };
+    } },
     from: (table: string) => {
-      const result = fake.tables[table] ?? { data: null, error: null, status: 200 };
+      const result = (table === "units" && fake.unitResponse) || fake.tables[table] || { data: null, error: null, status: 200 };
       const chain: Record<string, unknown> = {};
       for (const m of ["select", "order", "maybeSingle"]) chain[m] = () => chain;
       chain.then = (resolve: (r: unknown) => unknown) => Promise.resolve(result).then(resolve);
@@ -65,6 +70,8 @@ beforeEach(() => {
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
   store.resetAccountForTests();
   fake.tables = {};
+  fake.unitResponse = null;
+  fake.authCallback = null;
 });
 
 afterEach(() => {
@@ -113,6 +120,17 @@ describe("account store: who is this?", () => {
 });
 
 describe("account store: sign-in and sign-out", () => {
+  const accountA = () => store.resetAccountForTests({
+    status: "signed_in", email: "a@example.com",
+    units: [{ id: "a", name: "A only", operatingModel: form.operatingModel, inputs: { form, assumed: [] }, engineVersion: "1.0.0", updatedAt: row("a", "A only").updated_at }],
+    maxUnits: 5, apartmentCount: "2-3", loadError: null,
+  });
+
+  async function subscribedAsA() {
+    await store.signInWithGoogle("/demo");
+    accountA();
+  }
+
   it("Google sign-in returns to exactly /auth/callback; the page travels in a cookie, not the URL", async () => {
     window.history.replaceState(null, "", "/en/demo/more?tab=x");
     await store.signInWithGoogle(window.location.pathname);
@@ -141,6 +159,61 @@ describe("account store: sign-in and sign-out", () => {
     finishSession({ data: { session: { user: { email: "old-account@example.com" } } } });
     await loading;
     expect(store.readAccount()).toEqual({ status: "guest" });
+  });
+
+  it("hides A immediately on B sign-in, then shows only B after its read", async () => {
+    await subscribedAsA();
+    let finishUnits!: (value: { data: unknown; error: null; status: number }) => void;
+    fake.unitResponse = new Promise((resolve) => { finishUnits = resolve; });
+    fake.getSession.mockResolvedValueOnce({ data: { session: { user: { email: "b@example.com" } } } });
+    fake.tables.profiles = { data: { apartment_count_answer: "1" }, error: null, status: 200 };
+    fake.authCallback?.("SIGNED_IN");
+    expect(store.readAccount()).toEqual({ status: "loading" });
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    expect(store.readAccount()).toEqual({ status: "loading" });
+    finishUnits({ data: [row("b", "B only")], error: null, status: 200 });
+    await vi.waitFor(() => expect(store.readAccount().status).toBe("signed_in"));
+    const next = store.readAccount();
+    expect(next.status === "signed_in" && [next.email, next.units.map((u) => u.name), next.apartmentCount]).toEqual([
+      "b@example.com", ["B only"], "1",
+    ]);
+  });
+
+  it("ignores an A unit read that finishes after sign-out", async () => {
+    await subscribedAsA();
+    let finishUnits!: (value: { data: unknown; error: null; status: number }) => void;
+    fake.unitResponse = new Promise((resolve) => { finishUnits = resolve; });
+    const loading = store.load();
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    const signingOut = store.signOut();
+    expect(store.readAccount()).toEqual({ status: "guest" });
+    finishUnits({ data: [row("a", "A only")], error: null, status: 200 });
+    await Promise.all([loading, signingOut]);
+    expect(store.readAccount()).toEqual({ status: "guest" });
+  });
+
+  it("hides A before the sign-out request finishes", async () => {
+    await subscribedAsA();
+    let finishSignOut!: (value: { error: null }) => void;
+    fake.signOut.mockImplementationOnce(() => new Promise((resolve) => { finishSignOut = resolve; }));
+    const signingOut = store.signOut();
+    expect(store.readAccount()).toEqual({ status: "guest" });
+    await vi.waitFor(() => expect(fake.signOut).toHaveBeenCalled());
+    finishSignOut({ error: null });
+    await signingOut;
+  });
+
+  it("does not sign B out when an older sign-out was waiting for the client", async () => {
+    await subscribedAsA();
+    const signingOut = store.signOut();
+    fake.getSession.mockResolvedValueOnce({ data: { session: { user: { email: "b@example.com" } } } });
+    fake.tables.units = { data: [row("b", "B only")], error: null, status: 200 };
+    fake.authCallback?.("SIGNED_IN");
+    await signingOut;
+    await vi.waitFor(() => expect(store.readAccount().status).toBe("signed_in"));
+    expect(fake.signOut).not.toHaveBeenCalled();
+    const next = store.readAccount();
+    expect(next.status === "signed_in" && next.email).toBe("b@example.com");
   });
 
   it("reads the callback's one-shot notice once", () => {
@@ -191,6 +264,58 @@ describe("account store: writes", () => {
     actions.deleteUnit.mockResolvedValueOnce({ ok: false, error: "not_signed_in" });
     await store.removeUnit("u1");
     expect(store.readAccount()).toEqual({ status: "guest" });
+  });
+
+  it("does not put a late A write into B's account", async () => {
+    signedIn();
+    await store.signInWithGoogle("/demo");
+    let finishWrite!: (value: { ok: true; data: ReturnType<typeof row> }) => void;
+    actions.updateUnit.mockImplementationOnce(() => new Promise((resolve) => { finishWrite = resolve; }));
+    const writing = store.renameUnit("u1", "A renamed");
+    await vi.waitFor(() => expect(actions.updateUnit).toHaveBeenCalled());
+    fake.getSession.mockResolvedValueOnce({ data: { session: { user: { email: "b@example.com" } } } });
+    fake.tables.units = { data: [row("b", "B only")], error: null, status: 200 };
+    fake.authCallback?.("SIGNED_IN");
+    await vi.waitFor(() => expect(store.readAccount().status).toBe("signed_in"));
+    finishWrite({ ok: true, data: row("u1", "A renamed") });
+    expect(await writing).toEqual({ ok: false, error: "not_signed_in" });
+    const next = store.readAccount();
+    expect(next.status === "signed_in" && [next.email, next.units.map((u) => u.name)]).toEqual(["b@example.com", ["B only"]]);
+  });
+
+  it("does not start A's write after its session refresh loses a race to B sign-in", async () => {
+    signedIn();
+    await store.signInWithGoogle("/demo");
+    let finishSession!: (value: { data: { session: { user: { email: string } } } }) => void;
+    fake.getSession.mockImplementationOnce(() => new Promise((resolve) => { finishSession = resolve; }));
+    const writing = store.renameUnit("u1", "A renamed");
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    fake.getSession.mockResolvedValueOnce({ data: { session: { user: { email: "b@example.com" } } } });
+    fake.tables.units = { data: [row("b", "B only")], error: null, status: 200 };
+    fake.authCallback?.("SIGNED_IN");
+    finishSession({ data: { session: { user: { email: "a@example.com" } } } });
+    expect(await writing).toEqual({ ok: false, error: "not_signed_in" });
+    expect(actions.updateUnit).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(store.readAccount().status).toBe("signed_in"));
+    const next = store.readAccount();
+    expect(next.status === "signed_in" && next.email).toBe("b@example.com");
+  });
+
+  it("does not clear B on a late A authentication error", async () => {
+    signedIn();
+    await store.signInWithGoogle("/demo");
+    let finishWrite!: (value: { ok: false; error: "not_signed_in" }) => void;
+    actions.deleteUnit.mockImplementationOnce(() => new Promise((resolve) => { finishWrite = resolve; }));
+    const writing = store.removeUnit("u1");
+    await vi.waitFor(() => expect(actions.deleteUnit).toHaveBeenCalled());
+    fake.getSession.mockResolvedValueOnce({ data: { session: { user: { email: "b@example.com" } } } });
+    fake.tables.units = { data: [row("b", "B only")], error: null, status: 200 };
+    fake.authCallback?.("SIGNED_IN");
+    await vi.waitFor(() => expect(store.readAccount().status).toBe("signed_in"));
+    finishWrite({ ok: false, error: "not_signed_in" });
+    expect(await writing).toEqual({ ok: false, error: "not_signed_in" });
+    const next = store.readAccount();
+    expect(next.status === "signed_in" && next.email).toBe("b@example.com");
   });
 
   it("deleting the account signs out and forgets this browser's Backdesk data", async () => {

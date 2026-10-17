@@ -40,6 +40,7 @@ const listeners = new Set<() => void>();
 let state: AccountState | null = null;
 let authSubscribed = false;
 let loadVersion = 0;
+let authVersion = 0;
 
 function emit(next: AccountState) {
   state = next;
@@ -93,10 +94,15 @@ async function client(): Promise<BrowserSupabase | null> {
     sb.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         loadVersion++;
+        authVersion++;
         if (state?.status !== "guest") emit({ status: "guest" });
       }
       // A different Google account can replace an existing session in this tab.
-      if (event === "SIGNED_IN") void load();
+      if (event === "SIGNED_IN") {
+        authVersion++;
+        emit({ status: "loading" });
+        void load();
+      }
     });
   }
   return sb;
@@ -105,10 +111,11 @@ async function client(): Promise<BrowserSupabase | null> {
 /** Reads the session, then the apartments, the profile answer and the limit, in parallel. */
 export async function load(): Promise<void> {
   const version = ++loadVersion;
+  // A fresh session read may belong to another account. Hide the old one now.
+  emit({ status: "loading" });
   const sb = await client();
   if (version !== loadVersion) return;
   if (!sb) return emit({ status: "off" });
-  if (state?.status !== "signed_in") emit({ status: "loading" });
   const { data } = await sb.auth.getSession();
   if (version !== loadVersion) return;
   const session = data.session;
@@ -140,68 +147,96 @@ async function freshSession(): Promise<void> {
   await sb?.auth.getSession();
 }
 
-function setUnits(change: (units: AccountUnit[]) => AccountUnit[]) {
-  const current = signedIn();
+function writeIsCurrent(version: number): boolean {
+  return version === authVersion && state?.status === "signed_in";
+}
+
+const staleWrite = () => ({ ok: false, error: "not_signed_in" } as const);
+
+function setUnits(version: number, change: (units: AccountUnit[]) => AccountUnit[]) {
+  const current = writeIsCurrent(version) ? signedIn() : null;
   if (current) emit({ ...current, units: change(current.units) });
 }
 
 /** An action failed because the session is gone: show the person as signed out. */
-function afterError<T>(result: ActionResult<T>): ActionResult<T> {
-  if (!result.ok && result.error === "not_signed_in") emit({ status: "guest" });
+function afterError<T>(result: ActionResult<T>, version: number): ActionResult<T> {
+  if (!result.ok && result.error === "not_signed_in" && writeIsCurrent(version)) {
+    loadVersion++;
+    authVersion++;
+    emit({ status: "guest" });
+  }
   return result;
 }
 
 export async function addUnit(name: string, inputs: StoredInputs): Promise<ActionResult<AccountUnit>> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await createUnit({ name, inputs });
-  if (!result.ok) return afterError(result);
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
   const unit = toAccountUnit(result.data);
-  setUnits((units) => [...units, unit]);
+  setUnits(version, (units) => [...units, unit]);
   return { ok: true, data: unit };
 }
 
 export async function renameUnit(id: string, name: string): Promise<ActionResult<AccountUnit>> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await updateUnit({ id, name });
-  if (!result.ok) return afterError(result);
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
   const unit = toAccountUnit(result.data);
-  setUnits((units) => units.map((u) => (u.id === id ? unit : u)));
+  setUnits(version, (units) => units.map((u) => (u.id === id ? unit : u)));
   return { ok: true, data: unit };
 }
 
 export async function saveUnitInputs(id: string, inputs: StoredInputs): Promise<ActionResult<AccountUnit>> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await updateUnit({ id, inputs });
-  if (!result.ok) return afterError(result);
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
   const unit = toAccountUnit(result.data);
-  setUnits((units) => units.map((u) => (u.id === id ? unit : u)));
+  setUnits(version, (units) => units.map((u) => (u.id === id ? unit : u)));
   return { ok: true, data: unit };
 }
 
 export async function removeUnit(id: string): Promise<ActionResult<{ id: string }>> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await deleteUnit(id);
-  if (!result.ok) return afterError(result);
-  setUnits((units) => units.filter((u) => u.id !== id));
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
+  setUnits(version, (units) => units.filter((u) => u.id !== id));
   return result;
 }
 
 export async function adoptBrowserUnit(name: string, inputs: StoredInputs): Promise<ActionResult<AdoptionOutcome>> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await adoptGuestUnit({ name, inputs, apartmentCount: null });
-  if (!result.ok) return afterError(result);
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
   if (result.data.outcome === "added") {
     const unit = toAccountUnit(result.data.unit);
-    setUnits((units) => [...units, unit]);
+    setUnits(version, (units) => [...units, unit]);
   }
   return result;
 }
 
 /** The first-run answer. `onlyIfEmpty`: the copy made at sign-in never replaces an existing answer. */
 export async function saveCount(answer: ApartmentCount, onlyIfEmpty = false): Promise<ActionResult<{ saved: boolean }>> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await saveApartmentCount(answer, onlyIfEmpty);
-  if (!result.ok) return afterError(result);
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
   const current = signedIn();
   if (current && (result.data.saved || !onlyIfEmpty)) emit({ ...current, apartmentCount: answer });
   return result;
@@ -228,22 +263,29 @@ export async function signInWithGoogle(pathname: string): Promise<ActionResult> 
 /** Signs this device out (other devices stay signed in). */
 export async function signOut(): Promise<void> {
   loadVersion++;
-  const sb = await client();
-  await sb?.auth.signOut({ scope: "local" });
+  const version = ++authVersion;
   emit({ status: "guest" });
+  const sb = await client();
+  if (version !== authVersion) return;
+  await sb?.auth.signOut({ scope: "local" });
 }
 
 /** Deletes the account and everything in it, then forgets this browser's Backdesk data too. */
 export async function deleteAccount(): Promise<ActionResult> {
+  const version = authVersion;
   await freshSession();
+  if (!writeIsCurrent(version)) return staleWrite();
   const result = await deleteMyAccount();
-  if (!result.ok) return afterError(result);
+  if (!writeIsCurrent(version)) return staleWrite();
+  if (!result.ok) return afterError(result, version);
   loadVersion++;
+  const signedOutVersion = ++authVersion;
+  emit({ status: "guest" });
   const sb = await client();
+  if (signedOutVersion !== authVersion) return result;
   // The server already cleared the session cookies; this clears the client's memory of it.
   await sb?.auth.signOut({ scope: "local" });
   clearGuest();
-  emit({ status: "guest" });
   return result;
 }
 
@@ -262,6 +304,7 @@ export function takeFlash(): string | null {
 /** Tests only: forget the module's state between tests. */
 export function resetAccountForTests(next: AccountState | null = null): void {
   loadVersion++;
+  authVersion++;
   state = next;
   authSubscribed = false;
   listeners.forEach((l) => l());
