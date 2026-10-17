@@ -277,6 +277,31 @@ describe("ownership, ids and timestamps come from the database, never the reques
     expect((await admin.query("select created_by from public.units where id = $1", [unitId])).rows[0]).toEqual(before);
   });
 
+  it("a nested non-FK writer cannot clear the author while that user exists", async () => {
+    const account = await signUp("nested-author");
+    const id = await addUnit(account);
+    await owner.query(`create function private.test_nested_author_null()
+      returns trigger language plpgsql security definer set search_path = '' as $$
+      begin
+        update public.units set created_by = null where created_by = new.user_id;
+        return new;
+      end; $$`);
+    try {
+      await owner.query("revoke all on function private.test_nested_author_null() from public, anon, authenticated");
+      await owner.query(`create trigger test_nested_author_null
+        after update of apartment_count_answer on public.profiles
+        for each row execute function private.test_nested_author_null()`);
+      try {
+        await run(user(account.id), "update public.profiles set apartment_count_answer = '1' where user_id = $1", [account.id]);
+        expect((await admin.query("select created_by from public.units where id = $1", [id])).rows).toEqual([{ created_by: account.id }]);
+      } finally {
+        await owner.query("drop trigger test_nested_author_null on public.profiles");
+      }
+    } finally {
+      await owner.query("drop function private.test_nested_author_null()");
+    }
+  });
+
   it("profiles: B may change only the apartment-count answer", async () => {
     const ok = await run(user(b.id), "update public.profiles set apartment_count_answer = '2-3' where user_id = $1", [b.id]);
     expect(ok.rowCount).toBe(1);
@@ -439,7 +464,7 @@ describe("delete_my_account (no service-role key: a SECURITY DEFINER function ac
     const staying = await signUp("shared-staying");
     const unitId = await addUnit(leaving, "shared apartment");
     await owner.query(
-      "insert into public.org_members (org_id, user_id, role) values ($1, $2, 'member')",
+      "insert into public.org_members (org_id, user_id, role) values ($1, $2, 'owner')",
       [leaving.orgId, staying.id],
     );
 
@@ -449,7 +474,7 @@ describe("delete_my_account (no service-role key: a SECURITY DEFINER function ac
     expect((await admin.query("select count(*)::int as n from public.orgs where id = $1", [leaving.orgId])).rows[0].n).toBe(1);
     expect((await admin.query("select count(*)::int as n from public.org_entitlements where org_id = $1", [leaving.orgId])).rows[0].n).toBe(1);
     expect((await admin.query("select user_id, role from public.org_members where org_id = $1", [leaving.orgId])).rows).toEqual([
-      { user_id: staying.id, role: "member" },
+      { user_id: staying.id, role: "owner" },
     ]);
     expect((await admin.query("select org_id, created_by from public.units where id = $1", [unitId])).rows).toEqual([
       { org_id: leaving.orgId, created_by: null },
@@ -459,6 +484,53 @@ describe("delete_my_account (no service-role key: a SECURITY DEFINER function ac
       { org_id: leaving.orgId },
     ]);
     expect((await run(user(leaving.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([]);
+  });
+
+  it.each(["member", "accountant"])("blocks the last owner from leaving a shared org with only a %s survivor", async (role) => {
+    const leaving = await signUp(`last-owner-${role}`);
+    const staying = await signUp(`staying-${role}`);
+    const unitId = await addUnit(leaving);
+    await owner.query("insert into public.org_members (org_id, user_id, role) values ($1, $2, $3)", [leaving.orgId, staying.id, role]);
+
+    await expectPgError(run(user(leaving.id), "select public.delete_my_account()"), RAISED, /shared_org_requires_owner_transfer/);
+
+    expect((await admin.query("select count(*)::int as n from auth.users where id = $1", [leaving.id])).rows[0].n).toBe(1);
+    expect((await admin.query("select count(*)::int as n from public.org_members where org_id = $1", [leaving.orgId])).rows[0].n).toBe(2);
+    expect((await admin.query("select created_by from public.units where id = $1", [unitId])).rows).toEqual([{ created_by: leaving.id }]);
+  });
+
+  it("serializes two last-member deletions so no org or apartment is orphaned", async () => {
+    const firstUser = await signUp("delete-race-first");
+    const secondUser = await signUp("delete-race-second");
+    const unitId = await addUnit(firstUser);
+    await owner.query(
+      "insert into public.org_members (org_id, user_id, role) values ($1, $2, 'owner')",
+      [firstUser.orgId, secondUser.id],
+    );
+
+    const first = await openRequest(user(firstUser.id));
+    const second = await openRequest(user(secondUser.id));
+    try {
+      await first.query("select public.delete_my_account()");
+      let settled = false;
+      const secondDelete = second.query("select public.delete_my_account()").finally(() => {
+        settled = true;
+      });
+      secondDelete.catch(() => undefined);
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      expect(settled, "second deletion should wait for the shared org lock").toBe(false);
+
+      await first.commit();
+      await secondDelete;
+      await second.commit();
+    } finally {
+      await first.rollback();
+      await second.rollback();
+    }
+
+    expect((await admin.query("select count(*)::int as n from public.orgs where id = $1", [firstUser.orgId])).rows[0].n).toBe(0);
+    expect((await admin.query("select count(*)::int as n from public.org_members where org_id = $1", [firstUser.orgId])).rows[0].n).toBe(0);
+    expect((await admin.query("select count(*)::int as n from public.units where id = $1", [unitId])).rows[0].n).toBe(0);
   });
 
   it("an access token left after deletion cannot read the deleted user's rows", async () => {

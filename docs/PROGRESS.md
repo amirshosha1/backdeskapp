@@ -2,9 +2,9 @@
 
 ## Stabilization: account deletion security (draft, 2026-10-17)
 
-- PR #21 adds `supabase/migrations/20261012100000_preserve_fk_set_null.sql`. It changes the apartment update trigger to allow the foreign key's `ON DELETE SET NULL` action when a creator deletes their account. Merging this PR could apply the migration to production; no production database operation was performed during PR review.
-- Disposable database tests cover direct authenticated authorship edits, shared-org survival, and isolation after account deletion. The migration-specific read-only check is `docs/verify_preserve_fk_set_null.sql`.
-- Open: final-head CI, disposable-account Preview acceptance, an approved backup procedure, and explicit owner approval for PR #21's merge. Keep the PR Draft until these gates are met.
+- PR #21 adds `supabase/migrations/20261012100000_preserve_fk_set_null.sql` and the forward-only follow-up `20261017142500_guard_shared_org_deletion.sql`. They permit the foreign key's `ON DELETE SET NULL` only for a deleted author, serialize concurrent account deletions, and require another owner/admin to remain in a shared org. Merging this PR could apply both migrations to production; no production database operation was performed during PR review.
+- Disposable database tests cover direct and nested authorship edits, shared-org survival, concurrent deletion, last-manager refusal, and stale-token isolation. The migration-specific read-only check is `docs/verify_preserve_fk_set_null.sql`. Arabic and English deletion/privacy copy now describes shared-org retention.
+- Open: final-head CI, independent review of both migrations, disposable-account Preview acceptance, confirmed Supabase integration and backup procedure, and explicit owner approval for PR #21's merge. Keep the PR Draft until these gates are met.
 
 ## Stabilization: account persistence (draft, 2026-10-12)
 

@@ -107,7 +107,7 @@ describe("docs/verify_preserve_fk_set_null.sql", () => {
     await client.query("begin transaction read only");
     try {
       const { rows } = await client.query<Row>({ text: FK_SQL, values: [] });
-      expect(rows).toHaveLength(5);
+      expect(rows).toHaveLength(6);
       expect(failing(rows)).toEqual([]);
       expect(JSON.stringify(rows)).not.toMatch(/@|sb_(publishable|secret)_|eyJ/);
     } finally {
@@ -123,7 +123,7 @@ describe("docs/verify_preserve_fk_set_null.sql", () => {
         returns trigger language plpgsql set search_path = '' as $$
         begin new.created_by := old.created_by; return new; end; $$`);
       const { rows } = await client.query<Row>({ text: FK_SQL, values: [] });
-      expect(failing(rows)).toEqual(["update trigger retains authorship except nested NULL update"]);
+      expect(failing(rows)).toEqual(["update trigger allows only a deleted author to be cleared by a nested update"]);
     } finally {
       await client.query("rollback");
     }

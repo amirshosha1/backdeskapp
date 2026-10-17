@@ -505,10 +505,10 @@
     "privacy": "Privacy policy",
     "deleteAccount": "Delete my account and data",
     "deleteTitle": "Delete your account for good?",
-    "deleteBody": "Your account, every apartment and its numbers, and your apartment-count answer are deleted and can't be recovered. Backdesk's data in this browser is removed too.",
+    "deleteBody": "Your account, your apartment-count answer and apartments in organizations where you're the only member will be permanently deleted. Apartments in shared organizations stay with their remaining members. Backdesk's data in this browser is removed too.",
     "deleteConfirm": "Delete for good",
     "deleting": "Deleting…",
-    "deleted": "Your account and all its data are deleted.",
+    "deleted": "Your account was deleted. Shared apartments remain with their other members.",
     "firstUnitName": "My first apartment",
     "newUnitName": "Apartment {n}",
     "loadFailed": "Your apartments couldn't be loaded.",
@@ -574,6 +574,7 @@
       "identity_changed": "Your account changed. Please reload before trying again.",
       "session_expired": "Your session ended. Please sign in again.",
       "unit_limit_reached": "You've reached your account's apartment limit. For more than 5 apartments, we agree a custom plan with you.",
+      "shared_org_requires_owner_transfer": "You're the last owner or admin of a shared organization. Contact support to arrange another owner or admin before deleting your account.",
       "forbidden": "You don't have permission to do this.",
       "invalid": "Some of the data isn't valid. Please check it and try again.",
       "not_found": "This apartment wasn't found. It may have been deleted on another device.",
@@ -595,7 +596,7 @@
   },
   "privacy": {
     "title": "Privacy policy",
-    "updated": "Last updated: 9 October 2026",
+    "updated": "Last updated: 17 October 2026",
     "intro": "Backdesk is a bookkeeping tool for short-term rental hosts. This page explains what we keep about you, where it is kept, who processes it, and how to delete it.",
     "guest": {
       "title": "Without an account",
@@ -631,7 +632,7 @@
     },
     "delete": {
       "title": "Deleting your account",
-      "body": "In the app: More → “Delete my account and data”. Your account, apartments and answer are deleted from the database at once and for good, Backdesk’s data is removed from that browser, and any existing sign-in stops within an hour at most.",
+      "body": "In the app: More → “Delete my account and data”. Your account, answer and apartments in organizations where you are the only member are deleted permanently. Apartments in shared organizations stay with their remaining members. If you are the last owner or admin of a shared organization, arrange another owner or admin before deleting your account. Backdesk’s data is removed from that browser, and any existing sign-in stops within an hour at most.",
       "logs": "Supabase's sign-in logs and Vercel's request logs are not deleted with the account; they remain until each provider deletes them automatically under its retention period. You can write to us to ask for their deletion.",
       "google": "To remove Backdesk's access from your Google account: <link>your Google account settings</link>."
     },

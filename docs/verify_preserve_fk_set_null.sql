@@ -1,4 +1,5 @@
--- Read-only post-deployment check for 20261012100000_preserve_fk_set_null.sql.
+-- Read-only post-deployment check for 20261012100000_preserve_fk_set_null.sql
+-- and 20261017142500_guard_shared_org_deletion.sql.
 -- Run after an authorized migration, alongside verify_after_migration.sql.
 -- One catalog-only SELECT; no account data, DML, or migration execution.
 with facts as (
@@ -17,7 +18,8 @@ with facts as (
         and t.tgfoid = 'private.units_before_update()'::regprocedure) as trigger_count,
     (select pg_get_functiondef('private.units_before_update()'::regprocedure)) as body,
     (select p.prosecdef from pg_proc p where p.oid = 'private.units_before_update()'::regprocedure) as security_definer,
-    (select p.proconfig from pg_proc p where p.oid = 'private.units_before_update()'::regprocedure) as function_config
+    (select p.proconfig from pg_proc p where p.oid = 'private.units_before_update()'::regprocedure) as function_config,
+    (select pg_get_functiondef('public.delete_my_account()'::regprocedure)) as delete_body
 ), checks (check_name, result, detail) as (
   select 'created_by FK sets NULL when auth user is deleted',
     case when fk_count = 1 then 'PASS' else 'FAIL' end,
@@ -27,8 +29,11 @@ with facts as (
     case when trigger_count = 1 then 'PASS' else 'FAIL' end,
     'matching trigger count: ' || trigger_count from facts
   union all
-  select 'update trigger retains authorship except nested NULL update',
-    case when body ~* 'pg_trigger_depth\(\)\s*>\s*1\s+and\s+new\.created_by\s+is\s+null'
+  select 'update trigger allows only a deleted author to be cleared by a nested update',
+    case when body ~* 'pg_trigger_depth\(\)\s*>\s*1'
+           and body ~* 'old\.created_by\s+is\s+not\s+null'
+           and body ~* 'new\.created_by\s+is\s+null'
+           and body ~* 'not\s+exists\s*\(\s*select\s+1\s+from\s+auth\.users'
            and body ~* 'new\.created_by\s*:=\s*old\.created_by'
            and body ~* 'new\.created_at\s*:=\s*old\.created_at'
            and body ~* 'new\.updated_at\s*:=\s*now\(\)'
@@ -44,5 +49,11 @@ with facts as (
     case when not has_column_privilege('authenticated', 'public.units', 'created_by', 'UPDATE')
       then 'PASS' else 'FAIL' end,
     'created_by UPDATE grant denied'
+  union all
+  select 'account deletion serializes orgs and requires a remaining manager',
+    case when delete_body ~* 'for\s+update\s+of\s+o'
+           and delete_body ~* 'shared_org_requires_owner_transfer'
+      then 'PASS' else 'FAIL' end,
+    'installed function locks orgs and checks remaining owner/admin' from facts
 )
 select check_name, result, detail from checks;
