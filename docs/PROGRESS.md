@@ -9,6 +9,12 @@
 > Dated history, not the entry point. Start at `AGENTS.md` (rules) and `docs/project/SESSION_HANDOFF.md` (current state); `docs/BUILD_PLAN.md` is the spec and phases; `CLAUDE.md` is now a pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations below resolve through `docs/project/INDEX.md` §5. Do not read this file in full. Update it at the end of every phase.
 > Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 
+## Docs: roadmap and competitor features (2026-10-17)
+
+- Docs-only PR from `docs/roadmap-competitor-features`; no code, migration or workflow touched. Added `docs/BUILD_PLAN.md` §8 (features F1–F10 mapped to existing phases, no phase added or renumbered), §9 (backlog, empty), an out-of-scope note in §7, open questions 20–21, and one-line pointers in P.2 and Phases 5–9; added `docs/COMPETITORS.md` and `docs/IDEAS.md` (parking lot I1–I19, nothing scheduled); linked both from `CLAUDE.md` and `docs/project/INDEX.md`.
+- Landing: F1–F3 in the remaining P.2 (before the gate); F4, F6, F7 in Phase 7; F5 in Phase 8; F8–F10 in Phase 9 (F10 only if a Gulf design partner commits).
+- Decisions to confirm (Amir): F1's pre-gate slice is browser-only (no `stays` until Phase 5); question 20 (Booking.com sample) and question 21 (Free vs Pro for F2 and RevPAR).
+
 ## Current status
 
 - **Phase P (clickable prototype)** was merged into `main` (amirshosha1/str-money-finder#1). Amir reviewed it on his phone: it felt broken (silent taps) and the design was weak, which led to Phase P.1.
