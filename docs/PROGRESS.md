@@ -1,5 +1,11 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: account persistence (draft, 2026-10-12)
+
+- Done on `stabilization/account-persistence`: hide old account data during sign-in and sign-out transitions; reject stale read and write results; add account-switch and race regression tests and a two-account Preview checklist.
+- Decision: do not run account or RLS tests against the hosted Supabase project. CI uses a disposable database; Amir will complete the live two-account Google checks on Preview.
+- Open: the manual Preview results and green CI are required before calling persistence and isolation verified for private beta.
+
 > Dated history, not the entry point. Start at `AGENTS.md` (rules) and `docs/project/SESSION_HANDOFF.md` (current state); `docs/BUILD_PLAN.md` is the spec and phases; `CLAUDE.md` is now a pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations below resolve through `docs/project/INDEX.md` §5. Do not read this file in full. Update it at the end of every phase.
 > Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 

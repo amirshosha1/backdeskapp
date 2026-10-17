@@ -35,13 +35,18 @@ const actions = vi.hoisted(() => ({
 vi.mock("@/lib/account/actions", () => actions);
 
 const oauth = vi.hoisted(() => vi.fn(async () => ({ data: {}, error: null })));
+const auth = vi.hoisted(() => ({ userId: "test-user" as string | null, signOutError: false }));
 vi.mock("@/lib/supabase/browser", () => ({
   loadBrowserSupabase: () =>
     Promise.resolve({
       auth: {
         signInWithOAuth: oauth,
-        signOut: vi.fn(async () => ({ error: null })),
-        getSession: vi.fn(async () => ({ data: { session: null } })),
+        signOut: vi.fn(async () => {
+          if (auth.signOutError) return { error: new Error("network") };
+          auth.userId = null;
+          return { error: null };
+        }),
+        getSession: vi.fn(async () => ({ data: { session: auth.userId ? { user: { id: auth.userId, email: "host@example.com" } } : null }, error: null })),
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
       },
     }),
@@ -59,6 +64,7 @@ const unit = (id: string, name: string, f = form): AccountUnit => ({
 const row = (u: AccountUnit) => ({ id: u.id, name: u.name, operating_model: u.operatingModel, calculator_inputs: u.inputs, engine_version: "1.0.0", created_at: "t", updated_at: "t" });
 const signedIn = (units: AccountUnit[] = [], extra: Partial<Extract<AccountState, { status: "signed_in" }>> = {}): AccountState => ({
   status: "signed_in",
+  userId: "test-user",
   email: "host@example.com",
   units,
   maxUnits: 5,
@@ -75,6 +81,8 @@ function setUserAgent(ua: string) {
 }
 
 beforeEach(() => {
+  auth.userId = "test-user";
+  auth.signOutError = false;
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abcd.supabase.co");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test");
 });
@@ -193,7 +201,7 @@ describe("Units, signed in", () => {
     fireEvent.click(screen.getByRole("button", { name: "تعديل «شقة التجمع»" }));
     fireEvent.change(screen.getByTestId("unit-name-input"), { target: { value: "شقة التجمع الخامس" } });
     fireEvent.click(screen.getByTestId("unit-rename"));
-    await waitFor(() => expect(actions.updateUnit).toHaveBeenCalledWith({ id: "u1", name: "شقة التجمع الخامس" }));
+    await waitFor(() => expect(actions.updateUnit).toHaveBeenCalledWith({ id: "u1", name: "شقة التجمع الخامس" }, "test-user"));
     await waitFor(() => expect(screen.getAllByTestId("account-unit-card")[0]).toHaveTextContent("شقة التجمع الخامس"));
 
     fireEvent.click(screen.getByRole("button", { name: "تعديل «شقة التجمع الخامس»" }));
@@ -201,7 +209,7 @@ describe("Units, signed in", () => {
     expect(actions.deleteUnit).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId("unit-delete-confirm"));
     await waitFor(() => expect(screen.queryAllByTestId("account-unit-card")).toHaveLength(0));
-    expect(actions.deleteUnit).toHaveBeenCalledWith("u1");
+    expect(actions.deleteUnit).toHaveBeenCalledWith("u1", "test-user");
   });
 });
 
@@ -283,6 +291,19 @@ describe("More", () => {
     await waitFor(() => expect(actions.deleteMyAccount).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(screen.getByTestId("sign-in")).toBeInTheDocument());
   });
+
+  it("shows sign-out failure and a retry without claiming success", async () => {
+    auth.signOutError = true;
+    resetAccountForTests(signedIn([unit("u1", "شقة التجمع")]));
+    renderWithIntl(<MoreScreen />);
+    fireEvent.click(screen.getByTestId("sign-out"));
+    expect(await screen.findByTestId("toast")).toHaveTextContent("لم نتأكد من تسجيل الخروج");
+    expect(screen.getByTestId("sign-out")).toHaveTextContent("أعد محاولة تسجيل الخروج");
+    expect(screen.queryByText("شقة التجمع")).toBeNull();
+    auth.signOutError = false;
+    fireEvent.click(screen.getByTestId("sign-out"));
+    await waitFor(() => expect(screen.getByTestId("toast")).toHaveTextContent("سجّلت الخروج"));
+  });
 });
 
 describe("in-app browsers (Facebook, Messenger, Instagram…)", () => {
@@ -315,8 +336,26 @@ describe("moving the browser apartment into the account", () => {
     actions.adoptGuestUnit.mockResolvedValueOnce({ ok: true, data: { outcome: "added", unit: row(unit("u9", "شقتي الأولى")) } });
     renderWithIntl(<AccountSync />);
     await waitFor(() => expect(readGuest().units).toEqual([]));
-    expect(actions.adoptGuestUnit).toHaveBeenCalledWith({ name: "شقتي الأولى", inputs: { form, assumed: ["deposit"] }, apartmentCount: null });
+    expect(actions.adoptGuestUnit).toHaveBeenCalledWith({ name: "شقتي الأولى", inputs: { form, assumed: ["deposit"] }, apartmentCount: null }, "test-user");
     expect(await screen.findByTestId("toast")).toHaveTextContent("أضفنا شقتك إلى حسابك.");
+  });
+
+  it("asks B before adopting a guest unit whose automatic transfer began under A", async () => {
+    saveOwnUnit(form, []);
+    resetAccountForTests(signedIn([]));
+    let finishAdoption!: (value: { ok: true; data: { outcome: "added"; unit: ReturnType<typeof row> } }) => void;
+    actions.adoptGuestUnit.mockImplementationOnce(() => new Promise((resolve) => { finishAdoption = resolve; }));
+    renderWithIntl(<AccountSync />);
+    await waitFor(() => expect(actions.adoptGuestUnit).toHaveBeenCalledTimes(1));
+    auth.userId = "user-b";
+    act(() => resetAccountForTests(signedIn([], { userId: "user-b", email: "b@example.com" })));
+    expect(await screen.findByTestId("adopt-sheet")).toBeInTheDocument();
+    expect(actions.adoptGuestUnit).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      finishAdoption({ ok: true, data: { outcome: "added", unit: row(unit("a1", "A guest")) } });
+    });
+    expect(readGuest().units).toHaveLength(1);
+    expect(screen.getByTestId("adopt-sheet")).toBeInTheDocument();
   });
 
   it("otherwise one sheet asks; at the limit, the contact replaces the add button", async () => {
@@ -338,7 +377,7 @@ describe("moving the browser apartment into the account", () => {
     setApartmentCount("4-10");
     resetAccountForTests(signedIn([], { apartmentCount: null }));
     renderWithIntl(<AccountSync />);
-    await waitFor(() => expect(actions.saveApartmentCount).toHaveBeenCalledWith("4-10", true));
+    await waitFor(() => expect(actions.saveApartmentCount).toHaveBeenCalledWith("4-10", true, "test-user"));
   });
 });
 

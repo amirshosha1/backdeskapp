@@ -5,15 +5,13 @@ import { SEEN, storageStateFor } from "./e2e/guest";
  * Accounts switched on. The two Supabase values are inlined at build time,
  * so this builds with placeholders and serves on its own port; the main
  * suite's build has none, so accounts are off there. The placeholder host
- * (`.invalid`) never resolves: the browser's calls to it are intercepted by
- * the spec, and the server's sign-in exchange fails fast, which is exactly
- * the failure path. Runs only e2e/accounts-env.spec.ts.
+ * (`.invalid`) never resolves: browser requests are intercepted by the specs.
  */
 export const SUPABASE_URL = "https://e2e-ref.supabase.invalid";
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: ["**/accounts-env.spec.ts"],
+  testMatch: ["**/accounts-env.spec.ts", "**/accounts-session.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -30,7 +28,9 @@ export default defineConfig({
         ...devices["Pixel 7"],
         viewport: { width: 360, height: 800 },
         locale: "ar-EG",
-        launchOptions: { executablePath: "/opt/pw-browsers/chromium" },
+        launchOptions: {
+          executablePath: process.env.CI ? undefined : process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? "/opt/pw-browsers/chromium",
+        },
       },
     },
   ],

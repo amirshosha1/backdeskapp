@@ -23,12 +23,13 @@ import { LimitNotice } from "./limit-notice";
 
 // Per page load: one attempt at a time, and a closed sheet stays closed until Units opens again.
 let adopting = false;
-let dismissed = false;
-let countTried = false;
+let adoptionStartedForUserId: string | null = null;
+let dismissedUserId: string | null = null;
+let countTriedUserId: string | null = null;
 
 /** Units calls this on mount: a sheet closed earlier asks again there. */
 export function resetAdoptionDismissal(): void {
-  dismissed = false;
+  dismissedUserId = null;
 }
 
 /** Serialises the move across this browser's open tabs (they share the browser copy). */
@@ -43,23 +44,28 @@ export function AccountSync() {
   const account = useAccount();
   const guest = useGuest();
   const pathname = usePathname();
-  const [asking, setAsking] = useState(false);
+  const [askingForUserId, setAskingForUserId] = useState<string | null>(null);
+  const [dismissedCurrent, setDismissedCurrent] = useState<string | null>(null);
   const signedIn = account?.status === "signed_in";
+  const userId = signedIn ? account.userId : null;
   const hasBrowserUnit = ownUnit(guest) !== null;
   const inFlow = pathname === "/demo/start";
+  const mustAskForSwitch = Boolean(userId && adoptionStartedForUserId && adoptionStartedForUserId !== userId);
 
   useEffect(() => {
     if (takeFlash() === "signin_failed") show(t("signInFailed"));
   }, [show, t]);
 
   useEffect(() => {
-    if (!signedIn || !hasBrowserUnit || inFlow || adopting || dismissed || asking) return;
+    if (!userId || !hasBrowserUnit || inFlow || dismissedUserId === userId || askingForUserId === userId || mustAskForSwitch) return;
+    if (adopting) return;
     adopting = true;
+    adoptionStartedForUserId = userId;
     void withTabLock(async () => {
       // Another tab may have moved it while this one waited.
       const unit = ownUnit(readGuest());
       const current = readAccount();
-      if (!unit || current.status !== "signed_in") return;
+      if (!unit || current.status !== "signed_in" || current.userId !== userId) return;
       const result = await adoptBrowserUnit(t("firstUnitName"), { form: unit.form, assumed: unit.assumed });
       if (!result.ok) return; // Left in the browser; tried again on the next page load.
       if (result.data.outcome === "added") {
@@ -68,27 +74,29 @@ export function AccountSync() {
       } else if (result.data.outcome === "duplicate") {
         clearOwnUnit();
       } else {
-        setAsking(true);
+        setAskingForUserId(userId);
       }
     }).finally(() => {
       adopting = false;
     });
-  }, [signedIn, hasBrowserUnit, inFlow, asking, show, t]);
+  }, [userId, hasBrowserUnit, inFlow, askingForUserId, mustAskForSwitch, show, t]);
 
   const count = guest?.firstRun.count ?? null;
   const accountCount = signedIn ? account.apartmentCount : undefined;
   useEffect(() => {
-    if (!signedIn || accountCount !== null || !count || countTried) return;
-    countTried = true;
+    if (!userId || accountCount !== null || !count || countTriedUserId === userId) return;
+    countTriedUserId = userId;
     void saveCount(count, true);
-  }, [signedIn, accountCount, count]);
+  }, [userId, accountCount, count]);
 
   return (
     <AdoptSheet
-      open={asking && signedIn && hasBrowserUnit}
+      key={userId}
+      open={(askingForUserId === userId || mustAskForSwitch) && dismissedCurrent !== userId && signedIn && hasBrowserUnit}
       onClose={() => {
-        dismissed = true;
-        setAsking(false);
+        dismissedUserId = userId;
+        setDismissedCurrent(userId);
+        setAskingForUserId(null);
       }}
     />
   );
