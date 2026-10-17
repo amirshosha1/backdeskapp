@@ -15,11 +15,11 @@ export default defineConfig({
   // real needs its own build (playwright.preorder.config.ts) with the
   // env var set — this default build has none.
   // The same goes for accounts: the Supabase values are inlined at build
-  // time, so e2e/accounts-env.spec.ts has its own build
+  // time, so e2e/accounts-env.spec.ts and accounts-session.spec.ts share a build
   // (playwright.accounts.config.ts). This build has none: accounts are off.
   // Analytics too (playwright.analytics.config.ts): this build has no
   // NEXT_PUBLIC_POSTHOG_KEY, so nothing is ever sent.
-  testIgnore: ["**/preorder-env.spec.ts", "**/accounts-env.spec.ts", "**/analytics-env.spec.ts"],
+  testIgnore: ["**/preorder-env.spec.ts", "**/accounts-env.spec.ts", "**/accounts-session.spec.ts", "**/analytics-env.spec.ts"],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

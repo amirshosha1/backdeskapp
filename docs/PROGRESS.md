@@ -1,13 +1,19 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
-## Stabilization: account deletion security (draft, 2026-10-12)
+## Stabilization: account deletion security (draft, 2026-10-17)
 
-- Added database regression cases for a shared org surviving its creator's account deletion, and for the deleted user's still-valid JWT seeing no rows. Existing cases cover anonymous denial, zero-argument scope, full owned-data deletion and another user's data preservation.
-- No migration or production database operation. The disposable CI RLS job is the acceptance check; manual Preview deletion uses a disposable test account only.
-- Open: green CI and a completed Preview deletion result are required before private beta.
+- PR #21 adds `supabase/migrations/20261012100000_preserve_fk_set_null.sql`. It changes the apartment update trigger to allow the foreign key's `ON DELETE SET NULL` action when a creator deletes their account. Merging this PR could apply the migration to production; no production database operation was performed during PR review.
+- Disposable database tests cover direct authenticated authorship edits, shared-org survival, and isolation after account deletion. The migration-specific read-only check is `docs/verify_preserve_fk_set_null.sql`.
+- Open: final-head CI, disposable-account Preview acceptance, an approved backup procedure, and explicit owner approval for PR #21's merge. Keep the PR Draft until these gates are met.
 
-> Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
+## Stabilization: account persistence (draft, 2026-10-12)
+
+- Done on `stabilization/account-persistence`: hide old account data during sign-in and sign-out transitions; reject stale read and write results; add account-switch and race regression tests and a two-account Preview checklist.
+- Decision: do not run account or RLS tests against the hosted Supabase project. CI uses a disposable database; Amir will complete the live two-account Google checks on Preview.
+- Open: the manual Preview results and green CI are required before calling persistence and isolation verified for private beta.
+
+> Dated history, not the entry point. Start at `AGENTS.md` (rules) and `docs/project/SESSION_HANDOFF.md` (current state); `docs/BUILD_PLAN.md` is the spec and phases; `CLAUDE.md` is now a pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations below resolve through `docs/project/INDEX.md` §5. Do not read this file in full. Update it at the end of every phase.
+> Last updated: 2026-10-17 (PR #21 migration disclosure and branch refresh; the landing page, #17, was merged on 2026-10-11 and the repository is `amirshosha1/backdeskapp`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 
 ## Current status
 
@@ -60,7 +66,7 @@
 
 - Local machine: Windows 11, Node 24.15, pnpm 9.15, Git 2.54. **No Docker, WSL, Supabase CLI or `gh`, by design.** Do not ask Amir to install anything.
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
-- Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
+- Repo: `github.com/amirshosha1/backdeskapp` (renamed from `str-money-finder`; older text here and in PR descriptions still uses the old name), branch `main`.
 - Supabase: the **Backdesk project exists** (created by Amir).
   - Ref `kmmfhaypqgzhoptmljki`, West EU / Ireland (`eu-west-1`), Free plan.
   - **It is production; there is no separate dev or prod project** (2026-10-08).
@@ -593,6 +599,6 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## How to resume in a fresh session (including Claude Code on the web)
 
-1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.
-2. Send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
-3. At the end of the phase, update this file: status, decisions, open issues, next step.
+1. Read `AGENTS.md` and `docs/project/SESSION_HANDOFF.md` (map: `docs/project/INDEX.md`) (Claude Code: `/project-resume`). Open `docs/BUILD_PLAN.md` and this file only by section, with `grep -n '^#'`.
+2. For phase work, send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
+3. At the end of a session run `/project-sync`; at the end of a phase also update this file: status, decisions, open issues, next step.
