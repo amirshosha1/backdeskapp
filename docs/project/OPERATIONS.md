@@ -4,7 +4,7 @@
 
 ## Commands (created in Phases P, 0a and 0b)
 
-- `pnpm dev` — local Next.js server (uses the hosted dev Supabase project; there is no local database)
+- `pnpm dev` — local Next.js server (with Supabase values in the local environment it talks to the production project; there is no dev project and no local database; without them accounts are off)
 - `pnpm build` — production build
 - `pnpm lint` / `pnpm typecheck`
 - `pnpm test` — Vitest unit and property tests (no network)

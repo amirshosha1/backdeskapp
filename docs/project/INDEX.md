@@ -26,7 +26,7 @@ Task shortcuts: auth → `ARCHITECTURE.md` (AuthN/AuthZ), `CODEBASE_MAP.md`, `do
 
 ## 2. Resume procedure (any agent)
 1. Read `AGENTS.md` and `SESSION_HANDOFF.md` (this file only for the map).
-2. Freshness: `git status -sb`; `git fetch -q origin`; `git log --oneline <baseline>..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (baseline from the handoff; code commits only); `git ls-remote origin 'refs/heads/*'` against the PR heads in `PROJECT_STATUS.md`.
+2. Freshness (the handoff and status files are dated snapshots, never proof of current state; live Git and PR state win): `git status -sb`; `git fetch -q origin`; `git log --oneline <baseline>..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (baseline from the handoff; code commits only); `git ls-remote origin 'refs/heads/*'` against the PR heads in `PROJECT_STATUS.md`; when a GitHub tool is available also list open PRs with minimal fields (`number`, `title`, `draft`, `state`, `head`) and compare. A PR that is merged, closed, or at a different head is a correction to make, not a fact to repeat. Distinguish the code baseline (last code commit) from `origin/main` HEAD (may be a documentation commit).
 3. A new commit or head invalidates only the claims about what it touched: `git diff --stat <baseline>..origin/main` shows which. Re-verify those rows; leave the rest.
 4. Choose the task (the user's, else the handoff's first next action). Read only its files via `CODEBASE_MAP.md`.
 5. Reply with a brief: branch, working tree, task, files, risks, first step. Then work. No repository-wide audit.
