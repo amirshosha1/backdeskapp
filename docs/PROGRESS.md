@@ -13,7 +13,7 @@
 
 - Docs-only PR from `docs/roadmap-competitor-features`; no code, migration or workflow touched. Added `docs/BUILD_PLAN.md` §8 (features F1–F10 mapped to existing phases, no phase added or renumbered), §9 (backlog, empty), an out-of-scope note in §7, open questions 20–21, and one-line pointers in P.2 and Phases 5–9; added `docs/COMPETITORS.md` and `docs/IDEAS.md` (parking lot I1–I19, nothing scheduled); linked both from `CLAUDE.md` and `docs/project/INDEX.md`.
 - Landing: F1–F3 in the remaining P.2 (before the gate); F4, F6, F7 in Phase 7; F5 in Phase 8; F8–F10 in Phase 9 (F10 only if a Gulf design partner commits).
-- Decisions to confirm (Amir): F1's pre-gate slice is browser-only (no `stays` until Phase 5); question 20 (Booking.com sample) and question 21 (Free vs Pro for F2 and RevPAR).
+- Decided by Amir the same day (`docs/project/DECISIONS.md` D-24..D-27): F2 break-even nights is Free for the current month only (question 21 closed; RevPAR and margin stay Pro); build order F2 → F3 → F1, with F1 time-boxed to 3 working days and blocked on real Airbnb (question 7) and Booking.com (question 20) samples; F8 keeps the existing roll-up rule; commissions computed not stored, dynamic pricing in BUILD_PLAN only, INDEX entry accepted. F1's pre-gate slice is browser-only (no `stays` until Phase 5).
 
 ## Current status
 
