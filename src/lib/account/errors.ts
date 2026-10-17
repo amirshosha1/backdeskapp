@@ -6,6 +6,7 @@
 export const ACCOUNT_ERRORS = [
   "not_configured",
   "not_signed_in",
+  "superseded",
   "session_expired",
   "unit_limit_reached",
   "forbidden",
