@@ -31,7 +31,7 @@ async function session(expectedUserId?: string): Promise<Session | AccountError>
   const userId = data?.claims?.sub;
   if (error || !userId) return mapAuthError(error);
   // A browser request dispatched as A must never run under B's newer cookies.
-  if (expectedUserId && userId !== expectedUserId) return "forbidden";
+  if (expectedUserId && userId !== expectedUserId) return "identity_changed";
   return { supabase, userId };
 }
 

@@ -193,6 +193,34 @@ describe("account store: sign-in and sign-out", () => {
     ]);
   });
 
+  it("discards A's pending read when the session becomes B without an auth event", async () => {
+    await subscribedAsA();
+    let finishUnits!: (value: { data: unknown; error: null; status: number }) => void;
+    fake.unitResponse = new Promise((resolve) => { finishUnits = resolve; });
+    const reading = store.load();
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    authUser = B;
+    fake.unitResponse = null;
+    fake.tables.units = { data: [row("b", "B only")], error: null, status: 200 };
+    finishUnits({ data: [row("b", "B row from A's pending request")], error: null, status: 200 });
+    await reading;
+    await vi.waitFor(() => expect(store.readAccount().status).toBe("signed_in"));
+    const next = store.readAccount();
+    expect(next.status === "signed_in" && [next.userId, next.units.map((u) => u.name)]).toEqual(["b", ["B only"]]);
+  });
+
+  it("keeps a pending read hidden when its final identity check cannot be verified", async () => {
+    await subscribedAsA();
+    let finishUnits!: (value: { data: unknown; error: null; status: number }) => void;
+    fake.unitResponse = new Promise((resolve) => { finishUnits = resolve; });
+    const reading = store.load();
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    fake.getSession.mockRejectedValueOnce(new Error("refresh failed"));
+    finishUnits({ data: [row("a", "A only")], error: null, status: 200 });
+    await reading;
+    expect(store.readAccount()).toEqual({ status: "loading" });
+  });
+
   it("keeps A's form state mounted on a same-user refocus event", async () => {
     await subscribedAsA();
     const before = store.readAccount();
@@ -432,6 +460,16 @@ describe("account store: writes", () => {
     actions.deleteUnit.mockResolvedValueOnce({ ok: false, error: "not_signed_in" });
     await store.removeUnit("u1");
     expect(store.readAccount()).toEqual({ status: "guest" });
+  });
+
+  it("hides stale A after a server identity mismatch even if browser session still says A", async () => {
+    signedIn();
+    actions.updateUnit.mockResolvedValueOnce({ ok: false, error: "identity_changed" });
+    expect(await store.renameUnit("u1", "A renamed")).toEqual({ ok: false, error: "identity_changed" });
+    expect(store.readAccount()).toEqual({ status: "loading" });
+    await vi.waitFor(() => expect(fake.getSession).toHaveBeenCalled());
+    expect(store.readAccount()).toEqual({ status: "loading" });
+    expect(actions.updateUnit).toHaveBeenCalledWith({ id: "u1", name: "A renamed" }, "a");
   });
 
   it("does not put a late A write into B's account", async () => {

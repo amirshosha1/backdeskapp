@@ -111,7 +111,7 @@ describe("createUnit", () => {
   });
 
   it("rejects a write sent as A when the server receives B's session", async () => {
-    expect(await createUnit({ name: "A unit", inputs }, "user-A")).toEqual({ ok: false, error: "forbidden" });
+    expect(await createUnit({ name: "A unit", inputs }, "user-A")).toEqual({ ok: false, error: "identity_changed" });
     expect(state.calls).toEqual([]);
   });
 

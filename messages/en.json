@@ -571,6 +571,7 @@
       "not_configured": "Sign-in isn't available right now.",
       "not_signed_in": "Your session ended. Please sign in again.",
       "superseded": "Your account changed. Please try again.",
+      "identity_changed": "Your account changed. Please reload before trying again.",
       "session_expired": "Your session ended. Please sign in again.",
       "unit_limit_reached": "You've reached your account's apartment limit. For more than 5 apartments, we agree a custom plan with you.",
       "forbidden": "You don't have permission to do this.",

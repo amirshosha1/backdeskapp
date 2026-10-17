@@ -177,6 +177,7 @@ async function client(): Promise<BrowserSupabase | null> {
 
 /** Reads the session, then the apartments, the profile answer and the limit, in parallel. */
 export async function load(): Promise<void> {
+  if (state?.status === "sign_out_error") return;
   let version = ++loadVersion;
   // A retry for the same user keeps forms mounted until identity is checked.
   if (state?.status !== "signed_in") emit({ status: "loading" });
@@ -194,7 +195,6 @@ export async function load(): Promise<void> {
     return emit({ status: error ? "loading" : "guest" });
   }
   if (expectNoSession) return emit({ status: "loading" });
-  if (state?.status === "sign_out_error" && state.userId === userId) return;
   if (state?.status === "signed_in" && state.userId !== userId) {
     hideAccount(userId);
     version = loadVersion;
@@ -211,6 +211,26 @@ export async function load(): Promise<void> {
   ]);
   if (version !== loadVersion) return;
   if (expectedUserId !== userId) return;
+  // The browser session can change without an auth event while these requests
+  // are in flight. Never publish their rows under the initiating identity.
+  let currentUserId: string | undefined;
+  try {
+    const current = await sb.auth.getSession();
+    if (version !== loadVersion) return;
+    if (current.error) {
+      hideAccount(userId);
+      return;
+    }
+    currentUserId = current.data.session?.user.id;
+  } catch {
+    if (version === loadVersion) hideAccount(userId);
+    return;
+  }
+  if (currentUserId !== userId) {
+    hideAccount(currentUserId ?? null, !currentUserId);
+    void load();
+    return;
+  }
   const answer = profile.data?.apartment_count_answer;
   emit({
     status: "signed_in",
@@ -275,6 +295,13 @@ function setUnits(token: AuthToken, change: (units: AccountUnit[]) => AccountUni
 
 /** An action failed because the session is gone: show the person as signed out. */
 function afterError<T>(result: ActionResult<T>, token: AuthToken): ActionResult<T> {
+  if (!result.ok && result.error === "identity_changed" && writeIsCurrent(token)) {
+    // The server saw another identity even though the browser preflight saw A.
+    // Do not republish A from a possibly stale browser session without a new
+    // matching auth event.
+    hideAccount(null, true);
+    void load();
+  }
   if (!result.ok && result.error === "not_signed_in" && writeIsCurrent(token)) {
     loadVersion++;
     authVersion++;
