@@ -1,7 +1,7 @@
 # PROJECT_STATUS — verified snapshot
 
 > **Code baseline: `main` @ `4e14ee2`** (PR #17, merged 2026-10-11). Last verified 2026-10-16 unless a row says otherwise. Levels V0–V6 are defined in `VERIFICATION.md`; **no row has V6 (production) evidence** and tests were not re-run in the audit (CI results only).
-> **Stale check:** `git fetch -q origin && git log --oneline 4e14ee2..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (code commits only). Output means the areas those commits touched must be re-verified. Documentation-only commits since the baseline: `dfba35e` (#25). The PR table is also stale when `git ls-remote origin 'refs/heads/*'` shows other heads.
+> **Stale check:** `git fetch -q origin && git log --oneline 4e14ee2..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (code commits only). Output means the areas those commits touched must be re-verified. The baseline is the last *code* commit; `main` HEAD is later. Documentation-only commits since the baseline: `dfba35e` (#25), `acc5596` (#26), plus the documentation-sync PR once merged. HEAD at this update: `acc5596`. The PR table is also stale when `git ls-remote origin 'refs/heads/*'` shows other heads.
 > Status values: COMPLETE · PARTIAL · IN PROGRESS · NOT STARTED · BLOCKED · UNKNOWN. No completion percentages are kept.
 
 ## Overall
@@ -29,9 +29,9 @@ A calculator-first prototype with a real account layer: a visitor gets a profit/
 | Security hardening | PARTIAL | RLS, column grants, publishable key only, `src/lib/auth/next-path.ts`; no CSP/security headers | V1–V3 | — | KI-04, KI-05 | P1 |
 | Automated tests | PARTIAL | 56 unit files in `src`, 4 DB files, 18 e2e specs, 4 Playwright configs | V2–V3 in CI | — | e2e and coverage not in CI KI-06 | P2 |
 | CI/CD, deployment | PARTIAL | `.github/workflows/`, `vercel.json` (`dub1`) | V2–V3 | — | Required checks unenforceable KI-07; production unobserved | P1 |
-| Documentation, developer experience | PARTIAL | `docs/`, this folder | V1 | #25 merged `dfba35e`; #26 | Compaction of `docs/PROGRESS.md`; Windows setup KI-09 | P2 |
+| Documentation, developer experience | PARTIAL | `docs/`, this folder | V1 | #25 merged `dfba35e`; #26 merged `acc5596` | Compaction of `docs/PROGRESS.md`; Windows setup KI-09 | P2 |
 
-## In progress — open draft PRs (based on `4e14ee2`; "checks" and "rls" green at these heads, checked 2026-10-12 to 2026-10-16; none merged)
+## In progress — open draft PRs (based on `4e14ee2`; "checks" and "rls" green at these heads, checked 2026-10-12 to 2026-10-16; none merged; open state and heads re-confirmed against the live PR list 2026-10-17)
 | PR | Head | Purpose | Gate stated in PR |
 |---|---|---|---|
 | [#19](https://github.com/amirshosha1/backdeskapp/pull/19) pricing truth | `deb0c80` | Label each plan feature "available / in development"; remove Setup Kit order action | Owner approval, Preview review |
@@ -40,9 +40,8 @@ A calculator-first prototype with a real account layer: a visitor gets a profit/
 | [#22](https://github.com/amirshosha1/backdeskapp/pull/22) UX + beta gate | `64a009d` | Numeric entry in first-run; beta-gate doc | CI, AR/EN review at 360/768/1440 px |
 | [#23](https://github.com/amirshosha1/backdeskapp/pull/23) 3BR presets | `ffa2f1f` | Baseline-aligned examples, laundry input, new share images | Owner approval |
 | [#24](https://github.com/amirshosha1/backdeskapp/pull/24) analytics consent | `0ef9da6` | Signed 6 h consent cookie, route `/api/analytics-consent`, needs `ANALYTICS_CONSENT_SECRET`; edits two rule lines in `CLAUDE.md` (KI-21) | Phone + two-tab validation |
-| [#26](https://github.com/amirshosha1/backdeskapp/pull/26) agent-neutral knowledge | `9b7bb0e` (rebased on `dfba35e`) | Documentation and agent configuration only (`AGENTS.md`, `docs/project/`); this folder's own PR | Owner approval |
 
-Simulated merge conflicts (`git merge-tree`, pairwise, 2026-10-16): `docs/PROGRESS.md` (#19–#22, #24), `src/test/screens/landing.test.tsx` (#22 vs #23), `CLAUDE.md` (`main` since #25, and #26, vs #24). Other pairs merge cleanly.
+Merged since: #25 (`dfba35e`) and #26 (`acc5596`), documentation only. Simulated merge conflicts (`git merge-tree`, pairwise, 2026-10-16, before #26 merged): `docs/PROGRESS.md` (#19–#22, #24), `src/test/screens/landing.test.tsx` (#22 vs #23), `CLAUDE.md` (slimmed on `main` by #25 and #26; #24 edits lines that no longer exist there). Other pairs merge cleanly.
 
 ## Blockers
 Validation Gate blocks Phase 5 · Phase 2 benchmarks wait on AirROI coverage spike + licence (`BUILD_PLAN.md` §6 Q4, Q10–Q15) · email sign-in needs a sending domain (Q1) · pre-orders need `NEXT_PUBLIC_PREORDER_URL` and a confirmed price (Q2, Q3).
