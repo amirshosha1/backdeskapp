@@ -12,6 +12,7 @@ import { connection } from "./connection";
  */
 
 const SQL = readFileSync(fileURLToPath(new URL("../../docs/verify_after_migration.sql", import.meta.url)), "utf8");
+const FK_SQL = readFileSync(fileURLToPath(new URL("../../docs/verify_preserve_fk_set_null.sql", import.meta.url)), "utf8");
 
 interface Row {
   check_name: string;
@@ -97,5 +98,34 @@ describe("docs/verify_after_migration.sql", () => {
     ["the private schema is exposed", "alter role authenticator set pgrst.db_schemas = 'public, private'", "Data API exposed schemas (the private schema must not be listed)"],
   ])("FAILs when %s", async (_label, breakIt, checks) => {
     expect(failing(await verifyBroken(breakIt))).toEqual(Array.isArray(checks) ? checks : [checks]);
+  });
+});
+
+describe("docs/verify_preserve_fk_set_null.sql", () => {
+  it("is one read-only statement and passes against the installed migration", async () => {
+    const client = await connect("postgres");
+    await client.query("begin transaction read only");
+    try {
+      const { rows } = await client.query<Row>({ text: FK_SQL, values: [] });
+      expect(rows).toHaveLength(5);
+      expect(failing(rows)).toEqual([]);
+      expect(JSON.stringify(rows)).not.toMatch(/@|sb_(publishable|secret)_|eyJ/);
+    } finally {
+      await client.query("rollback");
+    }
+  });
+
+  it("fails if the update trigger loses the nested FK guard", async () => {
+    const client = await connect("supabase_admin");
+    await client.query("begin");
+    try {
+      await client.query(`create or replace function private.units_before_update()
+        returns trigger language plpgsql set search_path = '' as $$
+        begin new.created_by := old.created_by; return new; end; $$`);
+      const { rows } = await client.query<Row>({ text: FK_SQL, values: [] });
+      expect(failing(rows)).toEqual(["update trigger retains authorship except nested NULL update"]);
+    } finally {
+      await client.query("rollback");
+    }
   });
 });

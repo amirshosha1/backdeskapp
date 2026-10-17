@@ -271,6 +271,12 @@ describe("ownership, ids and timestamps come from the database, never the reques
     expect(after).toEqual({ name: "شقة الساحل", created_by: before.created_by, created_at: before.created_at, touched: true });
   });
 
+  it("an authenticated editor cannot directly clear created_by, even on their own apartment", async () => {
+    const before = (await admin.query("select created_by from public.units where id = $1", [unitId])).rows[0];
+    await expectPgError(run(user(b.id), "update public.units set created_by = null where id = $1", [unitId]), DENIED);
+    expect((await admin.query("select created_by from public.units where id = $1", [unitId])).rows[0]).toEqual(before);
+  });
+
   it("profiles: B may change only the apartment-count answer", async () => {
     const ok = await run(user(b.id), "update public.profiles set apartment_count_answer = '2-3' where user_id = $1", [b.id]);
     expect(ok.rowCount).toBe(1);
@@ -441,17 +447,31 @@ describe("delete_my_account (no service-role key: a SECURITY DEFINER function ac
 
     expect((await admin.query("select count(*)::int as n from auth.users where id = $1", [leaving.id])).rows[0].n).toBe(0);
     expect((await admin.query("select count(*)::int as n from public.orgs where id = $1", [leaving.orgId])).rows[0].n).toBe(1);
-    expect((await admin.query("select created_by from public.units where id = $1", [unitId])).rows).toEqual([{ created_by: null }]);
+    expect((await admin.query("select count(*)::int as n from public.org_entitlements where org_id = $1", [leaving.orgId])).rows[0].n).toBe(1);
+    expect((await admin.query("select user_id, role from public.org_members where org_id = $1", [leaving.orgId])).rows).toEqual([
+      { user_id: staying.id, role: "member" },
+    ]);
+    expect((await admin.query("select org_id, created_by from public.units where id = $1", [unitId])).rows).toEqual([
+      { org_id: leaving.orgId, created_by: null },
+    ]);
     expect((await run(user(staying.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([{ id: unitId }]);
+    expect((await run(user(staying.id), "select org_id from public.org_entitlements where org_id = $1", [leaving.orgId])).rows).toEqual([
+      { org_id: leaving.orgId },
+    ]);
     expect((await run(user(leaving.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([]);
   });
 
   it("an access token left after deletion cannot read the deleted user's rows", async () => {
     const deleted = await signUp("stale-token");
+    const surviving = await signUp("stale-survivor");
     const unitId = await addUnit(deleted);
+    const otherUnitId = await addUnit(surviving);
     await run(user(deleted.id), "select public.delete_my_account()");
-    expect((await run(user(deleted.id), "select id from public.units where id = $1", [unitId])).rows).toEqual([]);
-    expect((await run(user(deleted.id), "select user_id from public.profiles where user_id = $1", [deleted.id])).rows).toEqual([]);
+    for (const table of TABLES) {
+      expect((await run(user(deleted.id), `select * from public.${table}`)).rows, `${table} visible to deleted-user token`).toEqual([]);
+    }
+    expect((await run(user(deleted.id), "select id from public.units where id in ($1, $2)", [unitId, otherUnitId])).rows).toEqual([]);
+    expect((await run(user(surviving.id), "select id from public.units where id = $1", [otherUnitId])).rows).toEqual([{ id: otherUnitId }]);
   });
 
   it("takes no argument: there is no way to name another user", async () => {

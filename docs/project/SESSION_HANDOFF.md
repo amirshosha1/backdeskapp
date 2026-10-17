@@ -1,9 +1,9 @@
 # SESSION_HANDOFF
 
 > Model-independent continuation note. Rewritten at the end of each working session (procedure: `INDEX.md` §3).
-> **Updated:** 2026-10-17 · **Code baseline:** `main` @ `4e14ee2` (last commit that changed application code or CI) · **Git HEAD when written:** `main` @ `acc5596` (documentation only: #25, #26). The baseline is not the HEAD: HEAD moves with every documentation commit, the baseline only with code.
+> **Updated:** 2026-10-17 · **Code baseline and live `main` when checked:** `8dafab0` (#20 account persistence; recheck before acting). This PR branch also contains the account deletion changes from #21.
 > **This note is a snapshot.** Branch heads and PR states below were true on the date above; confirm them live before acting (freshness commands, and the GitHub PR list when available).
-> **Freshness (run first):** `git fetch -q origin && git log --oneline 4e14ee2..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (code commits only; documentation commits are expected) and `git ls-remote origin 'refs/heads/*'`. A code commit on `main`, or a PR head different from `PROJECT_STATUS.md`, invalidates only the claims about what it touched (`git diff --stat 4e14ee2..origin/main`).
+> **Freshness (run first):** `git fetch -q origin && git log --oneline 8dafab0..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (code commits only; documentation commits are expected) and `git ls-remote origin 'refs/heads/*'`. A code commit on `main`, or a PR head different from `PROJECT_STATUS.md`, invalidates only the claims about what it touched (`git diff --stat 8dafab0..origin/main`).
 
 ## 1. Objective
 Move Backdesk from calculator early access toward a trustworthy product: land the six stabilization PRs safely, then close the hardening gaps, then the pre-order → Validation Gate → ERP path (`ROADMAP.md`).
@@ -15,7 +15,7 @@ Shipped on `main`: landing, free calculator + first-run flow, finance engine, Go
 Audit and project memory: PR #25 squash-merged into `main` as `dfba35e`; the agent-neutral restructure (root `AGENTS.md`, this folder, thin `CLAUDE.md` / `GEMINI.md` / Copilot pointers) is PR #26, squash-merged as `acc5596` (documentation only; no application code, migration or workflow touched). A compatibility test from a fresh session loaded `CLAUDE.md` and `AGENTS.md` automatically. Post-merge sync: this note, `PROJECT_STATUS.md`, `ROADMAP.md`, the stale startup instructions in `BUILD_PLAN.md` / `PROGRESS.md` and the resume procedure were updated in a documentation-only PR.
 
 ## 4. Active task
-None approved. Open PRs on 2026-10-17 (live GitHub list): #19–#24, all draft and owner-gated, heads as in `PROJECT_STATUS.md`. Plus the documentation-sync PR that carries this note, awaiting owner approval.
+PR #21 only: `main` @ `8dafab0` merged into its existing Draft branch; the `docs/PROGRESS.md` conflict retained both account-persistence and account-deletion entries. The PR adds migration `20261012100000_preserve_fk_set_null.sql`; it remains a production migration requiring an approved backup procedure and explicit owner approval before merge. Local verification on the refreshed branch: lint, typecheck, 580 unit tests, 93 disposable Postgres tests on Postgres 17, and 14 account browser tests passed. The browser build used a temporary local copy of the checked-in font because the sandbox could not fetch Google Fonts; the source change was restored. Hosted Google Auth, production migration and Preview acceptance were not tested. Recheck the pushed head and CI before relying on these results.
 
 ## 5. Remaining work
 `ROADMAP.md` (Part A approved, Part B recommended) and `KNOWN_ISSUES.md` KI-01..KI-21. Newest findings: PR #21 ships a production migration its description omits (KI-19); PR #24 edits rule lines that moved (KI-21).
