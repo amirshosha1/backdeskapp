@@ -1,19 +1,11 @@
 ---
-description: Sync Backdesk project memory with what changed this session (updates context files, never commits)
+description: Sync Backdesk project knowledge with this session's work (wraps docs/project/INDEX.md section 3; never commits)
 allowed-tools: Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git fetch:*), Bash(git ls-remote:*), Bash(git merge-tree:*), Bash(ls:*), Read, Edit, Write, Grep, Glob
 ---
 
-Update the project memory from evidence. Do not commit, push or open PRs unless the user explicitly asks.
+Follow the sync procedure in `docs/project/INDEX.md` §3; it is agent-independent and this command only wraps it. Do not commit, push or open PRs unless the user asks.
 
-1. Collect evidence: `git status -sb`, `git log --oneline <handoff base commit>..HEAD`, `git diff --stat` for uncommitted work, and any test/CI results from this session (quote the command and outcome; never invent results). For PRs, read their state with the GitHub tools, using small pages.
-2. Update only the files whose facts changed:
-   - `SESSION_HANDOFF.md`: always. Date, branch, code baseline commit (the last commit that changed non-doc files; do not record the docs commit itself, it can never be current), what was completed, what is in progress, next three actions, blockers, files to read next. Keep it under 100 lines.
-   - `PROJECT_STATUS.md`: change an area's status only with new evidence (CODE / CI / PR / MANUAL / PROD); update the baseline commit, date and the PR head SHAs (`git ls-remote origin 'refs/heads/*'`).
-   - `ROADMAP.md`: change task status; add tasks only if they have acceptance criteria.
-   - `KNOWN_ISSUES.md`: add verified issues, close fixed ones with the evidence, deduplicate.
-   - `DECISIONS.md`: only a real decision that constrains future work; mark superseded ones.
-   - `ARCHITECTURE.md` / `PROJECT_OVERVIEW.md` / `RULES_REFERENCE.md`: only if structure, scope or a rule changed.
-3. Remove or merge stale or duplicated lines instead of appending. Facts, paths and evidence only; no transcripts.
-4. If `CLAUDE.md` or a context file disagrees with the code, fix the doc after verifying the code.
-5. Check that file paths named in the edited files still exist (`ls`), and that `CLAUDE.md` is still about 100 lines.
-6. Report which context files were updated and which were intentionally left alone, plus anything you could not verify.
+1. Collect evidence: `git status -sb`, `git log --oneline <baseline>..HEAD`, `git diff --stat`, and the test or CI results you actually obtained (never invent results).
+2. Update only the changed facts in `docs/project/`: `PROJECT_STATUS.md` (status, evidence level, refs, date, PR heads from `git ls-remote origin 'refs/heads/*'`), `VERIFICATION.md` (record of checks), `ROADMAP.md`, `KNOWN_ISSUES.md`, `DECISIONS.md` (real decisions only; mark superseded), and always `SESSION_HANDOFF.md` (under 100 lines, code baseline = last commit that changed non-documentation files).
+3. Remove or merge stale lines instead of appending; fix contradictions after checking the code; check that paths named in edited files exist.
+4. Skip the sync for trivial edits. Report which files changed and anything you could not verify.

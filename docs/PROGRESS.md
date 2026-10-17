@@ -1,7 +1,7 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
 > Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `.claude/context/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `.claude/context/SESSION_HANDOFF.md`.
+> Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 
 ## Current status
 
@@ -587,6 +587,6 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## How to resume in a fresh session (including Claude Code on the web)
 
-1. Read `CLAUDE.md` and `.claude/context/SESSION_HANDOFF.md` (or run `/project-resume`). Open `docs/BUILD_PLAN.md` and this file only by section, with `grep -n '^#'`.
+1. Read `AGENTS.md` and `docs/project/SESSION_HANDOFF.md` (map: `docs/project/INDEX.md`) (Claude Code: `/project-resume`). Open `docs/BUILD_PLAN.md` and this file only by section, with `grep -n '^#'`.
 2. For phase work, send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
 3. At the end of a session run `/project-sync`; at the end of a phase also update this file: status, decisions, open issues, next step.

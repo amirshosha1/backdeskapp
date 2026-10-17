@@ -5,26 +5,8 @@
 ## Shape
 Single Next.js 16 App Router app (TypeScript strict), deployed on Vercel (`vercel.json`: region `dub1`). Supabase (Postgres + Auth) is the only backend. No separate API service, no background jobs, no queues. The browser does most work (calculator, guest storage); the server is used for auth callback, account writes (server actions) and the analytics forwarder.
 
-## Directories
-| Path | Responsibility |
-|---|---|
-| `src/app/[locale]/` | Locale-aware pages: landing `page.tsx`, `privacy/`, `demo/` (the whole app: `(tabs)` = home, units, calculator, expenses, guide, pricing, more; `(task)` = start flow, expenses/new), `not-found.tsx` (server-only on purpose), `[...rest]` catch-all |
-| `src/app/api/e/route.ts` | First-party analytics forwarder to PostHog EU (only route handler besides auth) |
-| `src/app/auth/callback/route.ts` | Supabase PKCE code exchange; outside locales; `next` page read from `bd_next` cookie via allow-list `src/lib/auth/next-path.ts`; relative `Location` |
-| `src/proxy.ts` | next-intl middleware (matcher skips `api`, `auth/callback`, `_next`, files). `ar` has no URL prefix, `en` uses `/en` |
-| `src/lib/finance/` | Pure engine (Decimal, typed `Result`, Zod schemas, `ENGINE_VERSION` 1.0.0): scenario, pnl, kpis, breakeven, commission, fees, fx, statement, org-profit, projection, sensitivity, tax, verdict, period |
-| `src/lib/calculator`, `first-run`, `landing`, `pricing` | Form parsing → engine; first-run questions and verdict sentence; landing example computed at build time from the `arbitrage` preset; apartment price rule |
-| `src/lib/guest/` | Browser-only storage of the visitor's apartment/answers (`backdesk:guest*` keys) |
-| `src/lib/account/` | Account store (memory only), autosave, server actions (`actions.ts`), adoption of the browser apartment, Zod schemas, jsonb 8 KB guard |
-| `src/lib/supabase/` | Browser (on demand) and server clients, publishable key only; accounts switch off when env vars are unset (`env.ts`) |
-| `src/lib/analytics/` | Event catalogue (`events.ts`), sender (`track.ts`), inline landing script; guard test forbids other senders |
-| `src/lib/seo`, `src/lib/landing/share-*` | Metadata, hreflang, share images (`public/og/*.png`, hash guard test) |
-| `src/components/`, `src/demo/` | UI by feature; `src/demo/{fixtures,sample-data}` feed sample screens only |
-| `messages/{ar,en}.json` | All UI copy |
-| `supabase/migrations/` | One migration: `20261008180000_accounts_and_units.sql` |
-| `tests/db/` | Throwaway-Postgres harness (`scripts/test-db.sh`) with Supabase-like roles; RLS, grants, triggers, verify SQL, generated `src/types/database.ts` freshness |
-| `e2e/` + 4 `playwright*.config.ts` | Browser tests; each env-dependent build (accounts, analytics, preorder) has its own config |
-| `scripts/` | `check-public-bundle.mjs` (public pages must not ship app code; `/` ≤150 KB gzip), `og/` renderer, `test-db.sh` |
+## Where things live
+Directory and entry-point map: `CODEBASE_MAP.md`.
 
 ## Data flow
 - **Visitor:** landing (static, no client JS of its own) → `/demo/start` → answers + apartment in `localStorage` → engine runs in browser → verdict. Only anonymous counts leave the browser (`POST /api/e` → PostHog).
@@ -45,4 +27,17 @@ Supabase (Auth, Postgres), Vercel (hosting, previews), PostHog EU (via `/api/e`,
 Vercel Git integration: PR → Preview, `main` → `backdeskapp.com`. Supabase GitHub integration applies `supabase/migrations/` on merge to `main` against the single production project. CI: `.github/workflows/ci.yml` (lint, typecheck, unit tests, build with placeholder public values, `check:bundle`) and `db-tests.yml` (`pnpm test:db`). e2e is not run in CI.
 
 ## Constraints
-Binding rules: `CLAUDE.md` §2 and §6 (not repeated here).
+Binding rules: `AGENTS.md` §2 and §6 (not repeated here).
+
+## Stack (verbatim from the former CLAUDE.md §3)
+
+- Next.js (latest stable, App Router) + TypeScript `strict`
+- Tailwind CSS + shadcn/ui, lucide-react icons, Recharts
+- Supabase, hosted only (see §5): Postgres, Auth, Storage, Row Level Security, pg_cron
+- next-intl (`ar` default, `en` second); PWA via Serwist
+- Zod (validation), react-hook-form, decimal.js (money)
+- Vitest + fast-check (unit and property tests), Playwright (e2e)
+- Anthropic API, server-side only, for smart entry and receipt reading
+- Payments behind a `PaymentProvider` interface; Paymob implemented first, **only in the pre-launch payments phase (Phase 4)**. Until then, pre-orders are manual InstaPay transfers and access is granted manually.
+- PostHog (product analytics, EU cloud; until PR C, anonymous counting only through `/api/e`, `docs/ANALYTICS.md`), Resend (email; also the SMTP sender for Supabase Auth once email sign-in is added, see §5)
+- Package manager: pnpm. Deployment: Vercel, functions pinned to `dub1` (Dublin, next to Supabase in Ireland; decided 2026-10-08). Production URL: `https://backdeskapp.com`.
