@@ -312,7 +312,14 @@ function CalculatorHero({
       </div>
 
       <div className={cn("mt-2.5 flex flex-col items-center transition-opacity", s.stale && "opacity-50")}>
-        <p className="text-[0.9375rem] text-white/80">{t("heroLabel", { owner })}</p>
+        {/* One line on purpose: the summary must fit a 360×800 screen above the bottom nav. */}
+        <p className="flex items-center gap-1.5 text-[0.9375rem] text-white/80">
+          {t("heroLabel", { owner })}
+          <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs font-medium text-white/90" title={t("estimateNote")} data-testid="estimate-tag">
+            <span aria-hidden="true">{t("estimateTag")}</span>
+            <span className="sr-only">{t("estimateNote")}</span>
+          </span>
+        </p>
         <HeroFigure amount={toMoneyString(s.view.netAfterDepreciation)} size={tab === "summary" ? "md" : "sm"} className="mt-1" />
         <p className="glass mt-2 rounded-[1.125rem] px-3.5 py-1.5 text-center text-[0.8125rem] leading-snug font-semibold" data-testid="hero-sentence" aria-live="polite">
           {sentence(s.view.sentence, available)}

@@ -27,7 +27,8 @@ const renderPricing = (locale: AppLocale = "ar") =>
   );
 
 const card = (name: string) => screen.getByRole("heading", { name, level: 2 }).closest("article") as HTMLElement;
-const bullets = (article: HTMLElement) => within(article).getAllByRole("listitem").map((li) => li.textContent);
+const bullets = (article: HTMLElement) => within(article).getAllByTestId("feature-label").map((label) => label.textContent);
+const availability = (article: HTMLElement) => within(article).getAllByTestId("feature-availability").map((badge) => badge.textContent);
 
 describe("<PricingScreen />", () => {
   it("shows two plans, Free and Pro, plus the setup kit; Solo and Business are gone", () => {
@@ -48,10 +49,13 @@ describe("<PricingScreen />", () => {
     expect(within(free).getByText("شقة واحدة")).toBeInTheDocument();
     expect(within(free).getByText("مجانًا")).toBeInTheDocument();
     expect(bullets(free)).toEqual([
-      "حاسبة الجدوى كاملةمتاح الآن",
-      "نتيجة تقديرية للشهر: مكسب أو خسارةمتاح الآن",
-      "نسبة الإشغال ومتوسط سعر الليلة من مدخلاتكمتاح الآن",
+      "حاسبة الجدوى كاملة",
+      "نتيجة تقديرية للشهر: مكسب أو خسارة",
+      "نسبة الإشغال ومتوسط سعر الليلة من مدخلاتك",
     ]);
+    expect(availability(free)).toEqual(["متاح الآن", "متاح الآن", "متاح الآن"]);
+    // Free is the calculator that works today: a real link, never a "sign-up soon" toast.
+    expect(within(free).getByRole("link", { name: "جرّب الحاسبة مجانًا" })).toHaveAttribute("href", "/demo/calculator");
     expect(screen.queryByText("حسابات كاملة لوحدة واحدة")).toBeNull();
     expect(screen.queryByText("إدخال الحجوزات والمصروفات بلا حدود")).toBeNull();
   });
@@ -62,12 +66,16 @@ describe("<PricingScreen />", () => {
     expect(screen.queryByText("الأكثر اختيارًا")).toBeNull();
     expect(pro).toHaveTextContent("249ج.م.شهريًاتجريبي");
     expect(bullets(pro)).toEqual([
-      "كل ما في المجانيمتاح الآن",
-      "تفصيل الشهر كاملًا وكل الشهور السابقةقيد التطوير",
-      "تقرير الشهر PDF وكشف حساب المالكقيد التطوير",
-      "استيراد تقارير Airbnbقيد التطوير",
-      "كل شقة إضافية بنصف سعر الباقةقيد التطوير",
+      "كل ما في المجاني",
+      "تفصيل الشهر كاملًا وكل الشهور السابقة",
+      "تقرير الشهر PDF وكشف حساب المالك",
+      "استيراد تقارير Airbnb",
+      "كل شقة إضافية بنصف سعر الباقة",
     ]);
+    expect(availability(pro)).toEqual(["متاح الآن", "قيد التطوير", "قيد التطوير", "قيد التطوير", "قيد التطوير"]);
+    // Pro is not on sale: its only action is a pre-order, named as one.
+    expect(within(pro).getByRole("button", { name: "احجز برو مسبقًا" })).toBeEnabled();
+    expect(within(pro).queryByRole("button", { name: /^اختر/u })).toBeNull();
   });
 
   it("every price is labelled as a sample: Pro's price and the setup kit", () => {
@@ -137,6 +145,10 @@ describe("<PricingScreen />", () => {
     expect(screen.getByText("Planned: monthly payments without automatic renewal.")).toBeInTheDocument();
     expect(within(card("Pro")).getByText("Airbnb report import").closest("li")).toHaveTextContent("In development");
     expect(within(card("Setup Kit")).queryByRole("button", { name: "Order the kit" })).toBeNull();
+    expect(within(card("Setup Kit")).queryByRole("link")).toBeNull();
+    expect(within(card("Setup Kit")).getByText("In development")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Try the calculator free" })).toHaveAttribute("href", "/demo/calculator");
+    expect(screen.getByRole("button", { name: "Pre-order Pro" })).toBeEnabled();
   });
 
   it("pre-order buttons explain that pre-orders open soon until a link is set", () => {
