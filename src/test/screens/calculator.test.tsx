@@ -35,6 +35,14 @@ describe("<CalculatorScreen /> — Summary (rental-arbitrage example)", () => {
     expect(byTestId("nights-header")).toBe("18 ليلة محجوزة من 30الإشغال 60%");
   });
 
+  it("marks the result as an estimate from the entered numbers, in both languages", () => {
+    const { unmount } = renderCalculator();
+    expect(byTestId("estimate-tag")).toBe("تقديرتقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.");
+    unmount();
+    renderCalculator("en");
+    expect(byTestId("estimate-tag")).toBe("EstimateAn estimate from the numbers you entered, not an actual result.");
+  });
+
   it("the three rows add up as displayed: revenue − all costs with depreciation = net", () => {
     renderCalculator();
     expect(byTestId("summary-revenue")).toContain("47,400.00");
