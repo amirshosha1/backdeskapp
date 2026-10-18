@@ -24,9 +24,11 @@
 -- Comparable across databases: privileges are normalised (an empty ACL is
 -- its default; entries sorted), roles are compared by name, never by OID, and
 -- drill.sh runs this with search_path = pg_catalog so every definition is
--- printed fully schema-qualified whichever role runs it. Check constraints and
--- policy expressions are compared without parentheses and spaces: Postgres
--- re-prints nested AND/OR differently after a dump and restore.
+-- printed fully schema-qualified whichever role runs it. CHECK constraints and
+-- policy USING / WITH CHECK expressions appear here by name (and policies by
+-- mode, command and roles) only: their expressions are compared separately,
+-- by re-parsing on the restore server (expressions.sql, canonicalize.sql),
+-- because their printed text legitimately changes across a dump and restore.
 
 with
 target_schemas (nspname) as (values ('auth'), ('public'), ('private')),
@@ -68,7 +70,7 @@ rows as (
 
   union all
   select 'constraint', format('%s.%s', t.nspname, t.relname),
-         md5(string_agg(format('%s %s', k.conname, regexp_replace(pg_get_constraintdef(k.oid), '[()\s]', '', 'g')), '|' order by k.conname))
+         md5(string_agg(format('%s %s', k.conname, case when k.contype = 'c' then 'CHECK' else pg_get_constraintdef(k.oid) end), '|' order by k.conname))
   from tbl t join pg_constraint k on k.conrelid = t.oid
   group by t.nspname, t.relname
 
@@ -86,9 +88,8 @@ rows as (
 
   union all
   select 'policy', format('%s.%s', p.schemaname, p.tablename),
-         md5(string_agg(format('%s %s %s %s %s %s', p.policyname, p.permissive, p.cmd, p.roles::text,
-                               regexp_replace(coalesce(p.qual, ''), '[()\s]', '', 'g'),
-                               regexp_replace(coalesce(p.with_check, ''), '[()\s]', '', 'g')), '|' order by p.policyname))
+         md5(string_agg(format('%s %s %s %s using=%s check=%s', p.policyname, p.permissive, p.cmd, p.roles::text,
+                               p.qual is not null, p.with_check is not null), '|' order by p.policyname))
   from pg_policies p join target_schemas s on s.nspname = p.schemaname
   group by p.schemaname, p.tablename
 

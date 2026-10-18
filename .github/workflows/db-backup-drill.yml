@@ -1,10 +1,13 @@
 # Backup drill: dump → encrypt → decrypt → restore into a throwaway Supabase
-# Postgres 17 container → prove the copy matches. Runbook: docs/BACKUP_DRILL.md.
+# Postgres 17 container → prove the copy matches. A PARTIAL DATABASE BACKUP
+# (auth, public, private), not a Supabase project recovery. Runbook:
+# docs/BACKUP_DRILL.md.
 #
 # Two jobs, never both in one run:
 #   self-test   pull requests that touch the drill or a migration. Synthetic
-#               data only; no secrets are referenced. Must PASS, and must FAIL
-#               when the restored copy is deliberately damaged.
+#               data only; references no secret (checked by
+#               scripts/backup-drill/check_workflows.py). Must PASS, and must
+#               FAIL when the restored copy is deliberately damaged.
 #   production  manual only (Actions → Backup drill → Run workflow), on main,
 #               started by the repository owner, with the typed confirmation.
 #               Reads the hosted project; never writes to it.
@@ -13,7 +16,7 @@ name: Backup drill
 on:
   pull_request:
     paths:
-      - ".github/workflows/db-backup-drill.yml"
+      - ".github/workflows/**"
       - "scripts/backup-drill/**"
       - "supabase/migrations/**"
       - "docs/verify_after_migration.sql"
@@ -44,9 +47,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
+      - name: Secrets are referenced only by the manual production job
+        run: python3 -I scripts/backup-drill/check_workflows.py
+      - name: Connection-string validation
+        run: python3 -I scripts/backup-drill/test_source_url.py -v
       - run: docker pull --quiet "$IMAGE"
       - name: Drill on synthetic data must PASS
         run: OUT="$RUNNER_TEMP/drill" scripts/backup-drill/drill.sh self-test
@@ -56,8 +63,11 @@ jobs:
             echo "::error::the drill passed a damaged restore"
             exit 1
           fi
-          grep -q '^| FAIL | Restored data fingerprints match the source' "$RUNNER_TEMP/drill-tamper/report.md"
-          grep -q '^| FAIL | Restored acl fingerprints match the source' "$RUNNER_TEMP/drill-tamper/report.md"
+          report="$RUNNER_TEMP/drill-tamper/report.md"
+          grep -q '^| FAIL | Restored data fingerprints match the source' "$report"
+          grep -q '^| FAIL | Restored acl fingerprints match the source' "$report"
+          grep -q '^| FAIL | Restored CHECK constraints and policy expressions match the source.*units_name_check definition differs' "$report"
+          grep -q '^| FAIL | Restored CHECK constraints and policy expressions match the source.*USING expression differs' "$report"
 
   production:
     # Manual, on main, by the owner, with the exact confirmation. Anything else skips.
@@ -69,22 +79,24 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
       - run: docker pull --quiet "$IMAGE"
       - name: Drill against production (read-only)
         env:
           # Repository secrets, added just before the run and deleted after it
-          # (docs/BACKUP_DRILL.md). GitHub masks both in the log.
+          # (docs/BACKUP_DRILL.md). GitHub masks them in the log; drill.sh also
+          # masks the password on its own and never prints the URL.
           SOURCE_URL: ${{ secrets.BACKUP_SOURCE_DB_URL }}
           BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          BACKUP_DB_CA_CERT: ${{ secrets.BACKUP_DB_CA_CERT }}
         run: OUT="$RUNNER_TEMP/drill" scripts/backup-drill/drill.sh production
       - name: Upload the encrypted backup and the report (no plaintext)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: backdesk-backup-${{ github.run_id }}
+          name: backdesk-partial-db-backup-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/drill/encrypted/*.gpg
             ${{ runner.temp }}/drill/encrypted/manifest.txt
