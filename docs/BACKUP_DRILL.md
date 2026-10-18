@@ -86,7 +86,7 @@ Raising a limit is a code change and goes through review.
 
 The session pooler always uses TLS. By default the drill uses `sslmode=require`: the connection is encrypted, but the server's certificate is not checked against Supabase's CA, and the report says so in an INFO row.
 
-For full verification, download the CA certificate (Supabase dashboard → Database → Settings → SSL Configuration → Download certificate) and add its PEM text as the repository secret `BACKUP_DB_CA_CERT`. The drill then uses `verify-full`. If `verify-full` fails against the pooler, do not downgrade quietly: report it, and decide together whether `require` is acceptable.
+**Owner decision (2026-10-18): production runs use `verify-full`.** Download the CA certificate (Supabase dashboard → Database → Settings → SSL Configuration → Download certificate) and add its PEM text as the repository secret `BACKUP_DB_CA_CERT`. The drill then uses `verify-full`. If `verify-full` fails against the pooler, do not downgrade quietly: report it, and decide together whether `require` is acceptable.
 
 ## Secrets: exposure window, cleanup and rotation
 
@@ -121,9 +121,9 @@ GitHub offers **Run workflow** only for a workflow file that exists on the defau
 3. GitHub → repository → Settings → Secrets and variables → Actions → **New repository secret**:
    - `BACKUP_SOURCE_DB_URL` (step 1);
    - `BACKUP_PASSPHRASE` (step 2);
-   - optionally `BACKUP_DB_CA_CERT` (see TLS).
+   - `BACKUP_DB_CA_CERT`, Supabase's CA certificate (see TLS). Required for production runs by the owner's decision; without it the drill falls back to `require`, which is not approved.
 4. Actions → **Backup drill** → Run workflow → branch `main` → type `back up kmmfhaypqgzhoptmljki` → Run.
-5. When it finishes (about 5–10 minutes), open the run: the summary shows the report. **Every PASS/FAIL row must be PASS.**
+5. When it finishes (about 5–10 minutes), open the run: the summary shows the report. **Every PASS/FAIL row must be PASS**, and the Connection row must say `sslmode verify-full`; `require` means the CA secret was missing, so treat the run as not approved.
 6. **Immediately delete `BACKUP_SOURCE_DB_URL` and `BACKUP_PASSPHRASE`**, then reset the database password (see Rotation).
 7. Download the artifact `backdesk-partial-db-backup-<run id>` within 3 days. Keep the `.gpg` file somewhere private and durable, not in the repository. To check it opens on Windows: Git Bash → `gpg --decrypt --output backdesk.dump <file>.gpg`, enter the passphrase, then delete `backdesk.dump`.
 8. Send back the run link and the report table (it contains no personal data).
