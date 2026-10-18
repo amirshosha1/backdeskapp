@@ -25,7 +25,8 @@
 | 2026-10-16 | Merge-conflict simulation, pairwise (`git merge-tree`) | PR heads above + PR #25 | Conflicts as listed in `PROJECT_STATUS.md` | Local command output |
 | 2026-10-18 | CI "checks" + "rls" (V2, V3) | `main` @ `72903c6` (#33) | Pass | Actions runs 39134180568, 39134180652 |
 | 2026-10-18 | CI "checks" (V2) | `main` @ `0d68a58` (#22) | **Fail**: `scenario-view.test.ts` property, fast-check seed 1850402200 (pre-existing tie defect, fixed by #33); "rls" pass | Actions runs 39131816021, 39131816020 |
-| 2026-10-18 | Main Playwright 308/308; preorder 1/1; analytics 8/8; accounts 14/14 (V4, local Linux sandbox) | `main` @ `72903c6` and `0d68a58` | Pass | `pnpm test:e2e` and the three other configs, after `pnpm build` |
+| 2026-10-18 | Main Playwright 308/308; preorder 1/1; analytics 8/8; accounts 14/14 (V4, local Linux sandbox) | `main` @ `72903c6` | Pass | `pnpm test:e2e` and the three other configs, after `pnpm build`, in a worktree at `72903c6` |
+| 2026-10-18 | Main Playwright 308/308; preorder 1/1; analytics 8/8 (V4, local Linux sandbox). The accounts config was **not** run locally on this SHA (CI "accounts-browser" passed) | `main` @ `0d68a58` | Pass | Same commands, in a worktree at `0d68a58` |
 | 2026-10-18 | `scenario-view.test.ts` 50 consecutive runs (V2) | `main` @ `72903c6` | 0 failures | Local loop |
 | 2026-10-18 | Property stress, 100 seeded batches × 10,000 cases (V2) | before #33 / with #33 | 26 of 100 batches failed / 1,000,000 cases, 0 failures | PR #33 description |
 | 2026-10-18 | Coverage (`pnpm test:coverage`) | #33 head `8962539` (finance code = `72903c6`) | 99.66% lines overall; `scenario-view.ts` 100% branches | Local run |
