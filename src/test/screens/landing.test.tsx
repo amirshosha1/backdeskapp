@@ -30,6 +30,7 @@ describe("<LandingScreen /> in Arabic", () => {
     expect(figure).toContain(`${wholeNet.isNegative() ? "-" : ""}${wholeNet.abs().toNumber().toLocaleString("en-US")}`);
     expect(figure).not.toMatch(/\.\d/);
     expect(plain(within(card).getByTestId("landing-inputs"))).toBe("2,450 ج.م. لليلة · 14 من 30 ليلة · إيجار 35,000 ج.م.");
+    expect(card).toHaveTextContent("الإيراد يشمل رسوم تنظيف مفترضة لكل حجز.");
     expect(within(card).getByTestId("landing-sentence")).toHaveTextContent(/ينقصك/);
   });
 

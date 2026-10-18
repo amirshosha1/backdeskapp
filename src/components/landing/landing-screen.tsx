@@ -101,6 +101,7 @@ export function LandingScreen({ example }: { example: LandingExample }) {
               <p className="text-xs text-white/75" data-testid="landing-inputs">
                 {t("cardInputs", { adr: money(example.adr), booked: example.bookedNights, available: example.availableNights, rent: money(example.rent) })}
               </p>
+              <p className="text-xs text-white/75">{t("cardRevenueNote")}</p>
               <p className="mt-2 text-xs text-white/80">{tCalc("heroLabel", { owner: "no" })}</p>
               <p className={cn("text-[1.625rem] leading-snug font-bold", example.outcome === "profit" ? "text-hero-profit" : "text-hero-loss")} data-testid="landing-verdict">
                 {tFirstRun("verdictWord", { outcome: example.outcome, owner: "no" })}
