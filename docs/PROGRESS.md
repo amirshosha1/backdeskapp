@@ -6,8 +6,14 @@
 - Recorded the full regression matrix and the private-beta decision in `docs/STABILIZATION_BETA_GATE.md`.
 - Decision: the calculator remains suitable for clearly labelled early access; private beta as an operating ledger is blocked by real expense persistence and the pending two-account Google test.
 
-> Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-10 (Batch 4 PR 2, the landing page, in draft: amirshosha1/str-money-finder#17. Batch 4 PR 1 #15, the 404 fix #16 and the audit and financial baseline docs #18 are merged).
+## Stabilization: account persistence (draft, 2026-10-12)
+
+- Done on `stabilization/account-persistence`: hide old account data during sign-in and sign-out transitions; reject stale read and write results; add account-switch and race regression tests and a two-account Preview checklist.
+- Decision: do not run account or RLS tests against the hosted Supabase project. CI uses a disposable database; Amir will complete the live two-account Google checks on Preview.
+- Open: the manual Preview results and green CI are required before calling persistence and isolation verified for private beta.
+
+> Dated history, not the entry point. Start at `AGENTS.md` (rules) and `docs/project/SESSION_HANDOFF.md` (current state); `docs/BUILD_PLAN.md` is the spec and phases; `CLAUDE.md` is now a pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations below resolve through `docs/project/INDEX.md` §5. Do not read this file in full. Update it at the end of every phase.
+> Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 
 ## Current status
 
@@ -60,7 +66,7 @@
 
 - Local machine: Windows 11, Node 24.15, pnpm 9.15, Git 2.54. **No Docker, WSL, Supabase CLI or `gh`, by design.** Do not ask Amir to install anything.
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
-- Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
+- Repo: `github.com/amirshosha1/backdeskapp` (renamed from `str-money-finder`; older text here and in PR descriptions still uses the old name), branch `main`.
 - Supabase: the **Backdesk project exists** (created by Amir).
   - Ref `kmmfhaypqgzhoptmljki`, West EU / Ireland (`eu-west-1`), Free plan.
   - **It is production; there is no separate dev or prod project** (2026-10-08).
@@ -593,6 +599,6 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## How to resume in a fresh session (including Claude Code on the web)
 
-1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.
-2. Send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
-3. At the end of the phase, update this file: status, decisions, open issues, next step.
+1. Read `AGENTS.md` and `docs/project/SESSION_HANDOFF.md` (map: `docs/project/INDEX.md`) (Claude Code: `/project-resume`). Open `docs/BUILD_PLAN.md` and this file only by section, with `grep -n '^#'`.
+2. For phase work, send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
+3. At the end of a session run `/project-sync`; at the end of a phase also update this file: status, decisions, open issues, next step.
