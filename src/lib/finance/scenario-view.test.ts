@@ -197,6 +197,55 @@ describe("scenarioView — break-even status and sentence edge cases", () => {
   });
 });
 
+// A half-piastre tie that straddles zero: half-up (away from zero) gives
+// round(+0.005) = 0.01 but round(−0.005) = −0.01, so subtracting a whole
+// piastre amount no longer commutes with rounding. The tie is resolved in
+// the tied subtotal, never by moving a line that needed no rounding.
+describe("scenarioView — half-piastre ties around zero", () => {
+  const TINY: ScenarioInput = {
+    operatingModel: "owner_operated",
+    daysInPeriod: 30,
+    blockedNights: 0,
+    bookedNights: 1,
+    adr: 0,
+    avgLengthOfStay: 1,
+    cleaningFeePerStay: 0,
+    platformFeeRate: 0,
+    rent: 0,
+    fixedCosts: [],
+    perStayCosts: [],
+    perNightCosts: [],
+    irregularCosts: [],
+    setupCost: 0,
+    usefulLifeMonths: 1,
+    deposit: 0,
+    commission: NO_COMMISSION,
+  };
+
+  it("an exact depreciation stays exact when profit before depreciation is +0.005", () => {
+    // Revenue 0.01, fees 0.005 → before +0.005; depreciation exactly 0.01 → net −0.005.
+    const view = scenarioView({ ...TINY, adr: "0.01", platformFeeRate: "0.5", setupCost: "0.01" });
+    const s = view.sections;
+    expect(money(view.netAfterDepreciation)).toBe("-0.01");
+    expect(money(s.depreciation)).toBe("0.01");
+    expect(money(s.profitBeforeDepreciation)).toBe("0.00");
+    expect([s.revenue, s.platformFees, s.operatingExpenses].map(money)).toEqual(["0.01", "0.01", "0.00"]);
+    expect(view.outcome).toBe("loss");
+  });
+
+  it("a typed cost stays as typed when revenue is the only rounded line", () => {
+    // Half a stay's cleaning fee: revenue 0.005; one typed cost of 0.01 → before and net −0.005.
+    const view = scenarioView({ ...TINY, avgLengthOfStay: 2, cleaningFeePerStay: "0.01", fixedCosts: [{ id: "utilities", amount: "0.01" }] });
+    const s = view.sections;
+    expect(money(view.netAfterDepreciation)).toBe("-0.01");
+    expect(money(s.operatingExpenses)).toBe("0.01");
+    expect(money(s.profitBeforeDepreciation)).toBe("-0.01");
+    expect(money(s.revenue)).toBe("0.00");
+    expect(money(view.revenue)).toBe("0.00");
+    expect(money(view.totalCostsWithDepreciation)).toBe("0.01");
+  });
+});
+
 // ---------------------------------------------------------------- properties
 
 const RUNS = { numRuns: 300 };
@@ -288,6 +337,10 @@ describe("scenarioView — properties", () => {
           // A line already in whole piastres (e.g. one typed amount) never takes the leftover.
           if (new Decimal(exact).decimalPlaces() <= 2) expect(shown.equals(exact)).toBe(true);
         }
+        // Revenue and the subtotal are each a half-up rounding of their own value,
+        // or the other half of a tie: never more than half a piastre away.
+        expect(s.revenue.minus(r.pnl.grossRevenue).abs().lessThanOrEqualTo("0.005")).toBe(true);
+        expect(s.profitBeforeDepreciation.minus(r.profitBeforeDepreciation).abs().lessThanOrEqualTo("0.005")).toBe(true);
         // Typed amounts are shown as typed.
         if (s.rent) expect(s.rent.equals(input.rent)).toBe(true);
         if (input.commission.basis === "fixed_monthly") expect(s.managementCommission!.equals(input.commission.fixedFee)).toBe(true);
