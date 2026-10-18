@@ -74,8 +74,7 @@
     "statementLater": "كشف حساب هذه الوحدة متاح في النسخة الكاملة",
     "downloadPdf": "تنزيل الكشف PDF متاح في النسخة الكاملة",
     "shareLink": "رابط المشاركة مع المالك متاح في النسخة الكاملة",
-    "preorderSoon": "الحجز المسبق يُفتح قريبًا",
-    "signupSoon": "التسجيل يُفتح عند الإطلاق"
+    "preorderSoon": "الحجز المسبق يُفتح قريبًا"
   },
   "firstRun": {
     "skip": "تخطَّ",
@@ -259,7 +258,8 @@
     "title": "حاسبة الجدوى",
     "presetsLabel": "أمثلة جاهزة",
     "presets": {
-      "arbitrage": "مثال: إعادة تأجير",
+      "arbitrage": "مثال: شقة مفروشة بالإيجار",
+      "arbitrage-empty": "مثال: شقة فارغة بالإيجار",
       "managed": "إدارة لمالك — وسط البلد"
     },
     "unitDetails": {
@@ -284,6 +284,7 @@
       "internet": "الإنترنت (ثابت)",
       "compoundFees": "مصاريف الكمبوند (ثابت)",
       "cleaningCost": "التنظيف (لكل حجز)",
+      "laundryCost": "الغسيل (لكل حجز)",
       "consumables": "مستلزمات الضيوف (لكل حجز)",
       "repairs": "الصيانة (غير منتظمة، ضمن حساب التعادل افتراضيًا)",
       "setupCost": "تكلفة التجهيز (إجمالي تقريبي)",
@@ -339,6 +340,8 @@
     "projectionTeaserTitle": "توقعات 12 شهرًا حسب المواسم",
     "contributionBeforeCommissionLabel": "ربح الليلة قبل عمولة الإدارة",
     "contributionAfterCommissionLabel": "ربح الليلة بعد عمولة الإدارة",
+    "estimateTag": "تقدير",
+    "estimateNote": "تقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.",
     "heroLabel": "{owner, select, yes {صافي ربح المالك بعد الإهلاك} other {صافي الربح الشهري بعد الإهلاك}}",
     "tabsLabel": "عرض الحاسبة",
     "tabSummary": "الملخص",
@@ -454,6 +457,7 @@
   },
   "pricing": {
     "title": "الباقات",
+    "availability": { "available": "متاح الآن", "planned": "قيد التطوير" },
     "perMonth": "شهريًا",
     "scope": {
       "free": "شقة واحدة",
@@ -465,12 +469,11 @@
     "customPlans": "أكثر من {count, plural, one {شقة واحدة} two {شقتين} few {# شقق} many {# شقة} other {# شقة}}: باقات خاصة",
     "contactUs": "تواصل معنا",
     "customPlansPrefill": "مرحبًا، أسأل عن باقة خاصة في باك ديسك لأكثر من {count, plural, one {شقة واحدة} two {شقتين} few {# شقق} many {# شقة} other {# شقة}}.",
-    "firstMonthOpen": "أول شهر بعد إنشاء الحساب: كل شيء مفتوح.",
-    "monthToMonth": "الدفع شهر بشهر، بلا تجديد تلقائي.",
+    "firstMonthOpen": "مخطط: أول شهر بعد إنشاء الحساب سيكون مفتوحًا بالكامل.",
+    "monthToMonth": "مخطط: الدفع شهر بشهر، بلا تجديد تلقائي.",
     "preorderCta": "احجز مكانك",
-    "choosePlan": "اختر {plan}",
-    "startFree": "ابدأ مجانًا",
-    "orderSetupKit": "اطلب الباقة",
+    "choosePlan": "احجز {plan} مسبقًا",
+    "startFree": "جرّب الحاسبة مجانًا",
     "oneTime": "مرة واحدة",
     "samplePricesNote": "كل الأسعار تجريبية وستتحدد قبل الإطلاق."
   },

@@ -6,6 +6,7 @@ import { OwnerStatement } from "@/components/statement/owner-statement";
 import { UNITS } from "@/demo/fixtures/units";
 import { STATEMENT } from "@/demo/fixtures/statement";
 import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM } from "@/test/legacy-calculator-example";
 import { saveOwnUnit } from "@/lib/guest/store";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
@@ -53,7 +54,7 @@ describe("<UnitsScreen />", () => {
   });
 });
 
-const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
+const EXAMPLE = LEGACY_EXAMPLE_FORM;
 const plain = (el: Element) => (el.textContent ?? "").replace(/[\u2066-\u2069\u200e]/g, "");
 
 describe("<UnitsScreen /> — the visitor's own unit", () => {

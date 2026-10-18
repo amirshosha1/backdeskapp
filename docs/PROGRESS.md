@@ -6,6 +6,13 @@
 - Recorded the full regression matrix and the private-beta decision in `docs/STABILIZATION_BETA_GATE.md`.
 - Decision: the calculator remains suitable for clearly labelled early access; private beta as an operating ledger is blocked by real expense persistence and the pending two-account Google test.
 
+## Stabilization: pricing truth (draft, 2026-10-12)
+
+- Done on `stabilization/pricing-truth`: each Free and Pro feature now states whether it is available or in development; the free result is described as an estimate from user inputs. Setup Kit is labelled in development and has no order action. First-month access and monthly payment terms are labelled planned.
+- Decision: keep the existing sample prices visible with their SAMPLE badges; do not treat the page as proof that paid access or payment works.
+- Verification: TypeScript and `git diff --check` passed locally. Vitest could not start on this Windows runtime (`ERR_PACKAGE_IMPORT_NOT_DEFINED`); require green CI on the PR before any merge.
+- Open: confirm each planned feature with a live end-to-end check before changing its badge to available.
+
 ## Stabilization: account persistence (draft, 2026-10-12)
 
 - Done on `stabilization/account-persistence`: hide old account data during sign-in and sign-out transitions; reject stale read and write results; add account-switch and race regression tests and a two-account Preview checklist.
@@ -16,6 +23,8 @@
 > Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 
 ## Current status
+
+- **Stabilization step 3 (draft, 2026-10-12):** furnished and empty 3BR examples now follow the financial baseline's booked ADR, 14 nights and per-stay laundry. The engine formulas are unchanged. Saved older forms keep their former result with a zero laundry default. See `docs/STABILIZATION_PRESETS.md`; this branch still requires CI and review before any merge.
 
 - **Phase P (clickable prototype)** was merged into `main` (amirshosha1/str-money-finder#1). Amir reviewed it on his phone: it felt broken (silent taps) and the design was weak, which led to Phase P.1.
 - **Phase P.1 (prototype fixes and redesign) is built**: tap audit (no silent taps, enforced by an e2e crawler), design direction A2 on every screen, an expense-details screen, the Arabic/English switch, the Arabic copy pass, and bidi/404/safe-area fixes. See "Phase P.1 decisions" and "Phase P.1 build notes" below.

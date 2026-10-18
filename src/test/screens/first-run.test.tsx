@@ -4,7 +4,7 @@ import { renderWithIntl } from "@/test/render";
 import { router } from "@/test/mocks/navigation";
 import { FirstRunScreen } from "@/components/first-run/first-run-screen";
 import { FirstRunGate } from "@/components/first-run/first-run-gate";
-import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM } from "@/test/legacy-calculator-example";
 import { readFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { resetFlowEventsForTests } from "@/lib/analytics/flow-events";
 import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "@/lib/guest/store";
@@ -12,7 +12,7 @@ import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 afterEach(() => vi.clearAllMocks());
 
-const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
+const EXAMPLE = LEGACY_EXAMPLE_FORM;
 const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎]/g, "");
 const renderFlow = (locale: "ar" | "en" = "ar") => renderWithIntl(<FirstRunScreen example={EXAMPLE} />, { locale });
 const heading = () => screen.getByRole("heading", { level: 1 }).textContent;
@@ -47,6 +47,7 @@ describe("first-run flow: order per model", () => {
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("خسارة");
     expect(plain(screen.getByTestId("hero-figure"))).toContain("-7,013.67");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("تتعادل عند 21.41 ليلة وأنت عند 18. ينقصك 4 ليالٍ.");
+    expect(screen.getByTestId("estimate-note")).toHaveTextContent("تقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.");
   });
 
   it("managed: the cost question asks the commission, and the verdict is the owner's", () => {
@@ -204,6 +205,7 @@ describe("first-run flow: answers, verdict and saving", () => {
     tap("Show the result");
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("Loss");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("You break even at 21.41 nights and you're at 18. You need 4 more nights.");
+    expect(screen.getByTestId("estimate-note")).toHaveTextContent("An estimate from the numbers you entered, not an actual result.");
   });
 });
 
