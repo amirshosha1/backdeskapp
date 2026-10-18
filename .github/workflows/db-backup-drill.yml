@@ -1,0 +1,94 @@
+# Backup drill: dump → encrypt → decrypt → restore into a throwaway Supabase
+# Postgres 17 container → prove the copy matches. Runbook: docs/BACKUP_DRILL.md.
+#
+# Two jobs, never both in one run:
+#   self-test   pull requests that touch the drill or a migration. Synthetic
+#               data only; no secrets are referenced. Must PASS, and must FAIL
+#               when the restored copy is deliberately damaged.
+#   production  manual only (Actions → Backup drill → Run workflow), on main,
+#               started by the repository owner, with the typed confirmation.
+#               Reads the hosted project; never writes to it.
+name: Backup drill
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/db-backup-drill.yml"
+      - "scripts/backup-drill/**"
+      - "supabase/migrations/**"
+      - "docs/verify_after_migration.sql"
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "back up kmmfhaypqgzhoptmljki" to read the production database'
+        required: true
+        type: string
+
+# Least privilege: the jobs only check out code. Artifacts use the runner's
+# own upload token, not GITHUB_TOKEN.
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-drill-${{ github.event_name }}
+  cancel-in-progress: false
+
+env:
+  # Supabase's Postgres 17 image: the restore target and every client
+  # (pg_dump, pg_restore, psql), so versions always match.
+  IMAGE: supabase/postgres:17.6.1.172
+
+jobs:
+  self-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: docker pull --quiet "$IMAGE"
+      - name: Drill on synthetic data must PASS
+        run: OUT="$RUNNER_TEMP/drill" scripts/backup-drill/drill.sh self-test
+      - name: Drill on a damaged restore must FAIL
+        run: |
+          if OUT="$RUNNER_TEMP/drill-tamper" DRILL_TAMPER=1 scripts/backup-drill/drill.sh self-test; then
+            echo "::error::the drill passed a damaged restore"
+            exit 1
+          fi
+          grep -q '^| FAIL | Restored data fingerprints match the source' "$RUNNER_TEMP/drill-tamper/report.md"
+          grep -q '^| FAIL | Restored acl fingerprints match the source' "$RUNNER_TEMP/drill-tamper/report.md"
+
+  production:
+    # Manual, on main, by the owner, with the exact confirmation. Anything else skips.
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      && github.ref == 'refs/heads/main'
+      && github.actor == github.repository_owner
+      && inputs.confirm == 'back up kmmfhaypqgzhoptmljki'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: docker pull --quiet "$IMAGE"
+      - name: Drill against production (read-only)
+        env:
+          # Repository secrets, added just before the run and deleted after it
+          # (docs/BACKUP_DRILL.md). GitHub masks both in the log.
+          SOURCE_URL: ${{ secrets.BACKUP_SOURCE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: OUT="$RUNNER_TEMP/drill" scripts/backup-drill/drill.sh production
+      - name: Upload the encrypted backup and the report (no plaintext)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backdesk-backup-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/drill/encrypted/*.gpg
+            ${{ runner.temp }}/drill/encrypted/manifest.txt
+            ${{ runner.temp }}/drill/report.md
+          retention-days: 3
+          compression-level: 0
+          if-no-files-found: warn
