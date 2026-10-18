@@ -16,7 +16,9 @@ import { BASIS_AFTER_DEPRECIATION, computeScenario, scenarioModel, type Scenario
  * goes to a *computed* line — operating expenses, then platform fees, then
  * commission, the first that was itself rounded — never to a line that
  * equals a single input (rent, a fixed fee): a rent typed as 35,000 always
- * shows 35,000.00.
+ * shows 35,000.00. In a half-piastre tie of opposite sign, a tied derived
+ * figure (profit before depreciation, or revenue) takes the other half of
+ * its tie instead (DECISIONS.md D-24).
  */
 
 export type BreakEvenStatus = "within_month" | "beyond_available_nights" | "no_break_even";
