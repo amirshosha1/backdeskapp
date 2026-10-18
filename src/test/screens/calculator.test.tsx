@@ -2,15 +2,15 @@ import { act, fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
 import { CalculatorScreen } from "@/components/calculator/calculator-screen";
-import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM, LEGACY_PRESETS } from "@/test/legacy-calculator-example";
 import type { CalculatorForm } from "@/lib/calculator/form";
 import { GUEST_KEY, parseGuest, saveOwnUnit, type AssumedField } from "@/lib/guest/store";
 import { setQueryParam } from "@/lib/url-state";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 
-const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
-const renderCalculator = (locale: "ar" | "en" = "ar") => renderWithIntl(<CalculatorScreen presets={CALCULATOR_PRESETS} />, { locale });
+const EXAMPLE = LEGACY_EXAMPLE_FORM;
+const renderCalculator = (locale: "ar" | "en" = "ar") => renderWithIntl(<CalculatorScreen presets={LEGACY_PRESETS} />, { locale });
 /** Text without the LRI/PDI isolates that wrap numbers inside sentences (src/lib/format/). */
 const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎]/g, "");
 const byTestId = (id: string) => plain(screen.getByTestId(id));
