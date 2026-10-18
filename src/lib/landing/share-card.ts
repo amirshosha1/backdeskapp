@@ -34,8 +34,10 @@ const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;
 
 /** The `@theme` colour tokens and the .royal-hero / .glass rules, verbatim from the repo's CSS. */
 function designCss(): string {
-  const tokens = readFileSync(join(ROOT, "src/styles/tokens.css"), "utf8");
-  const globals = readFileSync(join(ROOT, "src/styles/globals.css"), "utf8");
+  // Git checks out CSS with CRLF on Windows; normalize before hashing so the
+  // same share image and manifest pass on Windows and Linux.
+  const tokens = readFileSync(join(ROOT, "src/styles/tokens.css"), "utf8").replace(/\r\n/g, "\n");
+  const globals = readFileSync(join(ROOT, "src/styles/globals.css"), "utf8").replace(/\r\n/g, "\n");
   const colors = [...tokens.matchAll(/(--color-[a-z0-9-]+):\s*([^;]+);/g)].map(([, name, value]) => `${name}:${value!.trim()};`).join("");
   const rule = (selector: string) => {
     const match = globals.match(new RegExp(`\\n  ${selector.replace(".", "\\.")} \\{[\\s\\S]*?\\n  \\}`));

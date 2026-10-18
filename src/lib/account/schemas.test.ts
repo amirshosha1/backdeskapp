@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { parseCalculatorForm } from "@/lib/calculator/form";
+import { computeScenario, scenarioView, toMoneyString } from "@/lib/finance";
 import { jsonbTextBytes } from "./jsonb-size";
 import {
   adoptGuestUnitSchema,
@@ -59,6 +61,19 @@ describe("calculatorInputsSchema", () => {
 
   it("accepts every preset", () => {
     for (const preset of CALCULATOR_PRESETS) expect(calculatorInputsSchema.safeParse({ form: preset.form, assumed: [] }).success).toBe(true);
+  });
+
+  it("reads a payload saved before laundry existed as zero laundry, and the engine's result is unchanged", () => {
+    const { laundryCost: _dropped, ...legacyValues } = form.values;
+    const parsed = calculatorInputsSchema.parse({ form: { ...form, values: legacyValues }, assumed: [] });
+    expect(parsed.form.values.laundryCost).toBe("0");
+    const net = (f: typeof form) => {
+      const r = parseCalculatorForm(f);
+      if (!r.ok) throw new Error("form must parse");
+      return toMoneyString(scenarioView(r.input, computeScenario(r.input)).netAfterDepreciation);
+    };
+    expect(net(parsed.form)).toBe(net({ ...form, values: { ...form.values, laundryCost: "0" } }));
+    expect(calculatorInputsSchema.safeParse({ form: { ...form, values: { ...legacyValues, laundryCost: 5 } }, assumed: [] }).success).toBe(false);
   });
 
   it("rejects anything that is not an object", () => {
