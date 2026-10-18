@@ -27,6 +27,7 @@ export type MoneyField =
   | "internet"
   | "compoundFees"
   | "cleaningCost"
+  | "laundryCost"
   | "consumables"
   | "repairs"
   | "setupCost"
@@ -70,6 +71,7 @@ export const FIELD_KIND: Record<NumberField, FieldKind> = {
   internet: "money",
   compoundFees: "money",
   cleaningCost: "money",
+  laundryCost: "money",
   consumables: "money",
   repairs: "money",
   setupCost: "money",
@@ -122,6 +124,7 @@ export function visibleFields(form: CalculatorForm): NumberField[] {
     "internet",
     "compoundFees",
     "cleaningCost",
+    "laundryCost",
     "consumables",
     "repairs",
     "setupCost",
@@ -179,6 +182,7 @@ export function parseCalculatorForm(form: CalculatorForm): ParsedForm {
     ],
     perStayCosts: [
       { id: "cleaning", amount: value.cleaningCost },
+      { id: "laundry", amount: value.laundryCost },
       { id: "consumables", amount: value.consumables },
     ],
     perNightCosts: [],

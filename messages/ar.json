@@ -28,6 +28,7 @@
     "subline": "أجب عن أسئلة قليلة، ويقدّر باك ديسك صافي شقتك الشهري بعد عمولة المنصة والمصاريف والإهلاك، بتكاليف مثال يمكنك تغييرها.",
     "cardTitle": "{model, select, rental_arbitrage {إعادة تأجير} managed_for_owner {إدارة لحساب مالك} other {يملكها ويديرها}} · {area}",
     "cardInputs": "{adr} لليلة · {booked} من {available, plural, one {ليلة واحدة} two {ليلتين} few {# ليالٍ} many {# ليلة} other {# ليلة}} · إيجار {rent}",
+    "cardRevenueNote": "الإيراد يشمل رسوم تنظيف مفترضة لكل حجز.",
     "cta": "احسب شقتك مجانًا",
     "ctaNote": "بدون حساب",
     "howTitle": "كيف تعمل",
@@ -98,6 +99,8 @@
     },
     "next": "التالي",
     "showResult": "اعرض النتيجة",
+    "directInputLabel": "اكتب {label} مباشرة",
+    "directInputError": "اكتب عددًا صحيحًا بين {min} و{max}.",
     "price": {
       "title": "كم تتوقع سعر الليلة؟",
       "caption": "المتوسط على مدار الشهر، قبل عمولة المنصة",
@@ -255,7 +258,8 @@
     "title": "حاسبة الجدوى",
     "presetsLabel": "أمثلة جاهزة",
     "presets": {
-      "arbitrage": "مثال: إعادة تأجير",
+      "arbitrage": "مثال: شقة مفروشة بالإيجار",
+      "arbitrage-empty": "مثال: شقة فارغة بالإيجار",
       "managed": "إدارة لمالك — وسط البلد"
     },
     "unitDetails": {
@@ -280,6 +284,7 @@
       "internet": "الإنترنت (ثابت)",
       "compoundFees": "مصاريف الكمبوند (ثابت)",
       "cleaningCost": "التنظيف (لكل حجز)",
+      "laundryCost": "الغسيل (لكل حجز)",
       "consumables": "مستلزمات الضيوف (لكل حجز)",
       "repairs": "الصيانة (غير منتظمة، ضمن حساب التعادل افتراضيًا)",
       "setupCost": "تكلفة التجهيز (إجمالي تقريبي)",
@@ -427,13 +432,14 @@
     "errorAmountNonPositive": "المبلغ يجب أن يكون أكبر من صفر",
     "errorCategory": "اختر فئة المصروف",
     "unitSheetTitle": "اختر الوحدة",
-    "confirmationTitle": "تم حفظ المصروف (تجريبيًا)",
+    "confirmationTitle": "مثال فقط: لم يُحفظ المصروف",
     "confirmationBody": "في النسخة الكاملة يُسجَّل المصروف في حسابات الوحدة ويتحدّث الربح فورًا. لم يُحفظ شيء هنا.",
     "addAnother": "إضافة مصروف آخر",
     "backHome": "العودة للرئيسية"
   },
   "statement": {
     "title": "مثال: كشف حساب مالك",
+    "exampleNotReal": "بيانات توضيحية — ليس كشفًا فعليًا",
     "number": "كشف رقم {number}",
     "statusFinalized": "معتمد",
     "basisCash": "أساس نقدي",

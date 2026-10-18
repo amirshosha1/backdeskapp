@@ -29,7 +29,8 @@ describe("<LandingScreen /> in Arabic", () => {
     const figure = plain(within(card).getByTestId("hero-figure"));
     expect(figure).toContain(`${wholeNet.isNegative() ? "-" : ""}${wholeNet.abs().toNumber().toLocaleString("en-US")}`);
     expect(figure).not.toMatch(/\.\d/);
-    expect(plain(within(card).getByTestId("landing-inputs"))).toBe("2,500 ج.م. لليلة · 18 من 30 ليلة · إيجار 35,000 ج.م.");
+    expect(plain(within(card).getByTestId("landing-inputs"))).toBe("2,450 ج.م. لليلة · 14 من 30 ليلة · إيجار 35,000 ج.م.");
+    expect(card).toHaveTextContent("الإيراد يشمل رسوم تنظيف مفترضة لكل حجز.");
     expect(within(card).getByTestId("landing-sentence")).toHaveTextContent(/ينقصك/);
   });
 
@@ -87,7 +88,7 @@ describe("<LandingScreen /> in English", () => {
     expect(screen.getByTestId("landing-language")).toHaveAttribute("href", "/");
     expect(screen.getByTestId("landing-wordmark").querySelector('[lang="ar"]')).toHaveTextContent("باك ديسك");
     expect(screen.getByTestId("landing-verdict")).toHaveTextContent(example.outcome === "loss" ? "Loss" : "Profit");
-    expect(plain(screen.getByTestId("landing-inputs"))).toBe("EGP 2,500 a night · 18 of 30 nights · rent EGP 35,000");
+    expect(plain(screen.getByTestId("landing-inputs"))).toBe("EGP 2,450 a night · 14 of 30 nights · rent EGP 35,000");
   });
 });
 

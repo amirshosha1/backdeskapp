@@ -33,7 +33,7 @@ test("by its URL, add expense still completes in 2 taps, excluding the amount di
   await tap(page.getByRole("radio", { name: "التنظيف" }));
   await tap(page.getByRole("button", { name: "حفظ المصروف" }));
 
-  await expect(page.getByRole("heading", { name: "تم حفظ المصروف (تجريبيًا)" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "مثال فقط: لم يُحفظ المصروف" })).toBeVisible();
   expect(taps).toBe(2);
 });
 
@@ -53,7 +53,7 @@ test("Save explains what is missing instead of doing nothing", async ({ page }) 
 
   await page.getByRole("radio", { name: "الصيانة" }).click();
   await save.click();
-  await expect(page.getByRole("heading", { name: "تم حفظ المصروف (تجريبيًا)" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "مثال فقط: لم يُحفظ المصروف" })).toBeVisible();
 });
 
 test("an invalid amount shows a distinct message, never the empty-amount one", async ({ page }) => {

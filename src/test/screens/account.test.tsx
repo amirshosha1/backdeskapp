@@ -230,7 +230,7 @@ describe("the calculator saves an account apartment about a second after the las
       expect(actions.updateUnit).toHaveBeenCalledTimes(1);
       const sent = actions.updateUnit.mock.calls[0]![0] as { id: string; inputs: { form: { values: { adr: string } } } };
       expect(sent.id).toBe("u1");
-      expect(sent.inputs.form.values.adr).toBe("2600");
+      expect(sent.inputs.form.values.adr).toBe("2550");
       expect(screen.getByTestId("save-status")).toHaveAttribute("data-status", "saved");
     } finally {
       vi.useRealTimers();
