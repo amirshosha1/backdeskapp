@@ -3,11 +3,12 @@
 Reads the URL from the environment variable SOURCE_URL, never from argv, and
 accepts only Backdesk's Supabase *session pooler* connection:
 
-    postgresql://postgres.<project ref>:<password>@aws-<n>-<region>.pooler.supabase.com:5432/postgres[?sslmode=require|verify-full]
+    postgresql://postgres.<project ref>:<password>@aws-<n>-<region>.pooler.supabase.com:5432/postgres[?sslmode=verify-full]
 
 Anything else is refused: another project, the direct or transaction-mode
 endpoint, another database, extra parameters (options, host, service, ...),
-weaker TLS (disable, allow, prefer) or a malformed URL. Error messages name
+any TLS mode but verify-full (disable, allow, prefer, require: production
+runs are fail-closed on verified TLS) or a malformed URL. Error messages name
 the rule that failed, never the URL or any part of it.
 
 On success it writes host, port, user, password, database and sslmode,
@@ -26,7 +27,7 @@ PROJECT_REF = "kmmfhaypqgzhoptmljki"
 REGION = "eu-west-1"  # Ireland (docs/project/OPERATIONS.md, "Regions").
 HOST_PATTERN = re.compile(r"aws-[0-9]{1,2}-" + re.escape(REGION) + r"\.pooler\.supabase\.com")
 SESSION_PORT = 5432  # Session mode. 6543 (transaction mode) cannot run pg_dump safely.
-ALLOWED_SSLMODES = {"require", "verify-full"}
+ALLOWED_SSLMODES = {"verify-full"}  # Fail-closed: never an unverified mode.
 
 
 def fail(rule: str) -> None:
@@ -77,9 +78,9 @@ def main() -> None:
     names = [name for name, _ in params]
     if any(name != "sslmode" for name in names) or len(names) > 1:
         fail("the only parameter allowed is sslmode")
-    sslmode = params[0][1] if params else "require"
+    sslmode = params[0][1] if params else "verify-full"
     if sslmode not in ALLOWED_SSLMODES:
-        fail("sslmode must be require or verify-full")
+        fail("sslmode must be verify-full (or omitted, which means verify-full)")
 
     fields = [host, str(port), user, password, database, sslmode]
     if any("\0" in field for field in fields):

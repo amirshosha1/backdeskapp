@@ -20,11 +20,11 @@ It is one consistent snapshot of a quiet database, not point-in-time recovery: a
 
 `.github/workflows/db-backup-drill.yml` runs `scripts/backup-drill/drill.sh`:
 
-1. **Validates the connection string** (`source_url.py`). It accepts only Backdesk's session pooler:
+1. **Validates the CA certificate** (`ca_cert.py`, see TLS), then **the connection string** (`source_url.py`). The connection string must be Backdesk's session pooler:
    - user `postgres.kmmfhaypqgzhoptmljki`;
    - host `aws-N-eu-west-1.pooler.supabase.com`;
    - port 5432, database `postgres`;
-   - at most one parameter, `sslmode=require|verify-full`.
+   - at most one parameter, `sslmode=verify-full` (omitted means `verify-full`; every other mode is refused).
 
    Anything else is refused before any connection, with an error that names the failed rule and never the URL. The password reaches the Postgres client only as an environment variable, is masked in the log, and never appears in a command line.
 2. **Preflight.** It checks the Postgres major version and the size of the three schemas (catalog statistics only). It stops before any heavy work if they exceed the limits below.
@@ -51,10 +51,11 @@ It is one consistent snapshot of a quiet database, not point-in-time recovery: a
 Report rows are PASS, FAIL or INFO, with object names and counts. They contain no row data, emails or secrets.
 
 **Proof the checks work.** Every pull request that touches a workflow, the drill or a migration runs the drill's self-test job:
-1. a static check that no workflow but the manual production job references a `BACKUP_*` secret (`check_workflows.py`);
-2. the connection-string validator's tests (`test_source_url.py`): 5 accepted forms and 23 rejected ones, including look-alike hosts, the direct connection, transaction mode, extra parameters and weak TLS;
-3. the drill on synthetic data, which must PASS;
-4. the drill with the restored copy deliberately damaged, which must FAIL. The damage is one row deleted, `anon` granted access, a policy opened to `true`, and a CHECK constraint loosened.
+1. a static check that no workflow but the manual production job references a `BACKUP_*` secret, and that the production job still passes `BACKUP_DB_CA_CERT` (`check_workflows.py`);
+2. the connection-string validator's tests (`test_source_url.py`): 4 accepted forms and 25 rejected ones, including look-alike hosts, the direct connection, transaction mode, extra parameters and every TLS mode but `verify-full`;
+3. the fail-closed TLS tests (`test_tls_policy.py`, no Docker needed). Production mode refuses a missing, empty, malformed or key-bearing certificate before starting any container, and refuses `sslmode=require`. It passes `verify-full` and the certificate to the source connection even when the environment says otherwise, and stops after a failed verification, with no retry and no weaker mode;
+4. the drill on synthetic data, which must PASS;
+5. the drill with the restored copy deliberately damaged, which must FAIL. The damage is one row deleted, `anon` granted access, a policy opened to `true`, and a CHECK constraint loosened.
 
 ## How expressions are compared
 
@@ -84,9 +85,15 @@ Raising a limit is a code change and goes through review.
 
 ## TLS
 
-The session pooler always uses TLS. By default the drill uses `sslmode=require`: the connection is encrypted, but the server's certificate is not checked against Supabase's CA, and the report says so in an INFO row.
-
-**Owner decision (2026-10-18): production runs use `verify-full`.** Download the CA certificate (Supabase dashboard → Database → Settings → SSL Configuration → Download certificate) and add its PEM text as the repository secret `BACKUP_DB_CA_CERT`. The drill then uses `verify-full`. If `verify-full` fails against the pooler, do not downgrade quietly: report it, and decide together whether `require` is acceptable.
+**Production runs are fail-closed on verified TLS (owner decision, 2026-10-18; enforced in code).**
+- Every connection to the production database uses `sslmode=verify-full`: libpq checks the server's certificate against Supabase's CA and checks the host name.
+- The CA certificate comes from the repository secret `BACKUP_DB_CA_CERT`. Download it from the Supabase dashboard → Database → Settings → SSL Configuration → Download certificate, and paste its PEM text.
+- `ca_cert.py` refuses a missing, empty or malformed certificate, a private key, or text around the PEM blocks. When it refuses, the drill stops **before** it starts any container or opens any connection.
+- `source_url.py` refuses any `sslmode` other than `verify-full`; an omitted `sslmode` means `verify-full`. `drill.sh` sets `PGSSLMODE=verify-full` and `PGSSLROOTCERT` itself, whatever the environment holds, and refuses a source connection that lacks either.
+- If verification fails (wrong certificate, host name mismatch), the drill fails. There is **no fallback** to `require` or any weaker mode. Report the failure; changing the TLS rule needs a new owner decision and a code change.
+- The report shows `sslmode verify-full` in its Connection row and a PASS row "TLS verified" after the first verified connection.
+- `test_tls_policy.py` proves these refusals on every pull request, and `check_workflows.py` fails if the production job stops passing `BACKUP_DB_CA_CERT`.
+- The self-test needs no certificate: its source is a local throwaway container.
 
 ## Secrets: exposure window, cleanup and rotation
 
@@ -121,9 +128,9 @@ GitHub offers **Run workflow** only for a workflow file that exists on the defau
 3. GitHub → repository → Settings → Secrets and variables → Actions → **New repository secret**:
    - `BACKUP_SOURCE_DB_URL` (step 1);
    - `BACKUP_PASSPHRASE` (step 2);
-   - `BACKUP_DB_CA_CERT`, Supabase's CA certificate (see TLS). Required for production runs by the owner's decision; without it the drill falls back to `require`, which is not approved.
+   - `BACKUP_DB_CA_CERT`, Supabase's CA certificate (see TLS). **Required:** without a valid one the drill refuses to start.
 4. Actions → **Backup drill** → Run workflow → branch `main` → type `back up kmmfhaypqgzhoptmljki` → Run.
-5. When it finishes (about 5–10 minutes), open the run: the summary shows the report. **Every PASS/FAIL row must be PASS**, and the Connection row must say `sslmode verify-full`; `require` means the CA secret was missing, so treat the run as not approved.
+5. When it finishes (about 5–10 minutes), open the run: the summary shows the report. **Every PASS/FAIL row must be PASS**, including "TLS verified (sslmode=verify-full against BACKUP_DB_CA_CERT)".
 6. **Immediately delete `BACKUP_SOURCE_DB_URL` and `BACKUP_PASSPHRASE`**, then reset the database password (see Rotation).
 7. Download the artifact `backdesk-partial-db-backup-<run id>` within 3 days. Keep the `.gpg` file somewhere private and durable, not in the repository. To check it opens on Windows: Git Bash → `gpg --decrypt --output backdesk.dump <file>.gpg`, enter the passphrase, then delete `backdesk.dump`.
 8. Send back the run link and the report table (it contains no personal data).

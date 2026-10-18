@@ -5,8 +5,9 @@ Fails when any workflow in .github/workflows:
   * uses `pull_request_target` or `workflow_run` (triggers that run with the
     repository's secrets on behalf of pull-request code);
 and when the drill's `production` job can run on anything but a manual
-dispatch from main by the repository owner, or the `self-test` job
-references any secret.
+dispatch from main by the repository owner, stops passing the CA
+certificate that verify-full TLS needs, or the `self-test` job references
+any secret.
 
 This catches mistakes in reviewed changes. It cannot stop a hostile workflow
 pushed to another branch from reading repository secrets while they exist:
@@ -70,6 +71,8 @@ def main() -> int:
     ):
         if guard not in production:
             problems.append(f"db-backup-drill.yml: the production job lost its guard {guard!r}")
+    if "secrets.BACKUP_DB_CA_CERT" not in production:
+        problems.append("db-backup-drill.yml: the production job no longer passes BACKUP_DB_CA_CERT (verify-full TLS)")
     if "pull_request" in production:
         problems.append("db-backup-drill.yml: the production job mentions pull_request")
 

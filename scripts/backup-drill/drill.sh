@@ -13,9 +13,13 @@
 #                         FAIL, which proves the checks catch a bad restore.
 #   drill.sh production   source = the hosted project, read-only. Needs
 #                         SOURCE_URL (session pooler, validated strictly by
-#                         source_url.py) and BACKUP_PASSPHRASE; optional
-#                         BACKUP_DB_CA_CERT (PEM) for verify-full TLS. Runs only
-#                         from the manual workflow (docs/BACKUP_DRILL.md).
+#                         source_url.py), BACKUP_PASSPHRASE and
+#                         BACKUP_DB_CA_CERT (Supabase's CA certificate, PEM,
+#                         validated by ca_cert.py). TLS is fail-closed:
+#                         sslmode=verify-full against that certificate on every
+#                         source connection, never a weaker mode; without a
+#                         valid certificate the drill stops before connecting.
+#                         Runs only from the manual workflow (docs/BACKUP_DRILL.md).
 #
 # What it reads from the source, never writing to it: catalog sizes, role
 # names, the catalog fingerprint (fingerprint.sql) and the CHECK/policy
@@ -104,6 +108,9 @@ check() { # check PASS|FAIL|INFO "what" "detail" — INFO never fails the drill
 if [[ "$MODE" == "production" ]]; then
   : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE is not set}"
   (( ${#BACKUP_PASSPHRASE} >= 32 )) || { echo "drill: BACKUP_PASSPHRASE must be at least 32 characters" >&2; exit 1; }
+  # Fail-closed TLS: a valid CA certificate first, before the URL is even read.
+  python3 -I "$HERE/ca_cert.py" "$WORK/source-ca.crt"    # reads BACKUP_DB_CA_CERT; exits non-zero with the failed rule
+  unset BACKUP_DB_CA_CERT
   python3 -I "$HERE/source_url.py" "$WORK/source.conn"   # reads SOURCE_URL; exits non-zero with the failed rule
   unset SOURCE_URL
   { IFS= read -r -d '' SRC_HOST; IFS= read -r -d '' SRC_PORT; IFS= read -r -d '' SRC_USER
@@ -111,16 +118,10 @@ if [[ "$MODE" == "production" ]]; then
   shred -u "$WORK/source.conn"
   # GitHub masks the whole secret; mask the password on its own as well.
   [[ -n "${GITHUB_ACTIONS:-}" ]] && echo "::add-mask::$SRC_PASSWORD"
-  SRC_ROOTCERT=""
-  if [[ -n "${BACKUP_DB_CA_CERT:-}" ]]; then
-    printf '%s\n' "$BACKUP_DB_CA_CERT" >"$WORK/source-ca.crt"
-    grep -q 'BEGIN CERTIFICATE' "$WORK/source-ca.crt" || { echo "drill: BACKUP_DB_CA_CERT is not a PEM certificate" >&2; exit 1; }
-    chmod 644 "$WORK/source-ca.crt"
-    SRC_SSLMODE="verify-full"
-    SRC_ROOTCERT="/work/source-ca.crt"
-  elif [[ "$SRC_SSLMODE" == "verify-full" ]]; then
-    echo "drill: sslmode=verify-full needs BACKUP_DB_CA_CERT (Supabase's CA certificate)" >&2; exit 1
-  fi
+  # source_url.py accepts only verify-full; set it here as well, so no other
+  # value can reach libpq.
+  SRC_SSLMODE="verify-full"
+  SRC_ROOTCERT="/work/source-ca.crt"
 else
   # Throwaway values for the self-test; never a real secret.
   BACKUP_PASSPHRASE="$(head -c 48 /dev/urandom | base64)"
@@ -131,6 +132,13 @@ export BACKUP_PASSPHRASE
 
 # Clients run in the image; $WORK is mounted at /work.
 src_run() ( # src_run [--name N] <cmd...> — a client container connected to the source
+  # Last line of defence: in production, refuse any source connection that is
+  # not verify-full against the validated certificate.
+  if [[ "$MODE" == "production" ]] \
+    && { [[ "$SRC_SSLMODE" != "verify-full" || "$SRC_ROOTCERT" != "/work/source-ca.crt" ]] || [[ ! -s "$WORK/source-ca.crt" ]]; }; then
+    echo "drill: refusing a production connection without sslmode=verify-full and the CA certificate" >&2
+    exit 1
+  fi
   export PGHOST="$SRC_HOST" PGPORT="$SRC_PORT" PGUSER="$SRC_USER" PGPASSWORD="$SRC_PASSWORD" PGDATABASE="$SRC_DB" \
          PGSSLMODE="$SRC_SSLMODE" PGAPPNAME="backdesk-backup-drill" PGCONNECT_TIMEOUT=15
   local env=(-e PGHOST -e PGPORT -e PGUSER -e PGPASSWORD -e PGDATABASE -e PGSSLMODE -e PGAPPNAME -e PGCONNECT_TIMEOUT)
@@ -180,13 +188,15 @@ if [[ "$MODE" == "self-test" ]]; then
   log "source: throwaway container, $(find "$ROOT/supabase/migrations" -name '*.sql' | wc -l) migrations, synthetic seed"
 else
   check INFO "Connection" "session pooler, project user, port $SRC_PORT, database $SRC_DB, sslmode $SRC_SSLMODE"
-  if [[ "$SRC_SSLMODE" == "require" ]]; then
-    check INFO "TLS" "encrypted; server certificate not verified (add BACKUP_DB_CA_CERT for verify-full)"
-  fi
 fi
 
 # --- Preflight: version and size, before anything expensive --------------------------------
 SERVER_MAJOR="$(source_ro -c 'show server_version_num' | head -n 1)"
+# libpq has already refused the connection if the server's certificate did not
+# verify against BACKUP_DB_CA_CERT or did not match the host name.
+if [[ "$MODE" == "production" ]]; then
+  check PASS "TLS verified (sslmode=verify-full against BACKUP_DB_CA_CERT)" "host $SRC_HOST"
+fi
 SERVER_MAJOR="$((SERVER_MAJOR / 10000))"
 IMAGE_MAJOR="$(target_psql -c 'show server_version_num')"
 IMAGE_MAJOR="$((IMAGE_MAJOR / 10000))"

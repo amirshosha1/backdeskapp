@@ -29,13 +29,14 @@ def run(url: str):
 
 class AcceptsOnlyTheSessionPooler(unittest.TestCase):
     def test_accepts_the_session_pooler_url(self):
-        for url in (GOOD, GOOD.replace("aws-0-", "aws-1-"), GOOD + "?sslmode=require", GOOD + "?sslmode=verify-full",
+        for url in (GOOD, GOOD.replace("aws-0-", "aws-1-"), GOOD + "?sslmode=verify-full",
                     GOOD.replace("postgresql://", "postgres://")):
             proc, fields, mode = run(url)
             self.assertEqual(proc.returncode, 0, (url.replace(SECRET, "***"), proc.stderr))
             self.assertEqual(fields[0], "aws-0-eu-west-1.pooler.supabase.com" if "aws-0-" in url else "aws-1-eu-west-1.pooler.supabase.com")
             self.assertEqual(fields[1:5], ["5432", f"postgres.{REF}", SECRET, "postgres"])
-            self.assertEqual(fields[5], "verify-full" if "verify-full" in url else "require")
+            # Omitted sslmode means verify-full: production never connects unverified.
+            self.assertEqual(fields[5], "verify-full")
             self.assertEqual(mode, 0o600)
 
     def test_decodes_a_percent_encoded_password(self):
@@ -58,9 +59,11 @@ class AcceptsOnlyTheSessionPooler(unittest.TestCase):
             "other database": GOOD.replace("/postgres", "/template1"),
             "sslmode disable": GOOD + "?sslmode=disable",
             "sslmode prefer": GOOD + "?sslmode=prefer",
-            "extra options parameter": GOOD + "?sslmode=require&options=-c%20default_transaction_read_only%3Doff",
+            "sslmode require (unverified TLS)": GOOD + "?sslmode=require",
+            "sslmode verify-ca (no host check)": GOOD + "?sslmode=verify-ca",
+            "extra options parameter": GOOD + "?sslmode=verify-full&options=-c%20default_transaction_read_only%3Doff",
             "host override parameter": GOOD + "?host=evil.example",
-            "duplicate sslmode": GOOD + "?sslmode=require&sslmode=disable",
+            "duplicate sslmode": GOOD + "?sslmode=verify-full&sslmode=disable",
             "unencoded @ in password": GOOD.replace(SECRET, "pa@ss"),
             "no password": GOOD.replace(f":{SECRET}@", "@"),
             "fragment": GOOD + "#x",
