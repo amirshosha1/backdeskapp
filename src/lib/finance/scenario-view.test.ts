@@ -197,6 +197,71 @@ describe("scenarioView — break-even status and sentence edge cases", () => {
   });
 });
 
+/**
+ * Half-up rounds a tie away from zero (−0.005 → −0.01, 0.005 → 0.01), so
+ * subtracting whole piastres does not commute with rounding when one side
+ * is a negative tie and the other a positive one. Revenue, the net and the
+ * subtotals are each rounded half-up, so at such a tie the rows can only
+ * reconcile if one line moves by a piastre, even a line that needed no
+ * rounding. Both cases were found by the property below.
+ */
+describe("scenarioView — a half-piastre tie on both sides of zero", () => {
+  const base: ScenarioInput = {
+    ...EXAMPLE_B,
+    operatingModel: "owner_operated",
+    rent: 0,
+    deposit: 0,
+    fixedCosts: [{ id: "utilities", amount: 0 }],
+    perStayCosts: [{ id: "cleaning", amount: 0 }],
+    irregularCosts: [{ id: "repairs", amount: 0 }],
+  };
+
+  it("net −0.005 shows −0.01 and the depreciation line takes the piastre (fast-check seed −1284569275)", () => {
+    const input: ScenarioInput = {
+      ...base,
+      bookedNights: 3,
+      adr: 721.3,
+      avgLengthOfStay: 1.3,
+      cleaningFeePerStay: 232.51,
+      platformFeeRate: "0.0575",
+      setupCost: 2545.19,
+      usefulLifeMonths: 1,
+    };
+    const r = computeScenario(input);
+    expect([r.profitBeforeDepreciation, r.depreciation, r.netProfit].map((d) => d.toString())).toEqual(["2545.185", "2545.19", "-0.005"]);
+    const view = scenarioView(input);
+    const s = view.sections;
+    expect(money(view.netAfterDepreciation)).toBe("-0.01");
+    expect(view.outcome).toBe("loss");
+    expect(money(s.profitBeforeDepreciation)).toBe("2545.19");
+    expect(money(s.depreciation)).toBe("2545.20");
+    expect(s.profitBeforeDepreciation.minus(s.depreciation).equals(view.netAfterDepreciation)).toBe(true);
+  });
+
+  it("profit before depreciation −0.005 with every cost typed: operating expenses take the piastre", () => {
+    const input: ScenarioInput = {
+      ...base,
+      bookedNights: 1,
+      adr: 0,
+      avgLengthOfStay: 2,
+      cleaningFeePerStay: 0.01,
+      platformFeeRate: 0,
+      fixedCosts: [{ id: "utilities", amount: 0.01 }],
+      setupCost: 0,
+    };
+    const r = computeScenario(input);
+    expect([r.pnl.grossRevenue, r.opexExcludingRent, r.profitBeforeDepreciation].map((d) => d.toString())).toEqual(["0.005", "0.01", "-0.005"]);
+    const s = scenarioView(input).sections;
+    expect([s.revenue, s.platformFees, s.operatingExpenses, s.profitBeforeDepreciation, s.depreciation].map(money)).toEqual([
+      "0.01",
+      "0.00",
+      "0.02",
+      "-0.01",
+      "0.00",
+    ]);
+  });
+});
+
 // ---------------------------------------------------------------- properties
 
 const RUNS = { numRuns: 300 };
@@ -272,10 +337,14 @@ describe("scenarioView — properties", () => {
   });
 
   it("every line stays within two piastres of its own value; a line that needed no rounding is shown exactly", () => {
+    // Revenue, fees, expenses and commission are never negative, so only the
+    // two profits can be the negative tie that breaks exactness (see above).
+    const negativeTie = (d: Decimal) => d.isNegative() && d.times(100).modulo(1).abs().equals("0.5");
     fc.assert(
       fc.property(scenarioInput, (input) => {
         const { sections: s } = scenarioView(input);
         const r = computeScenario(input);
+        const tieAcrossZero = negativeTie(r.profitBeforeDepreciation) || negativeTie(r.netProfit);
         const lines: [Decimal | null, Decimal.Value][] = [
           [s.platformFees, r.pnl.platformFees],
           [s.operatingExpenses, r.opexExcludingRent],
@@ -285,8 +354,9 @@ describe("scenarioView — properties", () => {
         for (const [shown, exact] of lines) {
           if (shown === null) continue;
           expect(shown.minus(roundMoney(exact)).abs().lessThanOrEqualTo("0.02")).toBe(true);
-          // A line already in whole piastres (e.g. one typed amount) never takes the leftover.
-          if (new Decimal(exact).decimalPlaces() <= 2) expect(shown.equals(exact)).toBe(true);
+          // A line already in whole piastres (e.g. one typed amount) never takes the leftover,
+          // except at a half-piastre tie across zero, where no allocation keeps it exact.
+          if (new Decimal(exact).decimalPlaces() <= 2 && !tieAcrossZero) expect(shown.equals(exact)).toBe(true);
         }
         // Typed amounts are shown as typed.
         if (s.rent) expect(s.rent.equals(input.rent)).toBe(true);

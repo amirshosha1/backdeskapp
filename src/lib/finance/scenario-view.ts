@@ -17,6 +17,13 @@ import { BASIS_AFTER_DEPRECIATION, computeScenario, scenarioModel, type Scenario
  * commission, the first that was itself rounded — never to a line that
  * equals a single input (rent, a fixed fee): a rent typed as 35,000 always
  * shows 35,000.00.
+ *
+ * One exception is unavoidable: half-up rounds a tie away from zero, so when
+ * a profit is a negative half-piastre tie (−0.005) and the figure it is
+ * reconciled with is a positive one, the rows can only add up if a line
+ * that needed no rounding moves by a piastre (depreciation, or operating
+ * expenses when every computed line is whole piastres). Tested in
+ * scenario-view.test.ts.
  */
 
 export type BreakEvenStatus = "within_month" | "beyond_available_nights" | "no_break_even";
@@ -163,7 +170,7 @@ function sectionsFor(input: ScenarioInput, result: ScenarioResult, net: Decimal)
     const order = ["operatingExpenses", "platformFees", "managementCommission"] as const;
     const absorber =
       order.find((key) => lines[key] !== null && !new Decimal(lines[key]!).equals(rounded[key]!)) ??
-      // Unreachable in practice: a leftover needs at least one rounded line.
+      // Every computed line is whole piastres: only a negative tie (see above) leaves a leftover.
       "operatingExpenses";
     rounded[absorber] = rounded[absorber]!.plus(leftover);
   }
