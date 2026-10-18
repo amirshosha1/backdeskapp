@@ -353,6 +353,7 @@ function VerdictStep({
           </h1>
           <HeroFigure amount={toMoneyString(view.netAfterDepreciation)} />
           <p className="text-[0.8125rem] text-white/75">{t("perMonth")}</p>
+          <p className="text-xs text-white/75" data-testid="estimate-note">{tCalc("estimateNote")}</p>
         </div>
         <p className="glass self-center rounded-[1.125rem] px-3.5 py-2 text-center text-[0.8125rem] leading-relaxed font-semibold" data-testid="verdict-sentence">
           {sentence(view.sentence, answers.nights, result.nightsAvailable.toNumber())}

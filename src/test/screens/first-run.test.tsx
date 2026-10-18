@@ -47,6 +47,7 @@ describe("first-run flow: order per model", () => {
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("خسارة");
     expect(plain(screen.getByTestId("hero-figure"))).toContain("-7,013.67");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("تتعادل عند 21.41 ليلة وأنت عند 18. ينقصك 4 ليالٍ.");
+    expect(screen.getByTestId("estimate-note")).toHaveTextContent("تقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.");
   });
 
   it("managed: the cost question asks the commission, and the verdict is the owner's", () => {
@@ -161,6 +162,7 @@ describe("first-run flow: answers, verdict and saving", () => {
     tap("Show the result");
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("Loss");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("You break even at 21.41 nights and you're at 18. You need 4 more nights.");
+    expect(screen.getByTestId("estimate-note")).toHaveTextContent("An estimate from the numbers you entered, not an actual result.");
   });
 });
 

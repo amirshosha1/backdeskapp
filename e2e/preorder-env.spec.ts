@@ -16,11 +16,12 @@ test("pre-order buttons open the configured URL, target=_blank rel=noopener", as
   await expect(reserve).toHaveAttribute("target", "_blank");
   await expect(reserve).toHaveAttribute("rel", /noopener/);
 
-  const orderKit = page.getByRole("link", { name: "اطلب الباقة" });
-  await expect(orderKit).toHaveAttribute("href", PREORDER_URL);
-  await expect(orderKit).toHaveAttribute("target", "_blank");
-  await expect(orderKit).toHaveAttribute("rel", /noopener/);
+  // The setup kit is in development: it has no order action, even with a pre-order link set.
+  await expect(page.getByRole("link", { name: "اطلب الباقة" })).toHaveCount(0);
 
-  const choosePlan = page.getByRole("link", { name: /^اختر /u }).first();
-  await expect(choosePlan).toHaveAttribute("href", PREORDER_URL);
+  const preorderPro = page.getByRole("link", { name: "احجز برو مسبقًا" });
+  await expect(preorderPro).toHaveAttribute("href", PREORDER_URL);
+
+  // Free is the calculator that works today, never a pre-order.
+  await expect(page.getByTestId("start-free")).toHaveAttribute("href", /\/demo\/calculator$/);
 });
