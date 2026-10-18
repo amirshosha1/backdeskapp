@@ -41,6 +41,7 @@ const unit = (id: string, name: string, form: CalculatorForm): AccountUnit => ({
 });
 const signedIn = (units: AccountUnit[]): AccountState => ({
   status: "signed_in",
+  userId: "test-user",
   email: "host@example.com",
   units,
   maxUnits: 5,
