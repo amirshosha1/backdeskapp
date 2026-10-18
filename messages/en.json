@@ -429,7 +429,7 @@
     "errorAmountNonPositive": "The amount must be greater than zero",
     "errorCategory": "Choose a category",
     "unitSheetTitle": "Choose the unit",
-    "confirmationTitle": "Expense saved (sample only)",
+    "confirmationTitle": "Example only: the expense was not saved",
     "confirmationBody": "In the full version the expense is recorded in the unit's books and profit updates at once. Nothing was saved here.",
     "addAnother": "Add another expense",
     "backHome": "Back to Home"

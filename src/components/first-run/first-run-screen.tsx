@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { Building2, ChevronLeft, House, KeyRound, Minus, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { BrandMark } from "@/components/common/brand-mark";
@@ -227,7 +227,11 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
   const tCalc = useTranslations("calculator");
   const locale = useLocale() as AppLocale;
   const { show } = useToast();
+  // What the person is typing, kept as text until it is a whole number inside the range.
   const [draft, setDraft] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const errorId = useId();
   const label = kind === "price" ? tCalc("stepper.adr") : kind === "nights" ? tCalc("fields.bookedNights") : kind === "rent" ? tCalc("stepper.rent") : tCalc("stepper.commission");
   const shown = (n: number) => `${formatTypedAmount(String(n), locale)}${kind === "commission" ? "%" : ""}`;
   const step = shown(range.button);
@@ -236,20 +240,42 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
     const next = value + direction * range.button;
     if (next < range.min) return show(tCalc("stepper.atMin", { label, limit: shown(range.min) }));
     if (next > range.max) return show(tCalc("stepper.atMax", { label, limit: shown(range.max) }));
-    setDraft(null);
+    clearDraft();
     onChange(clampToRange(next, range));
   }
 
-  function commitDraft(): boolean {
-    if (draft === null) return true;
-    const parsed = parseAmount(draft, { allowZero: true, maxDecimals: 0 });
-    if (!parsed.ok || parsed.value.lessThan(range.min) || parsed.value.greaterThan(range.max)) {
-      show(t("directInputError", { min: shown(range.min), max: shown(range.max) }));
-      return false;
-    }
-    onChange(parsed.value.toNumber());
+  function typedValue(text: string): number | null {
+    const parsed = parseAmount(text, { allowZero: true, maxDecimals: 0 });
+    if (!parsed.ok || parsed.value.lessThan(range.min) || parsed.value.greaterThan(range.max)) return null;
+    return parsed.value.toNumber();
+  }
+
+  const invalid = draft !== null && typedValue(draft) === null;
+
+  function clearDraft() {
     setDraft(null);
-    return true;
+    setShowError(false);
+  }
+
+  function type(text: string) {
+    setDraft(text);
+    const typed = typedValue(text);
+    // A valid number moves the dial at once; an invalid one waits for blur or Next to explain itself.
+    if (typed !== null) {
+      setShowError(false);
+      onChange(typed);
+    }
+  }
+
+  function next() {
+    if (invalid) {
+      // Never advance on an invalid value, and never silently: say why and return to the field.
+      setShowError(true);
+      inputRef.current?.focus();
+      return;
+    }
+    clearDraft();
+    onNext();
   }
 
   const unit = kind === "nights" ? t("nights.unit", { count: value }) : kind === "commission" ? null : currencyLabel("EGP", locale);
@@ -275,20 +301,26 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
         <label className="mx-auto flex w-full max-w-56 flex-col gap-1.5 text-sm text-white/90">
           <span>{t("directInputLabel", { label })}</span>
           <input
+            ref={inputRef}
             type="text"
             inputMode="numeric"
             value={draft ?? String(value)}
-            onChange={(event) => setDraft(event.target.value)}
-            onBlur={commitDraft}
+            onChange={(event) => type(event.target.value)}
+            onBlur={() => (invalid ? setShowError(true) : clearDraft())}
+            aria-invalid={showError && invalid ? true : undefined}
+            aria-describedby={showError && invalid ? errorId : undefined}
             className="h-11 w-full rounded-xl bg-white px-3 text-center text-base font-semibold text-navy-900 tabular-nums-money"
             data-testid="dial-direct-input"
           />
         </label>
+        <p id={errorId} role="alert" className="mx-auto min-h-5 max-w-64 text-center text-sm font-semibold text-white" data-testid="dial-direct-error">
+          {showError && invalid ? t("directInputError", { min: shown(range.min), max: shown(range.max) }) : null}
+        </p>
         <div className="flex items-center gap-3.5">
           <GlassButton onClick={() => nudge(-1)} label={t(`${kind}.dec`, { step })} className="h-[3.25rem] w-[3.25rem]">
             <Minus className="h-5 w-5" aria-hidden="true" />
           </GlassButton>
-          <RangeSlider label={t(`${kind}.title`)} value={value} min={range.min} max={range.max} step={range.step} onChange={(next) => { setDraft(null); onChange(next); }} className="min-w-0 flex-1" testId="dial-slider">
+          <RangeSlider label={t(`${kind}.title`)} value={value} min={range.min} max={range.max} step={range.step} onChange={(next) => { clearDraft(); onChange(next); }} className="min-w-0 flex-1" testId="dial-slider">
             <SliderTrack ratio={(value - range.min) / (range.max - range.min)} />
           </RangeSlider>
           <GlassButton onClick={() => nudge(1)} label={t(`${kind}.inc`, { step })} className="h-[3.25rem] w-[3.25rem]">
@@ -296,7 +328,7 @@ function DialStep({ kind, range, value, onChange, onNext, last }: { kind: DialKi
           </GlassButton>
         </div>
       </div>
-      <button type="button" onClick={() => { if (commitDraft()) onNext(); }} className="tap h-[3.25rem] rounded-full bg-white text-[0.9375rem] font-semibold text-navy-900">
+      <button type="button" onClick={next} className="tap h-[3.25rem] rounded-full bg-white text-[0.9375rem] font-semibold text-navy-900">
         {last ? t("showResult") : t("next")}
       </button>
     </div>

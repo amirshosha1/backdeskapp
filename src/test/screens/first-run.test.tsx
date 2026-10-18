@@ -92,16 +92,41 @@ describe("first-run flow: answers, verdict and saving", () => {
     tap("التالي");
     tap("التالي");
     const input = screen.getByRole("textbox", { name: "اكتب الإيجار الشهري مباشرة" });
-    fireEvent.change(input, { target: { value: "20000" } });
+    fireEvent.change(input, { target: { value: "35,000" } });
+    // A valid typed value moves the dial at once: no repeated taps to reach a real rent.
+    expect(plain(screen.getByTestId("dial-value"))).toBe("35,000");
     tap("اعرض النتيجة");
-    expect(stored().units[0]!.form.values.rent).toBe("20000");
+    expect(stored().units[0]!.form.values.rent).toBe("35000");
 
     tap("رجوع");
     const rent = screen.getByRole("textbox", { name: "اكتب الإيجار الشهري مباشرة" });
     fireEvent.change(rent, { target: { value: "abc" } });
+    // Typing alone does not shout; the error appears when the person tries to move on.
+    expect(rent).not.toHaveAttribute("aria-invalid");
     tap("اعرض النتيجة");
     expect(heading()).toBe("كم تدفع إيجارًا في الشهر؟");
-    expect(screen.getByTestId("toast")).toHaveTextContent("اكتب عددًا صحيحًا");
+    expect(rent).toHaveAttribute("aria-invalid", "true");
+    expect(rent).toHaveFocus();
+    const error = screen.getByTestId("dial-direct-error");
+    expect(error).toHaveTextContent("اكتب عددًا صحيحًا بين 5,000 و150,000.");
+    expect(rent).toHaveAttribute("aria-describedby", error.id);
+    expect(stored().units[0]!.form.values.rent).toBe("35000");
+  });
+
+  it("rejects typed values outside the dial's range, decimals included, and accepts Arabic digits", () => {
+    renderFlow();
+    pick("أستأجرها وأعيد تأجيرها");
+    const price = screen.getByRole("textbox", { name: "اكتب سعر الليلة مباشرة" });
+    for (const bad of ["400", "10001", "2450.5", ""]) {
+      fireEvent.change(price, { target: { value: bad } });
+      fireEvent.blur(price);
+      expect(price, bad).toHaveAttribute("aria-invalid", "true");
+    }
+    fireEvent.change(price, { target: { value: "٢٤٥٠" } });
+    expect(price).not.toHaveAttribute("aria-invalid");
+    expect(plain(screen.getByTestId("dial-value"))).toBe("2,450");
+    fireEvent.blur(price);
+    expect(screen.getByTestId("dial-direct-error")).toBeEmptyDOMElement();
   });
 
   it("keeps the answers out of the URL: only the step is in the query string", () => {

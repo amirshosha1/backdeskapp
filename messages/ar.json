@@ -429,7 +429,7 @@
     "errorAmountNonPositive": "المبلغ يجب أن يكون أكبر من صفر",
     "errorCategory": "اختر فئة المصروف",
     "unitSheetTitle": "اختر الوحدة",
-    "confirmationTitle": "تم حفظ المصروف (تجريبيًا)",
+    "confirmationTitle": "مثال فقط: لم يُحفظ المصروف",
     "confirmationBody": "في النسخة الكاملة يُسجَّل المصروف في حسابات الوحدة ويتحدّث الربح فورًا. لم يُحفظ شيء هنا.",
     "addAnother": "إضافة مصروف آخر",
     "backHome": "العودة للرئيسية"
