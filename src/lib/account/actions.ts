@@ -24,12 +24,14 @@ import { UNIT_COLUMNS, type UnitRow } from "./units";
 
 type Session = { supabase: ServerSupabase; userId: string };
 
-async function session(): Promise<Session | AccountError> {
+async function session(expectedUserId?: string): Promise<Session | AccountError> {
   const supabase = await createServerSupabase();
   if (!supabase) return "not_configured";
   const { data, error } = await supabase.auth.getClaims();
   const userId = data?.claims?.sub;
   if (error || !userId) return mapAuthError(error);
+  // A browser request dispatched as A must never run under B's newer cookies.
+  if (expectedUserId && userId !== expectedUserId) return "identity_changed";
   return { supabase, userId };
 }
 
@@ -66,10 +68,10 @@ async function insertUnit(s: Session, orgId: string, name: string, inputs: Store
 }
 
 /** Adds an apartment to the account. At the limit the database refuses (P0001) and this returns unit_limit_reached. */
-export async function createUnit(input: unknown): Promise<ActionResult<UnitRow>> {
+export async function createUnit(input: unknown, expectedUserId?: string): Promise<ActionResult<UnitRow>> {
   const parsed = createUnitSchema.safeParse(input);
   if (!parsed.success) return fail("invalid");
-  const s = await session();
+  const s = await session(expectedUserId);
   if (typeof s === "string") return fail(s);
   const org = await editableOrgId(s);
   if ("error" in org) return fail(org.error);
@@ -77,10 +79,10 @@ export async function createUnit(input: unknown): Promise<ActionResult<UnitRow>>
 }
 
 /** Renames an apartment and/or saves its calculator inputs. operating_model always follows the inputs. */
-export async function updateUnit(input: unknown): Promise<ActionResult<UnitRow>> {
+export async function updateUnit(input: unknown, expectedUserId?: string): Promise<ActionResult<UnitRow>> {
   const parsed = updateUnitSchema.safeParse(input);
   if (!parsed.success) return fail("invalid");
-  const s = await session();
+  const s = await session(expectedUserId);
   if (typeof s === "string") return fail(s);
   const { id, name, inputs } = parsed.data;
   const { data, error, status } = await s.supabase
@@ -100,10 +102,10 @@ export async function updateUnit(input: unknown): Promise<ActionResult<UnitRow>>
   return { ok: true, data };
 }
 
-export async function deleteUnit(id: unknown): Promise<ActionResult<{ id: string }>> {
+export async function deleteUnit(id: unknown, expectedUserId?: string): Promise<ActionResult<{ id: string }>> {
   const parsed = unitIdSchema.safeParse(id);
   if (!parsed.success) return fail("invalid");
-  const s = await session();
+  const s = await session(expectedUserId);
   if (typeof s === "string") return fail(s);
   const { data, error, status } = await s.supabase.from("units").delete().eq("id", parsed.data).select("id").maybeSingle();
   if (error) return fail(mapDbError(error, status));
@@ -119,10 +121,10 @@ export type AdoptionOutcome = { outcome: "added"; unit: UnitRow } | { outcome: "
  * same numbers, otherwise the person is asked. Decided here, from a fresh
  * read of the account, never from what the browser believes.
  */
-export async function adoptGuestUnit(input: unknown): Promise<ActionResult<AdoptionOutcome>> {
+export async function adoptGuestUnit(input: unknown, expectedUserId?: string): Promise<ActionResult<AdoptionOutcome>> {
   const parsed = adoptGuestUnitSchema.safeParse(input);
   if (!parsed.success) return fail("invalid");
-  const s = await session();
+  const s = await session(expectedUserId);
   if (typeof s === "string") return fail(s);
   const { data: units, error, status } = await s.supabase.from("units").select("id, calculator_inputs");
   if (error || !units) return fail(mapDbError(error, status));
@@ -140,10 +142,10 @@ export async function adoptGuestUnit(input: unknown): Promise<ActionResult<Adopt
  * made at sign-in from the browser: it never replaces an answer the
  * account already has.
  */
-export async function saveApartmentCount(answer: unknown, onlyIfEmpty = false): Promise<ActionResult<{ saved: boolean }>> {
+export async function saveApartmentCount(answer: unknown, onlyIfEmpty = false, expectedUserId?: string): Promise<ActionResult<{ saved: boolean }>> {
   const parsed = apartmentCountSchema.safeParse(answer);
   if (!parsed.success || typeof onlyIfEmpty !== "boolean") return fail("invalid");
-  const s = await session();
+  const s = await session(expectedUserId);
   if (typeof s === "string") return fail(s);
   let query = s.supabase.from("profiles").update({ apartment_count_answer: parsed.data }).eq("user_id", s.userId);
   if (onlyIfEmpty) query = query.is("apartment_count_answer", null);
@@ -157,8 +159,8 @@ export async function saveApartmentCount(answer: unknown, onlyIfEmpty = false): 
  * (no service-role key: the function acts on auth.uid() only), then signs
  * this device out. If the deletion fails, nothing is signed out.
  */
-export async function deleteMyAccount(): Promise<ActionResult> {
-  const s = await session();
+export async function deleteMyAccount(expectedUserId?: string): Promise<ActionResult> {
+  const s = await session(expectedUserId);
   if (typeof s === "string") return fail(s);
   const { error, status } = await s.supabase.rpc("delete_my_account");
   if (error) return fail(mapDbError(error, status));
