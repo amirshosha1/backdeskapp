@@ -197,11 +197,11 @@ describe("scenarioView — break-even status and sentence edge cases", () => {
   });
 });
 
-// A half-piastre tie that straddles zero: half-up (away from zero) gives
-// round(+0.005) = 0.01 but round(−0.005) = −0.01, so subtracting a whole
-// piastre amount no longer commutes with rounding. The tie is resolved in
-// the tied subtotal, never by moving a line that needed no rounding.
-describe("scenarioView — half-piastre ties around zero", () => {
+// Half-up rounds away from zero: round(+0.005) = 0.01 but round(−0.005) =
+// −0.01, so subtracting a whole-piastre amount does not commute with
+// rounding when two tied figures have opposite signs. The tie is resolved
+// in a tied figure, never by moving a line that needed no rounding.
+describe("scenarioView — half-piastre ties of opposite sign", () => {
   const TINY: ScenarioInput = {
     operatingModel: "owner_operated",
     daysInPeriod: 30,
@@ -244,11 +244,32 @@ describe("scenarioView — half-piastre ties around zero", () => {
     expect(money(view.revenue)).toBe("0.00");
     expect(money(view.totalCostsWithDepreciation)).toBe("0.01");
   });
+
+  // Counterexamples the property found (fast-check seeds 35, 30 and 26, 10,000 runs each).
+  it("seed 35: a typed setup cost over one month shows as its own depreciation", () => {
+    const view = scenarioView({ ...TINY, adr: "30.58", avgLengthOfStay: 2, cleaningFeePerStay: "152.54", perStayCosts: [{ id: "cleaning", amount: "213.69" }], setupCost: "0.01" });
+    expect([view.sections.profitBeforeDepreciation, view.sections.depreciation, view.netAfterDepreciation].map(money)).toEqual(["0.00", "0.01", "-0.01"]);
+  });
+
+  it("seed 30: a revenue tie and a subtotal tie of opposite signs leave the typed per-stay cost as typed", () => {
+    // 21 nights of 4-night stays: 5.25 stays → revenue +1,673.175, profit −243.285.
+    const view = scenarioView({ ...TINY, bookedNights: 21, avgLengthOfStay: 4, cleaningFeePerStay: "318.7", perStayCosts: [{ id: "cleaning", amount: "365.04" }] });
+    const s = view.sections;
+    expect([s.revenue, s.operatingExpenses, s.profitBeforeDepreciation, view.netAfterDepreciation].map(money)).toEqual(["1673.17", "1916.46", "-243.29", "-243.29"]);
+  });
+
+  it("seed 26: a tie carried by a repeating stays count keeps depreciation exact", () => {
+    // 7 nights ÷ 3.6 per stay repeats; profit before depreciation is −999.985 (−999.98499999999999995 at 20 digits).
+    const view = scenarioView({ ...TINY, bookedNights: 7, adr: "13.87", avgLengthOfStay: "3.6", cleaningFeePerStay: "435.75", perStayCosts: [{ id: "cleaning", amount: "999.96" }], setupCost: "0.02" });
+    const s = view.sections;
+    expect([s.revenue, s.operatingExpenses, s.profitBeforeDepreciation, s.depreciation, view.netAfterDepreciation].map(money)).toEqual(["944.38", "1944.37", "-999.99", "0.02", "-1000.01"]);
+  });
 });
 
 // ---------------------------------------------------------------- properties
 
 const RUNS = { numRuns: 300 };
+const HALF_PIASTRE = new Decimal("0.005").plus("1e-12");
 const cents = (min: number, max: number) => fc.integer({ min, max }).map((c) => new Decimal(c).dividedBy(100));
 const rate = (maxBasisPoints: number) => fc.integer({ min: 0, max: maxBasisPoints }).map((bp) => new Decimal(bp).dividedBy(10_000));
 
@@ -338,9 +359,11 @@ describe("scenarioView — properties", () => {
           if (new Decimal(exact).decimalPlaces() <= 2) expect(shown.equals(exact)).toBe(true);
         }
         // Revenue and the subtotal are each a half-up rounding of their own value,
-        // or the other half of a tie: never more than half a piastre away.
-        expect(s.revenue.minus(r.pnl.grossRevenue).abs().lessThanOrEqualTo("0.005")).toBe(true);
-        expect(s.profitBeforeDepreciation.minus(r.profitBeforeDepreciation).abs().lessThanOrEqualTo("0.005")).toBe(true);
+        // or the other half of a tie: never more than half a piastre away. The
+        // allowance is decimal.js's 20-digit noise on a repeating stays count
+        // (seed 26: −999.98499999999999995 for an exact −999.985).
+        expect(s.revenue.minus(r.pnl.grossRevenue).abs().lessThanOrEqualTo(HALF_PIASTRE)).toBe(true);
+        expect(s.profitBeforeDepreciation.minus(r.profitBeforeDepreciation).abs().lessThanOrEqualTo(HALF_PIASTRE)).toBe(true);
         // Typed amounts are shown as typed.
         if (s.rent) expect(s.rent.equals(input.rent)).toBe(true);
         if (input.commission.basis === "fixed_monthly") expect(s.managementCommission!.equals(input.commission.fixedFee)).toBe(true);

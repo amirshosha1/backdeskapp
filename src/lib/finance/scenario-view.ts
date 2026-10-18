@@ -139,11 +139,11 @@ function sectionsFor(input: ScenarioInput, result: ScenarioResult, net: Decimal)
   const isManaged = input.operatingModel === "managed_for_owner";
 
   let revenue = roundMoney(pnl.grossRevenue);
-  // Half-up rounds away from zero, so round(x − k) ≠ round(x) − k when x
-  // is a half-piastre tie that straddles zero (+0.005 → 0.01, −0.005 →
-  // −0.01). Then a depreciation already in whole piastres keeps its value
-  // and profit before depreciation takes the other half of its tie:
-  // net + depreciation is still within half a piastre of the exact figure.
+  // Half-up rounds away from zero, so for a whole-piastre k, round(x − k)
+  // ≠ round(x) − k when x is a half-piastre tie and x, x − k have opposite
+  // signs (+0.005 → 0.01 but −0.005 → −0.01). Then a depreciation already
+  // in whole piastres keeps its value and profit before depreciation takes
+  // the other half of its tie: still within half a piastre of its value.
   const before = isWholePiastres(result.depreciation) ? net.plus(result.depreciation) : roundMoney(result.profitBeforeDepreciation);
   // Rent is a typed amount: shown as typed, never adjusted.
   const rent = isArbitrage ? roundMoney(result.rent) : null;
@@ -171,8 +171,9 @@ function sectionsFor(input: ScenarioInput, result: ScenarioResult, net: Decimal)
     const order = ["operatingExpenses", "platformFees", "managementCommission"] as const;
     const absorber = order.find((key) => lines[key] !== null && !new Decimal(lines[key]!).equals(rounded[key]!));
     if (absorber) rounded[absorber] = rounded[absorber]!.plus(leftover);
-    // Every cost line is in whole piastres: only revenue was rounded, in
-    // the same straddling tie, so revenue takes the other half of it.
+    // Every cost line is in whole piastres, so only revenue and the
+    // subtotal were rounded, in ties of opposite sign: revenue takes the
+    // other half of its tie.
     else revenue = revenue.minus(leftover);
   }
 
