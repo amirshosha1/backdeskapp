@@ -39,7 +39,11 @@ export const unitIdSchema = z.uuid();
 const calculatorFormSchema = z.strictObject({
   operatingModel: z.enum(OPERATING_MODELS as [CalculatorForm["operatingModel"], ...CalculatorForm["operatingModel"][]]),
   values: z.strictObject(
-    Object.fromEntries(NUMBER_FIELDS.map((f) => [f, z.string().max(32)])) as Record<(typeof NUMBER_FIELDS)[number], z.ZodString>,
+    // laundryCost postdates saved forms: a payload without it means zero, exactly as parseStoredForm reads it.
+    Object.fromEntries(NUMBER_FIELDS.map((f) => [f, f === "laundryCost" ? z.string().max(32).default("0") : z.string().max(32)])) as Record<
+      (typeof NUMBER_FIELDS)[number],
+      z.ZodString
+    >,
   ),
   commission: z.strictObject({
     basis: z.enum(MANAGED_BASES as [CalculatorForm["commission"]["basis"], ...CalculatorForm["commission"]["basis"][]]),

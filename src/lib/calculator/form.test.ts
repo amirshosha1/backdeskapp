@@ -37,6 +37,24 @@ describe("calculator form", () => {
     }
   });
 
+  it("keeps the 3BR examples well-defined at the edges: zero and full occupancy", () => {
+    for (const id of ["arbitrage", "arbitrage-empty"] as const) {
+      const preset = CALCULATOR_PRESETS.find((p) => p.id === id)!;
+      const at = (nights: string) => {
+        const parsed = parseCalculatorForm({ ...preset.form, values: { ...preset.form.values, bookedNights: nights } });
+        if (!parsed.ok) throw new Error(`${id} at ${nights} nights must parse`);
+        return scenarioView(parsed.input, computeScenario(parsed.input));
+      };
+      const empty = at("0");
+      // No stays: no revenue, so the month is a loss.
+      expect(empty.netAfterDepreciation.isNegative()).toBe(true);
+      const full = at("30");
+      expect(full.netAfterDepreciation.greaterThan(empty.netAfterDepreciation)).toBe(true);
+      // Break-even depends on prices and costs, not on how many nights are booked.
+      expect(full.breakEven).toEqual(empty.breakEven);
+    }
+  });
+
   it("opens saved pre-laundry forms with zero laundry and preserves their result", () => {
     const legacy = structuredClone(base) as unknown as { values: Record<string, string> };
     delete legacy.values.laundryCost;
