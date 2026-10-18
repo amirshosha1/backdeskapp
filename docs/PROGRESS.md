@@ -1,5 +1,11 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: UX and private beta gate (draft, 2026-10-12)
+
+- Added direct numeric input to first-run dials, a clear example warning inside the owner statement, and a cleaning-fee note under the landing example. Arabic and English screen tests cover these paths.
+- Recorded the full regression matrix and the private-beta decision in `docs/STABILIZATION_BETA_GATE.md`.
+- Decision: the calculator remains suitable for clearly labelled early access; private beta as an operating ledger is blocked by real expense persistence and the pending two-account Google test.
+
 ## Stabilization: pricing truth (draft, 2026-10-12)
 
 - Done on `stabilization/pricing-truth`: each Free and Pro feature now states whether it is available or in development; the free result is described as an estimate from user inputs. Setup Kit is labelled in development and has no order action. First-month access and monthly payment terms are labelled planned.

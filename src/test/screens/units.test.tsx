@@ -149,6 +149,7 @@ describe("<OwnerStatement />", () => {
     renderWithIntl(<OwnerStatement statement={STATEMENT} />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("مثال: كشف حساب مالك");
     expect(screen.getByTestId("example-chip")).toHaveTextContent("مثال · أرقام توضيحية");
+    expect(screen.getByTestId("statement-example-warning")).toHaveTextContent("بيانات توضيحية — ليس كشفًا فعليًا");
     expect(screen.queryByText(/تنزيل PDF/)).toBeNull();
     expect(screen.queryByText(/رابط للمالك/)).toBeNull();
   });
@@ -157,5 +158,6 @@ describe("<OwnerStatement />", () => {
     renderWithIntl(<OwnerStatement statement={STATEMENT} />, { locale: "en" });
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Example: owner statement");
     expect(screen.getByTestId("example-chip")).toHaveTextContent("Example · illustrative numbers");
+    expect(screen.getByTestId("statement-example-warning")).toHaveTextContent("Illustrative data — not a real statement");
   });
 });
