@@ -258,6 +258,14 @@ describe("scenarioView — half-piastre ties of opposite sign", () => {
     expect([s.revenue, s.operatingExpenses, s.profitBeforeDepreciation, view.netAfterDepreciation].map(money)).toEqual(["1673.17", "1916.46", "-243.29", "-243.29"]);
   });
 
+  it("seed 1850402200 (main CI, 0d68a58): a typed setup cost over one month shows as its own depreciation", () => {
+    // 3 nights of 1.2-night stays: 2.5 stays → revenue and profit before depreciation +183.325, net −0.005.
+    // With no costs, revenue equals profit before depreciation, so both take the other half of the tie.
+    const view = scenarioView({ ...TINY, bookedNights: 3, avgLengthOfStay: "1.2", cleaningFeePerStay: "73.33", setupCost: "183.33" });
+    const s = view.sections;
+    expect([s.revenue, s.profitBeforeDepreciation, s.depreciation, view.netAfterDepreciation].map(money)).toEqual(["183.32", "183.32", "183.33", "-0.01"]);
+  });
+
   it("seed 26: a tie carried by a repeating stays count keeps depreciation exact", () => {
     // 7 nights ÷ 3.6 per stay repeats; profit before depreciation is −999.985 (−999.98499999999999995 at 20 digits).
     const view = scenarioView({ ...TINY, bookedNights: 7, adr: "13.87", avgLengthOfStay: "3.6", cleaningFeePerStay: "435.75", perStayCosts: [{ id: "cleaning", amount: "999.96" }], setupCost: "0.02" });
