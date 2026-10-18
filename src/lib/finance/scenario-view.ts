@@ -16,7 +16,9 @@ import { BASIS_AFTER_DEPRECIATION, computeScenario, scenarioModel, type Scenario
  * goes to a *computed* line — operating expenses, then platform fees, then
  * commission, the first that was itself rounded — never to a line that
  * equals a single input (rent, a fixed fee): a rent typed as 35,000 always
- * shows 35,000.00.
+ * shows 35,000.00. In a half-piastre tie of opposite sign, a tied derived
+ * figure (profit before depreciation, or revenue) takes the other half of
+ * its tie instead (DECISIONS.md D-24).
  */
 
 export type BreakEvenStatus = "within_month" | "beyond_available_nights" | "no_break_even";
@@ -130,13 +132,21 @@ function sentenceFor(result: ScenarioResult, breakEven: AfterDepreciationBreakEv
   return { kind: "short", nights: breakEven.nights, nightsShort: new Decimal(breakEven.wholeNights).minus(booked).ceil().toNumber() };
 }
 
+/** True when a value is already in whole piastres, so rounding leaves it unchanged. */
+const isWholePiastres = (value: Decimal.Value) => new Decimal(value).decimalPlaces() <= 2;
+
 function sectionsFor(input: ScenarioInput, result: ScenarioResult, net: Decimal): ScenarioSections {
   const { pnl } = result;
   const isArbitrage = input.operatingModel === "rental_arbitrage";
   const isManaged = input.operatingModel === "managed_for_owner";
 
-  const revenue = roundMoney(pnl.grossRevenue);
-  const before = roundMoney(result.profitBeforeDepreciation);
+  let revenue = roundMoney(pnl.grossRevenue);
+  // Half-up rounds away from zero, so for a whole-piastre k, round(x − k)
+  // ≠ round(x) − k when x is a half-piastre tie and x, x − k have opposite
+  // signs (+0.005 → 0.01 but −0.005 → −0.01). Then a depreciation already
+  // in whole piastres keeps its value and profit before depreciation takes
+  // the other half of its tie: still within half a piastre of its value.
+  const before = isWholePiastres(result.depreciation) ? net.plus(result.depreciation) : roundMoney(result.profitBeforeDepreciation);
   // Rent is a typed amount: shown as typed, never adjusted.
   const rent = isArbitrage ? roundMoney(result.rent) : null;
 
@@ -161,11 +171,12 @@ function sectionsFor(input: ScenarioInput, result: ScenarioResult, net: Decimal)
     .minus(before);
   if (!leftover.isZero()) {
     const order = ["operatingExpenses", "platformFees", "managementCommission"] as const;
-    const absorber =
-      order.find((key) => lines[key] !== null && !new Decimal(lines[key]!).equals(rounded[key]!)) ??
-      // Unreachable in practice: a leftover needs at least one rounded line.
-      "operatingExpenses";
-    rounded[absorber] = rounded[absorber]!.plus(leftover);
+    const absorber = order.find((key) => lines[key] !== null && !new Decimal(lines[key]!).equals(rounded[key]!));
+    if (absorber) rounded[absorber] = rounded[absorber]!.plus(leftover);
+    // Every cost line is in whole piastres, so only revenue and the
+    // subtotal were rounded, in ties of opposite sign: revenue takes the
+    // other half of its tie.
+    else revenue = revenue.minus(leftover);
   }
 
   return {
@@ -180,11 +191,11 @@ function sectionsFor(input: ScenarioInput, result: ScenarioResult, net: Decimal)
 }
 
 export function scenarioView(input: ScenarioInput, result: ScenarioResult = computeScenario(input)): ScenarioView {
-  const revenue = roundMoney(result.pnl.grossRevenue);
   const net = roundMoney(result.netProfit);
   const outcome = net.greaterThanOrEqualTo(0) ? "profit" : "loss";
   const breakEven = afterDepreciationBreakEven(input, result);
   const sections = sectionsFor(input, result, net);
+  const revenue = sections.revenue;
   return {
     revenue,
     totalCostsWithDepreciation: revenue.minus(net),
