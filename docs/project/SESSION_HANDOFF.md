@@ -78,3 +78,7 @@ Full list: `DECISIONS.md`.
 - Do not change decimal.js precision or the rounding mode without a new owner decision (D-25).
 - `backdeskapp.com` and the Vercel team API are unreachable from the cloud sandbox: production status must come from the owner.
 - A property-test failure is a finding, not a flake: capture the seed (fast-check prints it) before re-running.
+
+## Strategy documentation task — 2026-10-19
+
+Documentation-only proposal based on `main` @ `1321766`; the older snapshot above has not been reverified by this task. [Strategy index](../strategy/README.md) records the supplied war-room preview's version distinction and the missing full sources. No strategy approval, gate completion or production readiness is inferred. Next: import full v1.1/v1.2 sources and obtain the owner's explicit strategy review using [REVIEW.md](../strategy/REVIEW.md). Keep this documentation PR draft until its source-import checklist is complete. Runtime, migrations and CI configuration are outside this task.

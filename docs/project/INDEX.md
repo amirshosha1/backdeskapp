@@ -18,6 +18,7 @@
 | `VERIFICATION.md` | Evidence levels V0–V6, check record, what is still unverified | Recording or questioning a check |
 | `OPERATIONS.md` | Commands, environments, CI/CD, migrations, rollback, limits | Running, deploying, migrating |
 | `UX_RULES.md` | i18n, RTL, UX, landing and analytics display rules | Any UI or copy work |
+| `../strategy/README.md` | Canonical GTM version status, source gaps, registries and approval workflow | GTM, launch, positioning, pricing, acquisition or public claims |
 | `../BUILD_PLAN.md` | Full spec: formulas, data model, worked examples, phases | One section at a time: `grep -n '^#' docs/BUILD_PLAN.md` |
 | `../PROGRESS.md` | Dated history (592 lines) | Rarely; search a date or term, never read in full |
 | `../ANALYTICS.md`, `../SETUP_AUTH.md`, `../FINANCIAL_BASELINE.md` | Event catalogue; Google/Supabase setup; sourced default figures | Analytics, auth setup, presets |
