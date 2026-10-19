@@ -1,11 +1,12 @@
 # INDEX — documentation map, resume and sync
 
-> Documentation map and the resume/sync procedures. Shared, agent-independent. Startup reads only `AGENTS.md` and `SESSION_HANDOFF.md`; open this file when you need the map or a procedure.
+> Documentation map and the resume/sync procedures. Shared, agent-independent. Startup reads `AGENTS.md`, `docs/strategy/90-day-launch.md` and `SESSION_HANDOFF.md`; open this file when you need the map or a procedure.
 
-## 1. Startup set (`AGENTS.md`, `SESSION_HANDOFF.md`) and everything else (on demand)
+## 1. Startup set (`AGENTS.md`, `docs/strategy/90-day-launch.md`, `SESSION_HANDOFF.md`) and everything else (on demand)
 | File | Contains | Read when |
 |---|---|---|
 | `AGENTS.md` (root) | Identity, truth precedence, non-goals, architecture rules, safety, workflow | Always |
+| [`../strategy/90-day-launch.md`](../strategy/90-day-launch.md) | 90-day strategy, approved vs pending scope, provenance, review and evidence rules | Always, before choosing work |
 | `SESSION_HANDOFF.md` | Objective, code baseline + freshness commands, what is done / active / next, blockers | Always |
 | `PROJECT_STATUS.md` | Per-area status, evidence level, open PRs and conflicts | Before claiming anything works or is missing; after the freshness check says it may be stale |
 | `ROADMAP.md` | Approved scope vs recommendations, IDs, dependencies, acceptance | Choosing or scoping work |
@@ -25,7 +26,7 @@
 Task shortcuts: auth → `ARCHITECTURE.md` (AuthN/AuthZ), `CODEBASE_MAP.md`, `docs/SETUP_AUTH.md`, `tests/db/` · database → migrations, `OPERATIONS.md`, `KNOWN_ISSUES.md` · billing → `PRODUCT_SCOPE.md`, `DECISIONS.md` D-07..D-09, `BUILD_PLAN.md` §2 · deployment → `OPERATIONS.md`, `.github/workflows/` · UI → `UX_RULES.md`.
 
 ## 2. Resume procedure (any agent)
-1. Read `AGENTS.md` and `SESSION_HANDOFF.md` (this file only for the map).
+1. Read `AGENTS.md`, `docs/strategy/90-day-launch.md` and `SESSION_HANDOFF.md` (this file only for the map).
 2. Freshness (the handoff and status files are dated snapshots, never proof of current state; live Git and PR state win): `git status -sb`; `git fetch -q origin`; `git log --oneline <baseline>..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (baseline from the handoff; code commits only); `git ls-remote origin 'refs/heads/*'` against the PR heads in `PROJECT_STATUS.md`; when a GitHub tool is available also list open PRs with minimal fields (`number`, `title`, `draft`, `state`, `head`) and compare. A PR that is merged, closed, or at a different head is a correction to make, not a fact to repeat. Distinguish the code baseline (last code commit) from `origin/main` HEAD (may be a documentation commit).
 3. A new commit or head invalidates only the claims about what it touched: `git diff --stat <baseline>..origin/main` shows which. Re-verify those rows; leave the rest.
 4. Choose the task (the user's, else the handoff's first next action). Read only its files via `CODEBASE_MAP.md`.

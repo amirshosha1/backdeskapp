@@ -1,6 +1,9 @@
 # SESSION_HANDOFF
 
 > Model-independent continuation note. Rewritten at the end of each working session (procedure: `INDEX.md` §3).
+
+> **2026-10-19 documentation addendum:** Read [`../strategy/90-day-launch.md`](../strategy/90-day-launch.md) before acting on this snapshot. This task authorizes only a documentation branch/draft PR, without merge. The 2026-10-18 freeze is archived under `docs/strategy/sources/`; the owner's current request approves the freeze, G0 assessment and synthetic bridge PLANNING only. G1/G2 and implementation remain pending; G2's numeric cash target is unspecified. Repository docs were inspected at `main` @ `132176601fdab5cb6614d59deb34d003d3cdc78b`; application tests and production were not checked in this task. The 2026-10-18 code/test/PR facts below remain historical, not a current readiness assessment.
+
 > **Updated:** 2026-10-18 · **Code baseline:** `main` @ `72903c6` (PR #33, last commit that changed application code or CI) · **Git HEAD when written:** `main` @ `72903c6`.
 > **This note is a snapshot.** Branch heads and PR states below were true on the date above; confirm them live before acting (freshness commands, and the GitHub PR list when available).
 > **Freshness (run first):** `git fetch -q origin && git log --oneline 72903c6..origin/main -- . ':!docs' ':!.claude' ':!*.md' ':!.github/copilot-instructions.md'` (code commits only) and `git ls-remote origin 'refs/heads/*'`. A code commit on `main`, or a PR head different from `PROJECT_STATUS.md`, invalidates only the claims about what it touched.

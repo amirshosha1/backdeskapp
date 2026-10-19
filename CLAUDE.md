@@ -2,6 +2,8 @@
 
 @AGENTS.md
 
+Before work, also read [`docs/strategy/90-day-launch.md`](docs/strategy/90-day-launch.md) for the 90-day strategy's approval boundaries and unresolved source checks. The shared startup sequence remains in `AGENTS.md`.
+
 Claude Code specifics only; everything shared lives in `AGENTS.md` and `docs/project/`.
 
 - The line above is Claude Code's file-import syntax. If your version does not resolve it, read `AGENTS.md` yourself, then `docs/project/SESSION_HANDOFF.md`.
