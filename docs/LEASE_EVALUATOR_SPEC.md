@@ -200,9 +200,10 @@ Monthly cash-flow and P&L views per scenario; upfront funding by category; insur
 - [ ] Reality-check thresholds; haircut choices offered in the UI
 - [ ] Furnishing tier ranges; AC unit price; cluster names
 - [ ] Copy for مكسب بمخاطرة: works in a normal year, fails in a bad one, names what breaks it
+- [ ] KI-22 (issue #34): L1 must compute verdict, walk-away and safe rent in integer piastres end-to-end and must not route these through the 20-significant-digit path. Otherwise T3/T4 exactness and boundary verdicts are unreliable. Decide before L1: (a) L1 uses integer piastres throughout, or (b) fix KI-22 first.
 
 ## Appendix A — L1 implementation brief (FOR REVIEW; NOT AUTHORIZED)
-Implement sections 2–7 exactly. Plan first; wait for approval. Prerequisite: spec merged; scenario-view.test.ts verified clean on main.
+Implement sections 2–7 exactly. Plan first; wait for approval. Prerequisite: spec merged; scenario-view.test.ts verified clean on main. KI-22 decision recorded (see section 11).
 Rules: integer piastres; separate cash and P&L views; advance offsets covered months' cash rent; applied deposit offsets final-month cash rent; depreciation only in P&L, capex only in cash; validate dominance with typed errors; haircut required for refundable arrangements; daily seasonality with per-effect precedence and local date overrides; no hard-coded fees, tariffs, prices, multipliers, or thresholds; warnings as codes only; owner-mode snapshots captured first and unchanged with the switch off.
 Tests (fast-check, seed printed on every failure; any failure is a real counterexample, never re-run to pass):
 T1 Σ cash = Σ P&L over the term.
