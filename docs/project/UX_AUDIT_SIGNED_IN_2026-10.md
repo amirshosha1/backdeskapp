@@ -1,11 +1,11 @@
 > **Report only; nothing here is a decision or a build.** Run on **production** (`backdeskapp.com`) with a disposable test account via Claude in Chrome, 2026-10-19. It complements `UX_AUDIT_PUBLIC_2026-10.md` (IDs UX-P01…P25), which ran on a **local production build** of `main` @ `adeab33` because production was unreachable from that sandbox: the public findings still need a production re-check. The fix plan and the batch for every UX-P and UX-S ID are in `ROADMAP.md` (UX-1…UX-8). Founder decisions that apply: D7 (type lock), D8 (Home summary), D9 (5-apartment limit, no "Free = 1 apartment" or "custom plan" wording), D10 (hide prices and the pre-order button until gate G6); recorded as D-31…D-34 in `DECISIONS.md`. Fixes touching the calculator stay bug fixes (GTM:D-030). Imported verbatim from the founder's upload; the only change is this banner.
 >
-> **Count note:** the report's header says 30 findings (0 Blocker, 8 High, 8 Medium, 14 Low); its table rows give 7 High, 9 Medium and 14 Low (UX-S01–S07 High, S08–S16 Medium, S17–S30 Low), also 30. The rows are kept as written and no severity was changed here; the founder can confirm which one is right. Journey 6 (account deletion) passed on production on 2026-10-19; UX-S28…S30 come from it.
+> **Counts:** 30 findings: 0 Blocker, 7 High (UX-S01–S07), 9 Medium (UX-S08–S16), 14 Low (UX-S17–S30). The founder confirmed the table rows on 2026-10-19; the uploaded report's header read "8 High, 8 Medium" and is corrected here. Journey 6 (account deletion) passed on production on 2026-10-19; UX-S28…S30 come from it.
 
 # Backdesk: Signed-in UX audit (UX-S series)
 
 **Run:** Mon 19 Oct 2026, 16:55–17:25 (Africa/Cairo) · **Env:** PROD `backdeskapp.com` · **Account:** disposable test Google account · **Tool:** Claude in Chrome (Windows)
-**Status:** All 6 journeys complete. 30 findings: 0 Blocker, 8 High, 8 Medium, 14 Low (UX-S28 to S30 are in the Journey 6 section).
+**Status:** All 6 journeys complete. 30 findings: 0 Blocker, 7 High, 9 Medium, 14 Low (UX-S28 to S30 are in the Journey 6 section).
 
 ## Method limits (read first)
 
