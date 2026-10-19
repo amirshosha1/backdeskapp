@@ -79,6 +79,25 @@ test.describe("calculator", () => {
     expect(sent).toEqual([]);
   });
 
+  test("tabbing into a formatted amount and typing replaces it instead of appending", async ({ page }) => {
+    await page.goto("/demo/calculator?tab=all");
+    const adr = page.getByRole("textbox", { name: /^متوسط سعر الليلة/ });
+    await expect(adr).toHaveValue("2,450");
+    // Tab focus selects the whole "2,450"; the field then shows the raw "2450", which must stay selected.
+    await adr.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await expect(adr).toBeFocused();
+    await page.keyboard.type("3000");
+    await expect(adr).toHaveValue("3000");
+    // A click still places the caret, so a click then typing keeps editing the value.
+    await page.getByTestId("hero-figure").click();
+    await adr.click();
+    await page.keyboard.press("End");
+    await page.keyboard.type("5");
+    await expect(adr).toHaveValue("30005");
+  });
+
   test("every field of the managed model fits 360 px without horizontal scroll", async ({ page }) => {
     await page.goto("/demo/calculator?tab=all");
     await page.getByRole("radio", { name: "إدارة لمالك", exact: true }).click();

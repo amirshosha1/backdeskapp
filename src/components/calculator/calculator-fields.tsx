@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useLocale } from "next-intl";
 import { formatTypedAmount } from "@/lib/format/amount";
 import type { AppLocale } from "@/i18n/routing";
@@ -48,6 +48,15 @@ export function NumberFieldRow({
   const locale = useLocale() as AppLocale;
   // Raw digits while typing; thousands separators once the field loses focus.
   const [focused, setFocused] = useState(false);
+  // Tab focus selects the whole formatted value; swapping in the raw digits
+  // drops that selection, so typing would append ("2,450" + "3000" →
+  // "24503000"). Re-select the raw value before the next keystroke.
+  const inputRef = useRef<HTMLInputElement>(null);
+  const reselect = useRef(false);
+  useLayoutEffect(() => {
+    if (focused && reselect.current) inputRef.current?.select();
+    reselect.current = false;
+  }, [focused]);
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   return (
@@ -70,7 +79,12 @@ export function NumberFieldRow({
             inputMode="decimal"
             autoComplete="off"
             value={focused ? value : formatTypedAmount(value, locale)}
-            onFocus={() => setFocused(true)}
+            ref={inputRef}
+            onFocus={(event) => {
+              const input = event.currentTarget;
+              reselect.current = input.value !== "" && input.selectionStart === 0 && input.selectionEnd === input.value.length;
+              setFocused(true);
+            }}
             onBlur={() => {
               setFocused(false);
               onCommit?.();
