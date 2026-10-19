@@ -24,6 +24,7 @@
 
 ## Current status
 
+- 2026-10-19: Lease evaluator spec v2 drafted (docs only; L1 not authorized).
 - **Stabilization step 3 (draft, 2026-10-12):** furnished and empty 3BR examples now follow the financial baseline's booked ADR, 14 nights and per-stay laundry. The engine formulas are unchanged. Saved older forms keep their former result with a zero laundry default. See `docs/STABILIZATION_PRESETS.md`; this branch still requires CI and review before any merge.
 
 - **Phase P (clickable prototype)** was merged into `main` (amirshosha1/str-money-finder#1). Amir reviewed it on his phone: it felt broken (silent taps) and the design was weak, which led to Phase P.1.
