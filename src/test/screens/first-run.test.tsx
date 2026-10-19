@@ -4,7 +4,7 @@ import { renderWithIntl } from "@/test/render";
 import { router } from "@/test/mocks/navigation";
 import { FirstRunScreen } from "@/components/first-run/first-run-screen";
 import { FirstRunGate } from "@/components/first-run/first-run-gate";
-import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM } from "@/test/legacy-calculator-example";
 import { readFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { resetFlowEventsForTests } from "@/lib/analytics/flow-events";
 import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "@/lib/guest/store";
@@ -12,7 +12,7 @@ import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 afterEach(() => vi.clearAllMocks());
 
-const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
+const EXAMPLE = LEGACY_EXAMPLE_FORM;
 const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎]/g, "");
 const renderFlow = (locale: "ar" | "en" = "ar") => renderWithIntl(<FirstRunScreen example={EXAMPLE} />, { locale });
 const heading = () => screen.getByRole("heading", { level: 1 }).textContent;
@@ -47,6 +47,7 @@ describe("first-run flow: order per model", () => {
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("خسارة");
     expect(plain(screen.getByTestId("hero-figure"))).toContain("-7,013.67");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("تتعادل عند 21.41 ليلة وأنت عند 18. ينقصك 4 ليالٍ.");
+    expect(screen.getByTestId("estimate-note")).toHaveTextContent("تقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.");
   });
 
   it("managed: the cost question asks the commission, and the verdict is the owner's", () => {
@@ -84,6 +85,49 @@ describe("first-run flow: answers, verdict and saving", () => {
     fireEvent.change(screen.getByRole("slider"), { target: { value: "10000" } });
     tap("ارفع السعر 100");
     expect(screen.getByTestId("toast")).toHaveTextContent("سعر الليلة لا يزيد على 10,000");
+  });
+
+  it("accepts a typed rent and blocks an invalid value before the verdict", () => {
+    renderFlow();
+    pick("أستأجرها وأعيد تأجيرها");
+    tap("التالي");
+    tap("التالي");
+    const input = screen.getByRole("textbox", { name: "اكتب الإيجار الشهري مباشرة" });
+    fireEvent.change(input, { target: { value: "35,000" } });
+    // A valid typed value moves the dial at once: no repeated taps to reach a real rent.
+    expect(plain(screen.getByTestId("dial-value"))).toBe("35,000");
+    tap("اعرض النتيجة");
+    expect(stored().units[0]!.form.values.rent).toBe("35000");
+
+    tap("رجوع");
+    const rent = screen.getByRole("textbox", { name: "اكتب الإيجار الشهري مباشرة" });
+    fireEvent.change(rent, { target: { value: "abc" } });
+    // Typing alone does not shout; the error appears when the person tries to move on.
+    expect(rent).not.toHaveAttribute("aria-invalid");
+    tap("اعرض النتيجة");
+    expect(heading()).toBe("كم تدفع إيجارًا في الشهر؟");
+    expect(rent).toHaveAttribute("aria-invalid", "true");
+    expect(rent).toHaveFocus();
+    const error = screen.getByTestId("dial-direct-error");
+    expect(error).toHaveTextContent("اكتب عددًا صحيحًا بين 5,000 و150,000.");
+    expect(rent).toHaveAttribute("aria-describedby", error.id);
+    expect(stored().units[0]!.form.values.rent).toBe("35000");
+  });
+
+  it("rejects typed values outside the dial's range, decimals included, and accepts Arabic digits", () => {
+    renderFlow();
+    pick("أستأجرها وأعيد تأجيرها");
+    const price = screen.getByRole("textbox", { name: "اكتب سعر الليلة مباشرة" });
+    for (const bad of ["400", "10001", "2450.5", ""]) {
+      fireEvent.change(price, { target: { value: bad } });
+      fireEvent.blur(price);
+      expect(price, bad).toHaveAttribute("aria-invalid", "true");
+    }
+    fireEvent.change(price, { target: { value: "٢٤٥٠" } });
+    expect(price).not.toHaveAttribute("aria-invalid");
+    expect(plain(screen.getByTestId("dial-value"))).toBe("2,450");
+    fireEvent.blur(price);
+    expect(screen.getByTestId("dial-direct-error")).toBeEmptyDOMElement();
   });
 
   it("keeps the answers out of the URL: only the step is in the query string", () => {
@@ -161,6 +205,7 @@ describe("first-run flow: answers, verdict and saving", () => {
     tap("Show the result");
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("Loss");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("You break even at 21.41 nights and you're at 18. You need 4 more nights.");
+    expect(screen.getByTestId("estimate-note")).toHaveTextContent("An estimate from the numbers you entered, not an actual result.");
   });
 });
 

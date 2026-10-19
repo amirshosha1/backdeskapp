@@ -38,7 +38,7 @@ test("a first visit to the app entry opens the flow; a returning one never does"
 test("rental arbitrage: model → price → nights → rent → verdict → count, saved as the first unit", async ({ page }) => {
   const sent: string[] = [];
   page.on("request", (request) => {
-    if (request.method() !== "GET" || /2600|35000|nights=|adr=/.test(request.url())) sent.push(`${request.method()} ${request.url()}`);
+    if (request.method() !== "GET" || /2550|35000|nights=|adr=/.test(request.url())) sent.push(`${request.method()} ${request.url()}`);
   });
   await page.goto("/demo/start");
   await answerArbitrage(page);
@@ -46,7 +46,7 @@ test("rental arbitrage: model → price → nights → rent → verdict → coun
   await expect(page.getByText("تُحفظ هذه الشقة كأول وحدة لك على هذا الجهاز.")).toBeVisible();
   // Only the step is in the URL; the answers stay in this tab's sessionStorage.
   expect(page.url()).toMatch(/\/demo\/start\?step=verdict$/);
-  expect(await page.evaluate((key) => sessionStorage.getItem(key), FIRST_RUN_ANSWERS_KEY)).toContain('"adr":2600');
+  expect(await page.evaluate((key) => sessionStorage.getItem(key), FIRST_RUN_ANSWERS_KEY)).toContain('"adr":2550');
 
   await page.getByRole("button", { name: "كمّل" }).click();
   await page.getByRole("radio", { name: "شقة واحدة" }).click();
@@ -57,7 +57,7 @@ test("rental arbitrage: model → price → nights → rent → verdict → coun
 
   // A reload keeps the unit, and the app entry no longer opens the flow.
   await page.reload();
-  await expect(page.getByTestId("own-unit-card")).toContainText("2,600");
+  await expect(page.getByTestId("own-unit-card")).toContainText("2,550");
   await page.goto("/demo");
   await expect(page).toHaveURL(/\/demo$/);
   expect(sent).toEqual([]);
@@ -89,7 +89,7 @@ test("a language switch mid-flow keeps the step and the answers", async ({ page 
   await page.getByRole("button", { name: "ارفع السعر 100" }).click();
   await page.getByTestId("language-switch").click();
   await expect(page).toHaveURL(/\/en\/demo\/start\?step=price$/);
-  await expect(page.getByTestId("dial-value")).toHaveText("2,600");
+  await expect(page.getByTestId("dial-value")).toHaveText("2,550");
 });
 
 test("start over, then re-run from More: it asks first and replaces the unit only at the new verdict", async ({ page }) => {
@@ -108,5 +108,5 @@ test("start over, then re-run from More: it asks first and replaces the unit onl
   await page.getByRole("link", { name: "تخطَّ" }).click();
   const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? "null"), GUEST_KEY);
   expect(stored.units[0].form.operatingModel).toBe("rental_arbitrage");
-  expect(stored.units[0].form.values.adr).toBe("2600");
+  expect(stored.units[0].form.values.adr).toBe("2550");
 });

@@ -28,6 +28,7 @@
     "subline": "Answer a few questions and Backdesk estimates your monthly net after platform fees, running costs and depreciation, using example costs you can change.",
     "cardTitle": "{model, select, rental_arbitrage {Rental arbitrage} managed_for_owner {Managed for an owner} other {Owner-operated}} · {area}",
     "cardInputs": "{adr} a night · {booked} of {available, plural, one {# night} other {# nights}} · rent {rent}",
+    "cardRevenueNote": "Revenue includes an assumed cleaning fee per booking.",
     "cta": "Check your apartment, free",
     "ctaNote": "No account needed",
     "howTitle": "How it works",
@@ -73,8 +74,7 @@
     "statementLater": "This unit's statement comes in the full version",
     "downloadPdf": "PDF download comes in the full version",
     "shareLink": "Sharing with the owner comes in the full version",
-    "preorderSoon": "Pre-orders open soon",
-    "signupSoon": "Sign-up opens at launch"
+    "preorderSoon": "Pre-orders open soon"
   },
   "firstRun": {
     "skip": "Skip",
@@ -99,6 +99,8 @@
     },
     "next": "Next",
     "showResult": "Show the result",
+    "directInputLabel": "Type {label} directly",
+    "directInputError": "Enter a whole number from {min} to {max}.",
     "price": {
       "title": "What nightly rate do you expect?",
       "caption": "The month's average, before the platform fee",
@@ -256,7 +258,8 @@
     "title": "Feasibility calculator",
     "presetsLabel": "Examples",
     "presets": {
-      "arbitrage": "Example: rental arbitrage",
+      "arbitrage": "Example: furnished rental",
+      "arbitrage-empty": "Example: empty rental",
       "managed": "Managed — Downtown Cairo"
     },
     "unitDetails": {
@@ -281,6 +284,7 @@
       "internet": "Internet (fixed)",
       "compoundFees": "Compound fees (fixed)",
       "cleaningCost": "Cleaning (per stay)",
+      "laundryCost": "Laundry (per stay)",
       "consumables": "Guest supplies (per stay)",
       "repairs": "Repairs (irregular, included in break-even by default)",
       "setupCost": "Setup cost (quick total)",
@@ -336,6 +340,8 @@
     "projectionTeaserTitle": "12-month seasonal projection",
     "contributionBeforeCommissionLabel": "Profit per night before the management commission",
     "contributionAfterCommissionLabel": "Profit per night after the management commission",
+    "estimateTag": "Estimate",
+    "estimateNote": "An estimate from the numbers you entered, not an actual result.",
     "heroLabel": "{owner, select, yes {Owner's net profit after depreciation} other {Monthly net profit after depreciation}}",
     "tabsLabel": "Calculator view",
     "tabSummary": "Summary",
@@ -426,13 +432,14 @@
     "errorAmountNonPositive": "The amount must be greater than zero",
     "errorCategory": "Choose a category",
     "unitSheetTitle": "Choose the unit",
-    "confirmationTitle": "Expense saved (sample only)",
+    "confirmationTitle": "Example only: the expense was not saved",
     "confirmationBody": "In the full version the expense is recorded in the unit's books and profit updates at once. Nothing was saved here.",
     "addAnother": "Add another expense",
     "backHome": "Back to Home"
   },
   "statement": {
     "title": "Example: owner statement",
+    "exampleNotReal": "Illustrative data — not a real statement",
     "number": "Statement no. {number}",
     "statusFinalized": "Finalized",
     "basisCash": "Cash basis",
@@ -450,6 +457,7 @@
   },
   "pricing": {
     "title": "Plans",
+    "availability": { "available": "Available now", "planned": "In development" },
     "perMonth": "per month",
     "scope": {
       "free": "One apartment",
@@ -461,12 +469,11 @@
     "customPlans": "More than {count, plural, one {# apartment} other {# apartments}}: custom plans",
     "contactUs": "Contact us",
     "customPlansPrefill": "Hello, I'd like to ask about a custom Backdesk plan for more than {count, plural, one {# apartment} other {# apartments}}.",
-    "firstMonthOpen": "Your first month after creating an account: everything is unlocked.",
-    "monthToMonth": "Pay month to month, with no automatic renewal.",
+    "firstMonthOpen": "Planned: the first month after sign-up will be fully open.",
+    "monthToMonth": "Planned: monthly payments without automatic renewal.",
     "preorderCta": "Reserve your place",
-    "choosePlan": "Choose {plan}",
-    "startFree": "Start free",
-    "orderSetupKit": "Order the kit",
+    "choosePlan": "Pre-order {plan}",
+    "startFree": "Try the calculator free",
     "oneTime": "one-time",
     "samplePricesNote": "All prices are samples and will be set before launch."
   },

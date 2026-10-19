@@ -2,15 +2,15 @@ import { act, fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
 import { CalculatorScreen } from "@/components/calculator/calculator-screen";
-import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM, LEGACY_PRESETS } from "@/test/legacy-calculator-example";
 import type { CalculatorForm } from "@/lib/calculator/form";
 import { GUEST_KEY, parseGuest, saveOwnUnit, type AssumedField } from "@/lib/guest/store";
 import { setQueryParam } from "@/lib/url-state";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
 
-const EXAMPLE = CALCULATOR_PRESETS[0]!.form;
-const renderCalculator = (locale: "ar" | "en" = "ar") => renderWithIntl(<CalculatorScreen presets={CALCULATOR_PRESETS} />, { locale });
+const EXAMPLE = LEGACY_EXAMPLE_FORM;
+const renderCalculator = (locale: "ar" | "en" = "ar") => renderWithIntl(<CalculatorScreen presets={LEGACY_PRESETS} />, { locale });
 /** Text without the LRI/PDI isolates that wrap numbers inside sentences (src/lib/format/). */
 const plain = (el: Element) => (el.textContent ?? "").replace(/[⁦-⁩‎]/g, "");
 const byTestId = (id: string) => plain(screen.getByTestId(id));
@@ -33,6 +33,14 @@ describe("<CalculatorScreen /> — Summary (rental-arbitrage example)", () => {
     expect(byTestId("break-even-pill")).toBe("التعادل عند 21.41 ليلة");
     expect(sentence()).toBe("ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.");
     expect(byTestId("nights-header")).toBe("18 ليلة محجوزة من 30الإشغال 60%");
+  });
+
+  it("marks the result as an estimate from the entered numbers, in both languages", () => {
+    const { unmount } = renderCalculator();
+    expect(byTestId("estimate-tag")).toBe("تقديرتقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.");
+    unmount();
+    renderCalculator("en");
+    expect(byTestId("estimate-tag")).toBe("EstimateAn estimate from the numbers you entered, not an actual result.");
   });
 
   it("the three rows add up as displayed: revenue − all costs with depreciation = net", () => {

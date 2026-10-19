@@ -27,7 +27,8 @@ const renderPricing = (locale: AppLocale = "ar") =>
   );
 
 const card = (name: string) => screen.getByRole("heading", { name, level: 2 }).closest("article") as HTMLElement;
-const bullets = (article: HTMLElement) => within(article).getAllByRole("listitem").map((li) => li.textContent);
+const bullets = (article: HTMLElement) => within(article).getAllByTestId("feature-label").map((label) => label.textContent);
+const availability = (article: HTMLElement) => within(article).getAllByTestId("feature-availability").map((badge) => badge.textContent);
 
 describe("<PricingScreen />", () => {
   it("shows two plans, Free and Pro, plus the setup kit; Solo and Business are gone", () => {
@@ -49,9 +50,12 @@ describe("<PricingScreen />", () => {
     expect(within(free).getByText("مجانًا")).toBeInTheDocument();
     expect(bullets(free)).toEqual([
       "حاسبة الجدوى كاملة",
-      "نتيجة الشهر الحالي: مكسب أو خسارة",
-      "نسبة الإشغال ومتوسط سعر الليلة",
+      "نتيجة تقديرية للشهر: مكسب أو خسارة",
+      "نسبة الإشغال ومتوسط سعر الليلة من مدخلاتك",
     ]);
+    expect(availability(free)).toEqual(["متاح الآن", "متاح الآن", "متاح الآن"]);
+    // Free is the calculator that works today: a real link, never a "sign-up soon" toast.
+    expect(within(free).getByRole("link", { name: "جرّب الحاسبة مجانًا" })).toHaveAttribute("href", "/demo/calculator");
     expect(screen.queryByText("حسابات كاملة لوحدة واحدة")).toBeNull();
     expect(screen.queryByText("إدخال الحجوزات والمصروفات بلا حدود")).toBeNull();
   });
@@ -68,6 +72,10 @@ describe("<PricingScreen />", () => {
       "استيراد تقارير Airbnb",
       "كل شقة إضافية بنصف سعر الباقة",
     ]);
+    expect(availability(pro)).toEqual(["متاح الآن", "قيد التطوير", "قيد التطوير", "قيد التطوير", "قيد التطوير"]);
+    // Pro is not on sale: its only action is a pre-order, named as one.
+    expect(within(pro).getByRole("button", { name: "احجز برو مسبقًا" })).toBeEnabled();
+    expect(within(pro).queryByRole("button", { name: /^اختر/u })).toBeNull();
   });
 
   it("every price is labelled as a sample: Pro's price and the setup kit", () => {
@@ -115,8 +123,8 @@ describe("<PricingScreen />", () => {
   it("two lines under the cards: the first month is open, and payment is month to month", () => {
     renderPricing();
     const terms = screen.getByTestId("plan-terms");
-    expect(terms).toHaveTextContent("أول شهر بعد إنشاء الحساب: كل شيء مفتوح.");
-    expect(terms).toHaveTextContent("الدفع شهر بشهر، بلا تجديد تلقائي.");
+    expect(terms).toHaveTextContent("مخطط: أول شهر بعد إنشاء الحساب سيكون مفتوحًا بالكامل.");
+    expect(terms).toHaveTextContent("مخطط: الدفع شهر بشهر، بلا تجديد تلقائي.");
     // Under the cards: after Pro, before the setup kit.
     expect(card("برو").compareDocumentPosition(terms) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(terms.compareDocumentPosition(card("باقة تجهيز الشقة")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -134,7 +142,13 @@ describe("<PricingScreen />", () => {
     expect(new URLSearchParams(href.slice(href.indexOf("?") + 1)).get("body")).toBe(
       "Hello, I'd like to ask about a custom Backdesk plan for more than 5 apartments.",
     );
-    expect(screen.getByText("Pay month to month, with no automatic renewal.")).toBeInTheDocument();
+    expect(screen.getByText("Planned: monthly payments without automatic renewal.")).toBeInTheDocument();
+    expect(within(card("Pro")).getByText("Airbnb report import").closest("li")).toHaveTextContent("In development");
+    expect(within(card("Setup Kit")).queryByRole("button", { name: "Order the kit" })).toBeNull();
+    expect(within(card("Setup Kit")).queryByRole("link")).toBeNull();
+    expect(within(card("Setup Kit")).getByText("In development")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Try the calculator free" })).toHaveAttribute("href", "/demo/calculator");
+    expect(screen.getByRole("button", { name: "Pre-order Pro" })).toBeEnabled();
   });
 
   it("pre-order buttons explain that pre-orders open soon until a link is set", () => {

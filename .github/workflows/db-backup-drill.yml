@@ -1,0 +1,110 @@
+# Backup drill: dump → encrypt → decrypt → restore into a throwaway Supabase
+# Postgres 17 container → prove the copy matches. A PARTIAL DATABASE BACKUP
+# (auth, public, private), not a Supabase project recovery. Runbook:
+# docs/BACKUP_DRILL.md.
+#
+# Two jobs, never both in one run:
+#   self-test   pull requests that touch the drill or a migration. Synthetic
+#               data only; references no secret (checked by
+#               scripts/backup-drill/check_workflows.py). Must PASS, and must
+#               FAIL when the restored copy is deliberately damaged.
+#   production  manual only (Actions → Backup drill → Run workflow), on main,
+#               started by the repository owner, with the typed confirmation.
+#               Reads the hosted project; never writes to it.
+name: Backup drill
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "scripts/backup-drill/**"
+      - "supabase/migrations/**"
+      - "docs/verify_after_migration.sql"
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "back up kmmfhaypqgzhoptmljki" to read the production database'
+        required: true
+        type: string
+
+# Least privilege: the jobs only check out code. Artifacts use the runner's
+# own upload token, not GITHUB_TOKEN.
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-drill-${{ github.event_name }}
+  cancel-in-progress: false
+
+env:
+  # Supabase's Postgres 17 image: the restore target and every client
+  # (pg_dump, pg_restore, psql), so versions always match.
+  IMAGE: supabase/postgres:17.6.1.172
+
+jobs:
+  self-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Secrets are referenced only by the manual production job
+        run: python3 -I scripts/backup-drill/check_workflows.py
+      - name: Connection-string validation
+        run: python3 -I scripts/backup-drill/test_source_url.py -v
+      - name: Production TLS is fail-closed (verify-full only, CA certificate required)
+        run: python3 -I scripts/backup-drill/test_tls_policy.py -v
+      - run: docker pull --quiet "$IMAGE"
+      - name: Drill on synthetic data must PASS
+        run: OUT="$RUNNER_TEMP/drill" scripts/backup-drill/drill.sh self-test
+      - name: Drill on a damaged restore must FAIL
+        run: |
+          if OUT="$RUNNER_TEMP/drill-tamper" DRILL_TAMPER=1 scripts/backup-drill/drill.sh self-test; then
+            echo "::error::the drill passed a damaged restore"
+            exit 1
+          fi
+          report="$RUNNER_TEMP/drill-tamper/report.md"
+          grep -q '^| FAIL | Restored data fingerprints match the source' "$report"
+          grep -q '^| FAIL | Restored acl fingerprints match the source' "$report"
+          grep -q '^| FAIL | Restored CHECK constraints and policy expressions match the source.*units_name_check definition differs' "$report"
+          grep -q '^| FAIL | Restored CHECK constraints and policy expressions match the source.*USING expression differs' "$report"
+
+  production:
+    # Manual, on main, by the owner, with the exact confirmation. Anything else skips.
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      && github.ref == 'refs/heads/main'
+      && github.actor == github.repository_owner
+      && inputs.confirm == 'back up kmmfhaypqgzhoptmljki'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - run: docker pull --quiet "$IMAGE"
+      - name: Drill against production (read-only)
+        env:
+          # Repository secrets, added just before the run and deleted after it
+          # (docs/BACKUP_DRILL.md). GitHub masks them in the log; drill.sh also
+          # masks the password on its own and never prints the URL.
+          # BACKUP_DB_CA_CERT is required: drill.sh refuses to connect without
+          # a valid CA certificate and uses sslmode=verify-full only.
+          SOURCE_URL: ${{ secrets.BACKUP_SOURCE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          BACKUP_DB_CA_CERT: ${{ secrets.BACKUP_DB_CA_CERT }}
+        run: OUT="$RUNNER_TEMP/drill" scripts/backup-drill/drill.sh production
+      - name: Upload the encrypted backup and the report (no plaintext)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backdesk-partial-db-backup-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/drill/encrypted/*.gpg
+            ${{ runner.temp }}/drill/encrypted/manifest.txt
+            ${{ runner.temp }}/drill/report.md
+          retention-days: 3
+          compression-level: 0
+          if-no-files-found: warn

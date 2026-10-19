@@ -28,7 +28,9 @@ describe("<AddExpenseScreen />", () => {
     typeAmount("500");
     fireEvent.click(screen.getByRole("radio", { name: RECENT_CATEGORIES[0]!.name.ar }));
     fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
-    expect(screen.getByText("تم حفظ المصروف (تجريبيًا)")).toBeInTheDocument();
+    expect(screen.getByText("مثال فقط: لم يُحفظ المصروف")).toBeInTheDocument();
+    // Never a success message for a save that did not happen.
+    expect(screen.queryByText(/تم حفظ/u)).toBeNull();
     expect(screen.getByRole("link", { name: "العودة للرئيسية" })).toHaveAttribute("href", "/demo");
   });
 
@@ -61,7 +63,7 @@ describe("<AddExpenseScreen />", () => {
     typeAmount("٥٠٠");
     fireEvent.click(screen.getByRole("radio", { name: RECENT_CATEGORIES[0]!.name.ar }));
     fireEvent.click(screen.getByRole("button", { name: "حفظ المصروف" }));
-    expect(screen.getByText("تم حفظ المصروف (تجريبيًا)")).toBeInTheDocument();
+    expect(screen.getByText("مثال فقط: لم يُحفظ المصروف")).toBeInTheDocument();
   });
 
   it("preselects the default unit and lets the unit be changed from a sheet", () => {

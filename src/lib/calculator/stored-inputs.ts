@@ -35,7 +35,9 @@ export const oneOf = <T extends string>(list: readonly T[], x: unknown): x is T 
 export function parseStoredForm(x: unknown): CalculatorForm | null {
   if (!isRecord(x) || !oneOf(OPERATING_MODELS, x.operatingModel) || !isRecord(x.values) || !isRecord(x.commission)) return null;
   const values = x.values;
-  if (!NUMBER_FIELDS.every((f) => typeof values[f] === "string")) return null;
+  // Existing guest and account forms predate the laundry input. Zero preserves
+  // their exact old result; a new baseline preset can supply its real cost.
+  if (!NUMBER_FIELDS.every((f) => typeof values[f] === "string" || (f === "laundryCost" && values[f] === undefined))) return null;
   const c = x.commission;
   if (
     !oneOf(MANAGED_BASES, c.basis) ||
@@ -47,7 +49,7 @@ export function parseStoredForm(x: unknown): CalculatorForm | null {
   }
   const form: CalculatorForm = {
     operatingModel: x.operatingModel,
-    values: Object.fromEntries(NUMBER_FIELDS.map((f) => [f, values[f] as string])) as CalculatorForm["values"],
+    values: Object.fromEntries(NUMBER_FIELDS.map((f) => [f, f === "laundryCost" && values[f] === undefined ? "0" : values[f] as string])) as CalculatorForm["values"],
     commission: { basis: c.basis, hybridMode: c.hybridMode, hybridBasis: c.hybridBasis, includeCleaningFees: c.includeCleaningFees },
   };
   // Only a form the engine accepts is ever used: an older or edited payload falls back to nothing.

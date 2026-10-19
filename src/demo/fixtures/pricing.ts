@@ -26,7 +26,7 @@ export interface PlanFixture {
   code: "free" | "pro";
   name: Localized;
   priceMonthly: string | null;
-  features: Localized[];
+  features: { label: Localized; availability: "available" | "planned" }[];
   highlighted?: boolean;
 }
 
@@ -37,10 +37,10 @@ export const PLANS: PlanFixture[] = [
     priceMonthly: null,
     features: [
       // Hotfix 2026-10-09: "unlimited booking and expense entries" is listed again once that entry exists.
-      { ar: "حاسبة الجدوى كاملة", en: "The full feasibility calculator" },
-      { ar: "نتيجة الشهر الحالي: مكسب أو خسارة", en: "This month's result: profit or loss" },
+      { label: { ar: "حاسبة الجدوى كاملة", en: "The full feasibility calculator" }, availability: "available" },
+      { label: { ar: "نتيجة تقديرية للشهر: مكسب أو خسارة", en: "Estimated monthly result: profit or loss" }, availability: "available" },
       // Decided 2026-10-08: occupancy and the average nightly rate (from actual figures) are free.
-      { ar: "نسبة الإشغال ومتوسط سعر الليلة", en: "Occupancy and average nightly rate" },
+      { label: { ar: "نسبة الإشغال ومتوسط سعر الليلة من مدخلاتك", en: "Occupancy and average nightly rate from your inputs" }, availability: "available" },
     ],
   },
   {
@@ -48,11 +48,11 @@ export const PLANS: PlanFixture[] = [
     name: { ar: "برو", en: "Pro" },
     priceMonthly: PRO_PLAN_PRICE,
     features: [
-      { ar: "كل ما في المجاني", en: "Everything in Free" },
-      { ar: "تفصيل الشهر كاملًا وكل الشهور السابقة", en: "The full monthly breakdown and every past month" },
-      { ar: "تقرير الشهر PDF وكشف حساب المالك", en: "The monthly PDF report and the owner statement" },
-      { ar: "استيراد تقارير Airbnb", en: "Airbnb report import" },
-      { ar: "كل شقة إضافية بنصف سعر الباقة", en: "Each extra apartment at half the plan price" },
+      { label: { ar: "كل ما في المجاني", en: "Everything in Free" }, availability: "available" },
+      { label: { ar: "تفصيل الشهر كاملًا وكل الشهور السابقة", en: "The full monthly breakdown and every past month" }, availability: "planned" },
+      { label: { ar: "تقرير الشهر PDF وكشف حساب المالك", en: "The monthly PDF report and the owner statement" }, availability: "planned" },
+      { label: { ar: "استيراد تقارير Airbnb", en: "Airbnb report import" }, availability: "planned" },
+      { label: { ar: "كل شقة إضافية بنصف سعر الباقة", en: "Each extra apartment at half the plan price" }, availability: "planned" },
     ],
     highlighted: true,
   },

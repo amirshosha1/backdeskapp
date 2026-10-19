@@ -77,7 +77,7 @@ See `AGENTS.md` §2. Anything booking-related is permanently out of scope.
 | Area benchmark comparison (server-only; hidden entirely while no sourced figures exist) | Blurred placeholder teaser | ✅ | — |
 | The current month's result (profit or loss, the full figure) | ✅ | ✅ | — |
 | The current month's occupancy and average nightly rate (ADR), from actual figures | ✅ (added 2026-10-08) | ✅ | — |
-| Break-even nights **for the current month only** (F2: needed / booked / remaining; decided 2026-10-17, D-24) | ✅ | ✅ | — |
+| Break-even nights **for the current month only** (F2: needed / booked / remaining; decided 2026-10-17, D-26) | ✅ | ✅ | — |
 | The full month breakdown (P&L lines, RevPAR, profit margin, payback, portfolio; break-even for other months) | — | ✅ | — |
 | Past months | — (entries are kept, never deleted) | ✅ all | — |
 | Monthly PDF report | — | ✅ | — |
@@ -240,7 +240,7 @@ commission(n):
 - **`irregular` costs (e.g. repairs) and any monthly maintenance/irregular allowance are included in `fixed_costs` by default** — a host who never budgets for the odd repair or replacement is not actually at break-even. A per-scenario toggle excludes them (decided 2026-09-28, after `docs/PROGRESS.md`'s Phase P.1 review found the excluded-by-default figure understated how many nights a unit needs: at 19 booked nights — one below the excluded-default figure of ~19 — Example B's unit still loses 788.50). The UI shows the included-by-default figure as the primary break-even result, with the excluded variant as a secondary line (Example B2).
 - **Whole-night display.** Because a night is not divisible, a host needs the *ceiling* of `break_even_nights`, not the nearest whole night, to actually reach break-even (Example B: 19.38 rounds up to 20, not 19 — at 19 nights the unit still runs a loss). Any UI showing "nights needed" rounds up. (Precisely: the first whole night whose displayed, piastre-rounded profit is ≥ 0 — the ceiling, except in a sub-half-piastre tie.)
 - **Same cost basis (decided 2026-10-01, Phase 1 review).** Any break-even shown next to a profit figure covers the same costs as that profit (maintenance/irregular costs, depreciation); if it doesn't, its label states which costs it covers. The engine evaluates both through one function with an explicit basis, and tests that at `ceil(break_even_nights)` the displayed profit is ≥ 0 and at `floor` it is < 0, on the same basis.
-- **The calculator's headline is net profit after depreciation (decided 2026-10-06, P.2 slice 1).** The break-even beside it is on that basis too (repairs and depreciation included), and is not capped at the month: `scenarioView` (`src/lib/finance/scenario-view.ts`) returns it with a status — within the month, beyond the available nights (with the nights it would need), or no break-even (per-night contribution after commission ≤ 0). Before-depreciation figures (profit before depreciation, the primary and without-maintenance break-evens, payback and return) stay visible as rows labelled "قبل الإهلاك". Rows shown together reconcile at displayed precision: total costs with depreciation = revenue − net, and the leftover piastre of a section total goes to a computed line (operating expenses, then platform fees, then commission), never to a typed amount such as rent. The owner statement's `owner_net` is unchanged (no depreciation by definition, §4.2).
+- **The calculator's headline is net profit after depreciation (decided 2026-10-06, P.2 slice 1).** The break-even beside it is on that basis too (repairs and depreciation included), and is not capped at the month: `scenarioView` (`src/lib/finance/scenario-view.ts`) returns it with a status — within the month, beyond the available nights (with the nights it would need), or no break-even (per-night contribution after commission ≤ 0). Before-depreciation figures (profit before depreciation, the primary and without-maintenance break-evens, payback and return) stay visible as rows labelled "قبل الإهلاك". Rows shown together reconcile at displayed precision: total costs with depreciation = revenue − net, and the leftover piastre of a section total goes to a computed line (operating expenses, then platform fees, then commission), never to a typed amount such as rent. **Ties of opposite sign (decided 2026-10-18, D-24):** half-up rounds away from zero, so when two tied figures have opposite signs the rows can only add up if one figure takes the other half of its tie; that figure is profit before depreciation when depreciation is in whole piastres, and revenue when every cost line is in whole piastres. Each stays within half a piastre of its exact value; the headline net stays `round_half_up(net)` and every typed amount and exact depreciation is shown exactly. The owner statement's `owner_net` is unchanged (no depreciation by definition, §4.2).
 
 ### 4.4 Revenue recognition
 - **Accrual by night** (default for KPIs and P&L): stays crossing a month boundary are prorated by nights; cleaning fees are recognized on the check-in date; platform fees follow the component they were allocated to (the accommodation share is prorated by night, the cleaning share is recognized on check-in); refunds and adjustments on their own date.
@@ -624,7 +624,7 @@ Not a separate phase: the first public page, built between Phase 0b slice 1 and 
 - **The trial clock and all gating (§2), built here together with the month report** (decided 2026-10-08, §6 question 17); before this phase every account works with everything open.
   - `getEntitlements(orgId)` (server-only) and a `useEntitlements` hook that reads flags only; an org with no subscription is Free once its trial ends.
   - The one-month trial for every declared apartment.
-  - Free sees the current month's result, occupancy and average nightly rate (ADR), the same engine figures as Pro. Free also sees the current month's break-even nights (F2, D-24). Everything else is Pro: the breakdown (P&L lines, RevPAR, profit margin, payback, portfolio), past months, the month report, statements and exports.
+  - Free sees the current month's result, occupancy and average nightly rate (ADR), the same engine figures as Pro. Free also sees the current month's break-even nights (F2, D-26). Everything else is Pro: the breakdown (P&L lines, RevPAR, profit margin, payback, portfolio), past months, the month report, statements and exports.
   - The apartment limits and freezing extra apartments; the receipt-photo cap (Phase 5); the saved-scenario limit, projection and benchmarks (Phase 2); the guide's paid sections and the inventory preview (Phase 3).
   - The phase plan settles how the declared apartment count is captured, which apartment stays active after the trial, and when the trial clock starts for accounts created before this phase.
 
@@ -715,7 +715,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free (Amir kept this default on 2026-10-08; the question stays open) |
 | 19 | ~~The Supabase project is in Ireland (`eu-west-1`) but Vercel functions are pinned to Frankfurt (`fra1`, CLAUDE.md §3): move them to Dublin (`dub1`)?~~ **Decided 2026-10-08: `dub1`** (in PR B), next to Supabase | — | — |
 | 20 | Real Booking.com payout export sample (guest names removed). No parser is written without a real file (raised 2026-10-17, F1) | F1's Booking.com preset (P.2 slice, then Phase 6) | The Booking.com preset waits; the Airbnb preset ships alone |
-| 21 | ~~Gating of F2 (break-even nights this month) and F3's RevPAR~~ **Decided 2026-10-17 (D-24):** F2 is Free for the current month only; RevPAR and profit margin stay Pro | — | — |
+| 21 | ~~Gating of F2 (break-even nights this month) and F3's RevPAR~~ **Decided 2026-10-17 (D-26):** F2 is Free for the current month only; RevPAR and profit margin stay Pro | — | — |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 
@@ -726,7 +726,7 @@ Decided on 2026-10-07: the plan model (§2): Free and one paid plan, Pro, priced
 Decided on 2026-10-08:
 - **Question 16, sign-in:** Google only for now (Phase 0b). Email codes come later, once there is a domain and a custom SMTP sender (question 1), because Supabase's built-in mailer delivers only to the project's team members.
 - **Question 17, trial and gating:** the trial clock and all gating are built together with the month report, in Phase 7 (§2). Until then every account works with everything open.
-- Also: Free shows the current month's occupancy and average nightly rate from actual figures; payback and the rest of the month breakdown stay Pro (§2); *revised 2026-10-17 (D-24): the current month's break-even nights is also Free*.
+- Also: Free shows the current month's occupancy and average nightly rate from actual figures; payback and the rest of the month breakdown stay Pro (§2); *revised 2026-10-17 (D-26): the current month's break-even nights is also Free*.
 - **Question 19, region:** Vercel functions move to Dublin (`dub1`), next to Supabase in Ireland (Batch 3 PR B).
 
 Question 18 stays open, with its default.
@@ -751,23 +751,23 @@ Question 18 stays open, with its default.
 
 Added at Amir's request. Every item is mapped to an **existing** phase; no phase is added or renumbered, and the order in §5.0 is unchanged. How an item is sliced inside its phase is settled in that phase's plan (§5.0 step 1). All figures come from `src/lib/finance/` (`AGENTS.md` §6.1). Nothing is gated before Phase 7 (§2).
 
-### PRE-GATE (before the 20 pre-orders; all three land in the remaining P.2; build order F2 → F3 → F1, D-25)
+### PRE-GATE (before the 20 pre-orders; all three land in the remaining P.2; build order F2 → F3 → F1, D-27)
 **F1 — Payout CSV import** (Airbnb earnings CSV, Booking.com payout export). *Lands in: P.2 (browser-only slice); persistence in Phase 6.*
 - The visitor drops the file; it is parsed in the browser (Web Worker), guest names and contacts are stripped there, a listing is mapped to a unit, and the unit's bookings and its net payout and commission (computed from the unit's agreement, §4.2) appear after a row-level preview. No API, no account linking, the file is never uploaded or stored.
 - Pre-gate there is no ledger (`stays` arrives in Phase 5), so the imported bookings live in this browser only, like the visitor's apartment. They do not follow a signed-in account to another device until Phase 5/6.
 - "Commissions" are **computed**, not stored: commission transactions exist only as a snapshot when a statement is finalized (`AGENTS.md` §6.8).
 - Re-importing the same file adds nothing: browser-side dedupe by a one-way hash of confirmation code + row type + date + amount; the raw code is not kept. Server-side HMAC dedupe stays in Phase 6 (`AGENTS.md` §6.9).
 - A payout in another currency than the unit's needs an explicit rate (§4.1); no implicit FX.
-- Built last of the three, **time-boxed to 3 working days**, and blocked until real anonymised sample files exist: questions 7 (Airbnb) and 20 (Booking.com) (D-25). Import is Pro in §2; ungated until Phase 7.
+- Built last of the three, **time-boxed to 3 working days**, and blocked until real anonymised sample files exist: questions 7 (Airbnb) and 20 (Booking.com) (D-27). Import is Pro in §2; ungated until Phase 7.
 
 **F2 — Break-even nights this month.** *Lands in: P.2 (own-unit card and Home, browser data); continues in Phase 7 (Home break-even progress) on stored data.*
 - "You need X nights to cover this month's costs, you have Y booked, Z remaining": X = the whole-night ceiling of the engine's break-even (§4.3) on the **same cost basis as the headline profit** (after depreciation, maintenance included; the label states the basis, §4.3 "Same cost basis"); Y = nights booked in the month (§4.4 proration), from F1 or a hand-entered number; Z = max(0, X − Y).
 - Edge states reuse `scenarioView`: break-even beyond the month's available nights, or no break-even. They show the status, never a made-up number.
-- Same-basis test as §4.3 (at X profit ≥ 0, at X − 1 profit < 0). Gating (D-24): Free for the current month only; other months Pro. Built first of the three (D-25).
+- Same-basis test as §4.3 (at X profit ≥ 0, at X − 1 profit < 0). Gating (D-26): Free for the current month only; other months Pro. Built first of the three (D-27).
 
 **F3 — Per-unit KPIs.** *Lands in: P.2 (per own unit); Phase 7 (P&L per unit, Home).*
 - Occupancy, ADR and RevPAR already exist (§4.1, `kpis.ts`). **Profit margin is new** and needs one pure engine function with tests; proposed definition for the phase plan to confirm: net profit (after depreciation) ÷ gross revenue, null at zero revenue.
-- Displayed occupancy stays capped at 100% with the availability warning (§4.1). Gating: occupancy and ADR Free; RevPAR and profit margin Pro (§2, D-24). Built second (D-25).
+- Displayed occupancy stays capped at 100% with the availability warning (§4.1). Gating: occupancy and ADR Free; RevPAR and profit margin Pro (§2, D-26). Built second (D-27).
 
 ### POST-GATE (justifies Pro)
 **F4 — Owner statement.** *Lands in: Phase 7 (already specified there; no scope change).* Managed units only. The requested line "revenue − platform commission − expenses − management fee" is the engine's `owner_net` (§4.2): gross revenue − platform fees − **owner-borne** expenses − commission. "Net due to owner" is `balance_due`, which also carries the opening balance and payouts made. PDF and signed, expiring link as in Phase 7.
@@ -779,7 +779,7 @@ Added at Amir's request. Every item is mapped to an **existing** phase; no phase
 **F7 — Export for the accountant (Excel, PDF).** *Lands in: Phase 7 (exports: CSV, XLSX, PDF; already specified).* P&L per unit and portfolio plus the transaction list; the Phase 5 `accountant` role can read them. No tax filing or advice (`AGENTS.md` §2); tax lines only from user-configured rates. Pro.
 
 ### LATER (moat)
-**F8 — Benchmark vs similar units from anonymised user data.** *Lands in: Phase 9 (the `aggregated` source).* "Similar" means the existing cell: region × bedrooms × season. It follows the Phase 2 lookup rule unchanged: opted-in orgs only, at least 5 units per cell, `MIN_SAMPLE` 30 (a thinner cell rolls up to its parent; "عينة محدودة" shows at the national fallback), and the comparison is hidden when no source exists. Never SAMPLE data for paying users. (Decided 2026-10-17, D-26.)
+**F8 — Benchmark vs similar units from anonymised user data.** *Lands in: Phase 9 (the `aggregated` source).* "Similar" means the existing cell: region × bedrooms × season. It follows the Phase 2 lookup rule unchanged: opted-in orgs only, at least 5 units per cell, `MIN_SAMPLE` 30 (a thinner cell rolls up to its parent; "عينة محدودة" shows at the national fallback), and the comparison is hidden when no source exists. Never SAMPLE data for paying users. (Decided 2026-10-17, D-28.)
 
 **F9 — Log expenses by WhatsApp text or voice note.** *Lands in: Phase 9 (the WhatsApp entry line).* Text uses the Phase 8 parser; voice goes through the speech-to-text interface (question 8). Everything lands `unconfirmed`. To confirm in the phase plan: raw message text and audio are discarded after parsing, and `/privacy` names the processors first.
 
