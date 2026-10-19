@@ -622,8 +622,8 @@
     },
     "analytics": {
       "title": "Analytics and ads",
-      "body": "We count how often a few steps happen, to see where visitors stop and improve Backdesk: opening the home page and tapping its button, starting the first questions, and seeing the result (profit or loss only, never a number). The counting is anonymous: no cookies, no browser storage, and no identifier for you or your device, so two events cannot be linked to each other or to you.",
-      "details": "With each event we send: the page's language, whether it was opened inside an app such as Facebook, whether Backdesk is installed on the home screen, the visit's source if the link carries one (such as utm_source), and the country our host derives from the IP address. We never send the IP address itself, your apartment's numbers or name, or anything you type. These events go to PostHog in the European Union.",
+      "body": "We count how often a few steps happen, to see where visitors stop and improve Backdesk: opening the home page and tapping its button, starting the first questions, choosing how you run your apartment, and seeing the result (profit or loss only, never a number). The counting is anonymous: no cookies, no browser storage, and no identifier for you or your device, so two events cannot be linked to each other or to you.",
+      "details": "With each event we send: the page's language, whether it was opened inside an app such as Facebook, whether Backdesk is installed on the home screen, the visit's campaign labels if the link carries them (utm_source, utm_medium, utm_campaign and utm_content), how you run the apartment once you choose it in the first questions (for example, “I rent it and re-let it”), and the country our host derives from the IP address. We never send the IP address itself, your apartment's numbers or name, or anything you type. These events go to PostHog in the European Union.",
       "noAds": "No ads, and we sell your data to no one. Because the counting is not linked to you, it cannot be shown to you or deleted individually."
     },
     "cookies": {

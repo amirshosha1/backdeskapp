@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { detectInAppBrowser } from "@/lib/browser/in-app";
-import { DISPLAY_MODES, ENTRIES, LOCALES, OUTCOMES, UTM_PATTERN } from "@/lib/analytics/events";
+import { DISPLAY_MODES, ENTRIES, LOCALES, MODELS, OUTCOMES, UTM_PATTERN } from "@/lib/analytics/events";
 
 /**
  * The first-party analytics endpoint (docs/ANALYTICS.md). The browser
@@ -24,16 +24,25 @@ const common = {
   display_mode: z.enum(DISPLAY_MODES),
 };
 const utm = z.string().regex(UTM_PATTERN).optional();
+const utms = { utm_source: utm, utm_medium: utm, utm_campaign: utm, utm_content: utm };
 const entry = z.enum(ENTRIES);
+const model = z.enum(MODELS);
 
 const EventSchema = z.discriminatedUnion("event", [
   z.strictObject({
     event: z.literal("landing_view"),
-    properties: z.strictObject({ ...common, utm_source: utm, utm_medium: utm, utm_campaign: utm }),
+    properties: z.strictObject({ ...common, ...utms }),
   }),
   z.strictObject({ event: z.literal("landing_cta_click"), properties: z.strictObject(common) }),
   z.strictObject({ event: z.literal("first_run_started"), properties: z.strictObject({ ...common, entry }) }),
-  z.strictObject({ event: z.literal("verdict_shown"), properties: z.strictObject({ ...common, entry, outcome: z.enum(OUTCOMES) }) }),
+  // Only after a model is actually picked (GTM:D-063): the model is required.
+  z.strictObject({ event: z.literal("calc_start"), properties: z.strictObject({ ...common, ...utms, model }) }),
+  // `model` stays optional here so a page served before this release (its cached
+  // script sends no model) is still counted; the current client always sends it.
+  z.strictObject({
+    event: z.literal("verdict_shown"),
+    properties: z.strictObject({ ...common, ...utms, entry, outcome: z.enum(OUTCOMES), model: model.optional() }),
+  }),
 ]);
 
 const noContent = () => new NextResponse(null, { status: 204, headers: { "cache-control": "no-store" } });

@@ -45,14 +45,14 @@ describe("track()", () => {
   it("with the key: one beacon to /api/e with the event, its properties, locale and display mode", async () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
     document.documentElement.lang = "en";
-    track("verdict_shown", { entry: "other", outcome: "loss" });
+    track("verdict_shown", { entry: "other", outcome: "loss", model: "owner_operated" });
     expect(beacon).toHaveBeenCalledTimes(1);
     const [url, data] = beacon.mock.calls[0]!;
     expect(url).toBe("/api/e");
     expect((data as Blob).type).toBe("text/plain;charset=utf-8");
     expect(await bodyOf(data)).toEqual({
       event: "verdict_shown",
-      properties: { entry: "other", outcome: "loss", locale: "en", display_mode: "browser" },
+      properties: { entry: "other", outcome: "loss", model: "owner_operated", locale: "en", display_mode: "browser" },
     });
     expect(fetchMock).not.toHaveBeenCalled();
   });
