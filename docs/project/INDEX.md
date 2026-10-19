@@ -22,6 +22,7 @@
 | `../BUILD_PLAN.md` | Full spec: formulas, data model, worked examples, phases | One section at a time: `grep -n '^#' docs/BUILD_PLAN.md` |
 | `../PROGRESS.md` | Dated history (592 lines) | Rarely; search a date or term, never read in full |
 | `../COMPETITORS.md`, `../IDEAS.md` | Competitor landscape and feature origins (reference only); unscheduled ideas parking lot (never build from it without explicit instruction) | Positioning questions; only when the owner points at an idea |
+| `UX_AUDIT_PUBLIC_2026-10.md`, `UX_AUDIT_SIGNED_IN_2026-10.md` | UX audits of 2026-10-19: public (local build, needs a production re-check) and signed-in (production); the fix plan is ROADMAP UX-1…UX-8 | Any UX or copy fix; read the finding, not the whole report |
 | `../ANALYTICS.md`, `../SETUP_AUTH.md`, `../FINANCIAL_BASELINE.md` | Event catalogue; Google/Supabase setup; sourced default figures | Analytics, auth setup, presets |
 
 Task shortcuts: auth → `ARCHITECTURE.md` (AuthN/AuthZ), `CODEBASE_MAP.md`, `docs/SETUP_AUTH.md`, `tests/db/` · database → migrations, `OPERATIONS.md`, `KNOWN_ISSUES.md` · billing → `PRODUCT_SCOPE.md`, `DECISIONS.md` D-07..D-09, `BUILD_PLAN.md` §2 · deployment → `OPERATIONS.md`, `.github/workflows/` · UI → `UX_RULES.md` · marketing / campaigns / utm → `GTM.md`, `docs/ANALYTICS.md`.
