@@ -31,6 +31,15 @@ Still not built: the stored income/expense ledger, plan gating, payments, report
   - **#32**, a test-only workaround, was closed as superseded.
 - **Main CI on `0d68a58` failed once.** The cause was that property, not #22. It passed on `72903c6`, and the property file then passed 50 local runs in a row.
 
+## 3a. GTM consolidation (2026-10-19)
+GTM is consolidated into `docs/project/GTM.md` (verbatim sources in `docs/project/gtm/`), documentation only. Founder decisions recorded: D1 canonical strategy is GTM v1.1/v1.2; D2 v1.1 approval of record stays PENDING (unrecorded, not rejected); D3 the shipped `utmValue` length (40) is kept. Open: F1–F15 in the v1.2 archive; the repository D-n recording GTM adoption waits on #29 (D-26..D-29). No gate passed, no spend, publication or deployment authorized; the G1 fix (ROADMAP P1-7) is not started.
+
+## 3b. Founder decisions recorded (2026-10-19, later)
+GTM v1.2 approved (F15) and v1.1 superseded; F1 hours 25–30 (25 h model); F11 read-only inspection of Vercel, PostHog, Supabase and GitHub/CI authorized (no writes); the G1 fix authorized (ROADMAP P1-7, one narrow PR, plan first; G1 stays FAIL until verified in production); D5 #24 deferred (closed, branch kept, revisit after 2027-01-16); D6 #29 merges with the F1 payout import deferred until after 2027-01-16. Still founder-BLOCKED: GTM:D-038, D-047, D-008, D-015, D-026, D-058. Queue order: #21 (merges alone, then owner runs the verify SQL) → #24 docs follow-up → #29 → G1 fix. Evidence: GitHub on 2026-10-19 shows #40 merged (09:38 UTC, before these decisions) and #24 closed; the decisions land in this docs PR.
+
+## 3c. Queue progress (2026-10-19, evening)
+#43 and #21 merged. Founder reports the production verify SQL all PASS (20 checks) and the #21 Preview deletion flow PASSED on mobile. #24 closed (D5) and commented. New findings recorded as KI-26 (mobile Google sign-in, High, blocks G0-A), KI-27 and KI-28 (UX); ROADMAP P1-8 added (property-test check before any paid spend). Next in the queue: #29 (Step 4), then the G1 fix (Step 5, plan first).
+
 ## 4. Active task
 None approved. Open PRs (live list 2026-10-18), all draft:
 - **#21** delete-account security, **BLOCKED** until the real backup/restore and disposable-account acceptance are verified (KI-19 migration).

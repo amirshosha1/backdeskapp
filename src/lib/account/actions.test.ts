@@ -223,6 +223,16 @@ describe("deleteMyAccount", () => {
     expect(state.signOut).not.toHaveBeenCalled();
   });
 
+  it("keeps the person signed in when shared-org ownership must be transferred", async () => {
+    state.rpc.mockImplementation(async () => ({
+      data: null,
+      error: { code: "P0001", message: "shared_org_requires_owner_transfer" },
+      status: 400,
+    }));
+    expect(await deleteMyAccount()).toEqual({ ok: false, error: "shared_org_requires_owner_transfer" });
+    expect(state.signOut).not.toHaveBeenCalled();
+  });
+
   it("needs a session", async () => {
     state.claims = { data: null, error: null };
     expect(await deleteMyAccount()).toEqual({ ok: false, error: "not_signed_in" });

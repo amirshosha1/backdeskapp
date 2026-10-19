@@ -10,6 +10,7 @@ export const ACCOUNT_ERRORS = [
   "identity_changed",
   "session_expired",
   "unit_limit_reached",
+  "shared_org_requires_owner_transfer",
   "forbidden",
   "invalid",
   "not_found",
@@ -28,14 +29,17 @@ export interface DbErrorLike {
 
 /**
  * A Data API (PostgREST) error → the app's error. The order matters: the
- * apartment limit is a P0001 raised by the units trigger with this exact
- * message; any other P0001 is unexpected.
+ * known P0001 messages come from our database functions and triggers.
  */
 export function mapDbError(error: DbErrorLike | null | undefined, status?: number): AccountError {
   if (!error) return "unknown";
   const code = error.code ?? "";
   const message = error.message ?? "";
-  if (code === "P0001") return message === "unit_limit_reached" ? "unit_limit_reached" : "unknown";
+  if (code === "P0001") {
+    if (message === "unit_limit_reached") return "unit_limit_reached";
+    if (message === "shared_org_requires_owner_transfer") return "shared_org_requires_owner_transfer";
+    return "unknown";
+  }
   if (code === "42501") return "forbidden";
   // PostgREST's JWT errors (invalid, expired, claims) and plain 401s.
   if (/^PGRST30[0-3]$/.test(code) || status === 401) return "session_expired";

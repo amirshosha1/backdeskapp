@@ -285,7 +285,8 @@ describe("More", () => {
     expect(screen.getByTestId("sign-out")).toHaveTextContent("تسجيل الخروج");
     fireEvent.click(screen.getByTestId("delete-account"));
     const dialog = screen.getByRole("dialog", { name: "حذف حسابك نهائيًا؟" });
-    expect(dialog).toHaveTextContent("لا يمكن استرجاعها");
+    expect(dialog).toHaveTextContent("يُحذف حسابك");
+    expect(dialog).toHaveTextContent("شقق المؤسسات المشتركة تبقى متاحة لأعضائها الآخرين");
     expect(actions.deleteMyAccount).not.toHaveBeenCalled();
     fireEvent.click(within(dialog).getByTestId("delete-account-confirm"));
     await waitFor(() => expect(actions.deleteMyAccount).toHaveBeenCalledTimes(1));
