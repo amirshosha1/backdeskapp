@@ -2,16 +2,16 @@
 
 > **The one canonical go-to-market file** for any agent or person writing marketing, landing, social, ad or outreach material, touching analytics attribution, or planning GTM-gated work. Sources it summarises are archived verbatim in `docs/project/gtm/`; read them only for a detail this file does not carry.
 >
-> **Precedence:** subordinate to `AGENTS.md` §0. It never changes the phase order, the Validation Gate (D-02) or an architecture rule. If this file and an archived source disagree, report the difference; do not pick one silently. Last reviewed: 2026-10-19.
+> **Precedence:** subordinate to `AGENTS.md` §0. It never changes the phase order, the Validation Gate (D-02) or an architecture rule. If this file and an archived source disagree, report the difference; do not pick one silently. Last reviewed: 2026-10-19 (v1.2 approval recorded).
 
 ## 1. Version status
 
 | Version | Archived source | Status |
 |---|---|---|
-| v1.1 (2026-10-18) | `gtm/GTM-v1.1.md` | **Operating baseline.** Its own text declares it approved and frozen, and v1.2 (GTM:D-029) keeps it in force. **Founder approval of record: PENDING — v1.1 remains the operating baseline; no approval has been recorded (founder, 2026-10-19).** |
-| v1.2 Final Draft (2026-10-19) | `gtm/GTM-v1.2-final-draft.md` | **FINAL DRAFT — pending founder approval (F15, due Oct 25).** Does not replace v1.1. Where this file uses a v1.2 rule it says so; such rules are proposals until F15. |
+| v1.1 (2026-10-18) | `gtm/GTM-v1.1.md` | **SUPERSEDED by v1.2 on 2026-10-19** (history only). |
+| v1.2 (2026-10-19) | `gtm/GTM-v1.2-final-draft.md` | **APPROVED 2026-10-19 (founder, F15) — the operating plan.** The archive file keeps its "final draft" file name and body unchanged; only its banner records the approval. |
 
-Exception: the evidence corrections in v1.2 (gate statuses, O01-v2, G1 finding) record observed facts, not strategy, so this file applies them now.
+F15 approves the plan as a whole. It does **not** approve the founder-BLOCKED items in §3 (GTM:D-038, D-047, D-008, D-015, D-026, D-058), which stay blocked until their own decisions, and it authorizes no spend, publication, deployment or production access (§2). The evidence corrections in v1.2 (gate statuses, O01-v2, G1 finding) record observed facts and apply as before.
 
 ## 2. Authorization boundary
 
@@ -24,17 +24,20 @@ Each of those needs an explicit, dated founder authorization for that specific a
 
 GTM decisions keep their original IDs with a `GTM:` prefix: `GTM:D-001` … `GTM:D-063`, approvals `GTM:F1` … `GTM:F15`. They are **not** repository decisions: `D-n` in `DECISIONS.md` is a separate sequence; never renumber or equate the two. Statuses are copied from the archived source, never upgraded here.
 
-Decisions that bind engineering work (full text in the v1.2 draft):
+Decisions that bind engineering work (full text in the v1.2 archive; "Accepted" below means accepted with the plan approved by F15 on 2026-10-19):
 
 | ID | Rule | Status in source |
 |---|---|---|
-| GTM:D-030 | Calculator stays free and unchanged through Jan 16; no lease-evaluator paywall | Accepted (v1.2 draft) |
+| GTM:D-030 | Calculator stays free and unchanged through Jan 16; no lease-evaluator paywall | Accepted (v1.2, approved 2026-10-19) |
 | GTM:D-038 | Validation-ledger exception (narrow monthly entry + reviewed report) under six conditions | **Blocked: founder (F13)** — do not plan or build |
-| GTM:D-051 | Paid tests need G2 as well as G0-N and G1 | Accepted (v1.2 draft) |
-| GTM:D-052 | Revenue, collections and owner settlements stay distinct; a payout settles revenue, never adds to it; an owner transfer is a settlement, not an expense | Accepted (v1.2 draft) |
-| GTM:D-055 | Read-only Vercel / PostHog / Supabase / CI inspection by an agent | **Blocked: founder (F11)** — no delegated access until approved |
-| GTM:D-060 | G0-N tracked per scenario (S01, O01-v2) | Accepted (v1.2 draft) |
-| GTM:D-062 / D-063 | G1 status and event contract (§7) | Accepted (v1.2 draft) |
+| GTM:D-051 | Paid tests need G2 as well as G0-N and G1 | Accepted (v1.2, approved 2026-10-19) |
+| GTM:D-052 | Revenue, collections and owner settlements stay distinct; a payout settles revenue, never adds to it; an owner transfer is a settlement, not an expense | Accepted (v1.2, approved 2026-10-19) |
+| GTM:D-055 | Read-only Vercel / PostHog / Supabase / CI inspection by an agent | **Authorized 2026-10-19 (founder F11):** read-only only — no writes, no SQL that changes data, no settings changes. Never passes a gate alone (§7 evidence rules) |
+| GTM:D-060 | G0-N tracked per scenario (S01, O01-v2) | Accepted (v1.2, approved 2026-10-19) |
+| GTM:D-062 / D-063 | G1 status and event contract (§7) | Accepted (v1.2, approved 2026-10-19) |
+| GTM:D-018 / D-054 | Founder hours and temporary capacity | **Decided 2026-10-19 (founder F1):** 25–30 h/week; plan on the 25 h capacity model |
+
+**Still founder-BLOCKED (F15 does not approve them):** GTM:D-038 (validation-ledger exception, F13), D-047 (free-report merge, F12), D-008 (founder proof, F5), D-015 (price structure, F7), D-026 (software access in concierge terms, F10), D-058 (war-room closure, F14). Do not plan, build or publish against them.
 
 ## 4. Claims register
 
@@ -120,9 +123,9 @@ A gate closes only with filed evidence: date, environment, deployed commit. "Rep
 - `wa_cta_click {src, variant}` after G2. The WhatsApp prefill may carry a cohort code such as `BD-T1A-M`, never personal data.
 - Shipped event names (`landing_view`, `verdict_shown`) may stay if the mapping is documented in `docs/ANALYTICS.md`.
 
-**G1 implementation is not authorized.** The fix (ROADMAP P1-7) needs the founder's go-ahead and ships as one narrow PR that also updates `docs/ANALYTICS.md` and `/privacy`.
+**G1 fix authorized 2026-10-19 (founder).** One narrow PR (ROADMAP P1-7), plan first, founder merges; it also updates `docs/ANALYTICS.md` and `/privacy`. **G1 stays FAIL until the fix is verified in production** with filed evidence (date, environment, deployed commit); a merged PR alone does not pass it.
 
-## 8. Tests and budget (v1.2 proposals unless noted)
+## 8. Tests and budget (v1.2, approved 2026-10-19; each spend still needs its own written authorization)
 - Hard cap **EGP 10,000** for the window, released one test at a time (v1.1, unchanged).
 - Test 1 (first 2 s hook): default **Nov 16**; Nov 9 only if all early gates pass by Nov 7. EGP 4,000, needs F6.
 - Test 2 (presenter): unfunded by default; earliest Nov 30, separate approval.
@@ -134,8 +137,9 @@ A founder-prepared monthly P&L per apartment: a **service, not software**. Max 2
 
 ## 10. Open conflicts (founder decisions needed)
 1. **Competing strategy in draft PR #42** ("War Room Freeze, Rounds 1–9"; closed): paid concierge at 250/300 EGP per unit per month and cash-based G1/G2 gates, versus this plan's free baseline, internal 249 + 125 hypothesis and measurement-based G1/G2. **Resolved 2026-10-19 (founder D1):** v1.1/v1.2 is the canonical strategy and #42's freeze is superseded; its content is unapproved and not carried here.
-2. **Repository decision numbers:** draft PR #29 already uses D-26 … D-29. This file assigns no `D-n`; a repository decision recording GTM adoption waits until #29 is resolved.
+2. **Repository decision numbers:** draft PR #29 uses D-26 … D-29. **Resolved 2026-10-19 (founder D6):** #29 merges, with its F1 payout-CSV import deferred until after 2027-01-16 (no imports in this window). GTM adoption is recorded in this file; this file assigns no `D-n`.
 3. **utm value length:** v1.2 says ≤32 characters; the shipped `utmValue` allows 40. **Resolved 2026-10-19 (founder D3):** keep the shipped 40; v1.2's 32 is not adopted. ROADMAP P1-7 is unchanged.
+4. **PR #24 (analytics consent and accepted-session identity):** **Resolved 2026-10-19 (founder D5): deferred.** It conflicts with GTM:D-019/D-063 (no cookie, no identifier) and overlaps the G1 fix. The PR is closed, its branch `fix/analytics-consent-session` is kept, and it is revisited after 2027-01-16. KI-21 and ROADMAP P0-5 are updated in a separate docs PR.
 
 ## 11. Updating this file
-Change a status only with evidence (production run, CI id, commit), dated. Strategy changes come from a new archived source version and the founder's decision, never from an agent's summary. When v1.2 is approved, update §1, the statuses in §3 and §8, and archive the approval reference in the same PR.
+Change a status only with evidence (production run, CI id, commit), dated. Strategy changes come from a new archived source version and the founder's decision, never from an agent's summary. v1.2 was approved on 2026-10-19 (founder F15); the approval reference is the founder's instruction of that date, recorded in §1 and in `SESSION_HANDOFF.md`.
