@@ -37,6 +37,9 @@ GTM is consolidated into `docs/project/GTM.md` (verbatim sources in `docs/projec
 ## 3b. Founder decisions recorded (2026-10-19, later)
 GTM v1.2 approved (F15) and v1.1 superseded; F1 hours 25–30 (25 h model); F11 read-only inspection of Vercel, PostHog, Supabase and GitHub/CI authorized (no writes); the G1 fix authorized (ROADMAP P1-7, one narrow PR, plan first; G1 stays FAIL until verified in production); D5 #24 deferred (closed, branch kept, revisit after 2027-01-16); D6 #29 merges with the F1 payout import deferred until after 2027-01-16. Still founder-BLOCKED: GTM:D-038, D-047, D-008, D-015, D-026, D-058. Queue order: #21 (merges alone, then owner runs the verify SQL) → #24 docs follow-up → #29 → G1 fix. Evidence: GitHub on 2026-10-19 shows #40 merged (09:38 UTC, before these decisions) and #24 closed; the decisions land in this docs PR.
 
+## 3c. Queue progress (2026-10-19, evening)
+#43 and #21 merged. Founder reports the production verify SQL all PASS (20 checks) and the #21 Preview deletion flow PASSED on mobile. #24 closed (D5) and commented. New findings recorded as KI-26 (mobile Google sign-in, High, blocks G0-A), KI-27 and KI-28 (UX); ROADMAP P1-8 added (property-test check before any paid spend). Next in the queue: #29 (Step 4), then the G1 fix (Step 5, plan first).
+
 ## 4. Active task
 None approved. Open PRs (live list 2026-10-18), all draft:
 - **#21** delete-account security, **BLOCKED** until the real backup/restore and disposable-account acceptance are verified (KI-19 migration).
