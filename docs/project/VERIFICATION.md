@@ -31,6 +31,10 @@
 | 2026-10-18 | Property stress, 100 seeded batches × 10,000 cases (V2) | before #33 / with #33 | 26 of 100 batches failed / 1,000,000 cases, 0 failures | PR #33 description |
 | 2026-10-18 | Coverage (`pnpm test:coverage`) | #33 head `8962539` (finance code = `72903c6`) | 99.66% lines overall; `scenario-view.ts` 100% branches | Local run |
 | 2026-10-18 | Production deployment of `72903c6` (V6) | — | **Not verified by an agent** (Vercel API 403; site unreachable from the sandbox) | Owner to confirm |
+| 2026-10-19 | Production backup drill, first production run (V6, partial database backup: auth, public, private) | Production Supabase, workflow on `main` @ `2d3f4b0` | Pass: 21 checks, no FAIL rows (owner-reported; run conclusion "success" confirmed via the GitHub API) | Actions run 39202267998; artifact `backdesk-partial-db-backup-39202267998` (39 KB, expires 2026-10-22 05:01 UTC) |
+| 2026-10-19 | Main Playwright 309/309 (308 + new Tab-focus test); lint, typecheck, 593 unit tests, build, `check:bundle` (V2, V4, local Linux sandbox) | `main` @ `cdb5d93` + the `NumberFieldRow` fix (KI-24) | Pass | Local run; 308/308 on unmodified `cdb5d93` before the fix |
+| 2026-10-19 | Exploratory calculator matrix in Chromium (V4): AR/EN baseline −12,215.30 with revenue + costs = net; exact-zero, −0.01 and +0.01 net; invalid input (empty, letters, negative, fraction, > 9 digits) marked invalid with the stale notice; Arabic-Indic and Persian digits; booked > available shows the data warning and caps occupancy at 100%; 9 pages × AR/EN × 360/768/1440 px with HTTP 200, no horizontal overflow, correct `dir`, no console errors or failed requests | Local production build of `main` @ `cdb5d93` | Pass, except KI-24 (fixed) and a cosmetic clip of a 10-digit headline at 360 px | Scripts and screenshots in the session scratchpad; summary in the PR |
+| 2026-10-19 | Production site `backdeskapp.com` and Vercel Previews in a browser (V6) | — | **Blocked**: the cloud environment's network policy denies the host (proxy 403); the Vercel connector lists the project but returns 403 for deployments and aliases | Session log |
 
 ## Not yet verified (required before the matching claim can be made)
 | Needed check | Level | Why it matters | Owner |
@@ -41,8 +45,8 @@
 | PostHog Live events show `landing_view`, `landing_cta_click`, `first_run_started`, `verdict_shown` with `env = production` and no IP | V6 | Landing merge gate was never recorded as checked | Amir |
 | Landing in Facebook's in-app browser; Sharing Debugger "Scrape Again"; Search Console + sitemap | V5/V6 | Distribution channel | Amir |
 | Arabic and English at 360, 768, 1440 px on a real phone (automated layout checks pass, V4) | V5 | Beta-gate row from #22 | Amir |
-| Vercel Production serves `72903c6` (or later) | V6 | Agents cannot reach Vercel or the site | Amir |
-| Backup drill (#30) run against production, result recorded | V6 | Gate for #21 (KI-19) | Amir, after separate approvals |
+| Vercel Production serves `cdb5d93` (or later) | V6 | Agents cannot reach Vercel or the site | Amir |
+| Encrypted backup artifact of run 39202267998 saved to durable private storage before 2026-10-22 05:01 UTC; temporary `BACKUP_*` repository secrets deleted (agents cannot list Actions secrets: proxy 403) | V6 | The artifact expires; the secrets widen exposure (`BACKUP_DRILL.md`) | Amir |
 | Response headers and TLS on production | V6 | KI-04; unreachable from the cloud sandbox | Amir or Vercel access |
 | Supabase dashboard: plan and backups, redirect URL list, Google consent screen state | V6 | KI-12 | Amir |
 | Agent entry points: whether each tool actually loads `AGENTS.md` / `GEMINI.md` / `copilot-instructions.md` / the `@` import in `CLAUDE.md` | V1 | Only documented behaviour is assumed (see `INDEX.md`) | Any person with that tool |
