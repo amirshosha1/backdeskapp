@@ -431,7 +431,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   - The calculator becomes two tabs on one state: "الملخص" (one screen) and "كل الأرقام" (every input and figure). The headline is net profit **after** depreciation (see §4.3).
 - **Remaining in P.2:** adding expenses and recording income; Home updating live (Home does not show the visitor's unit yet); "تقرير الشهر" per unit; resetting to the fixtures; more than one own unit; turning the scenario-based own unit into a ledger unit; the sign-up migration (Phase 0b slice 1 moves the apartment; expenses and income follow when they exist).
 - **Then:** the host review (3–5 hosts), before the remaining P.2 items are built.
-- **Roadmap items landing in the remaining P.2 (§8):** F1 (browser-only payout import), F2 (break-even nights this month) and F3 (per-unit KPIs).
+- **Roadmap items landing in the remaining P.2 (§8):** F1 (browser-only payout import), F2 (break-even nights this month) and F3 (per-unit KPIs) F1 is deferred until after 2027-01-16 per GTM v1.2 (no imports this window).
 
 ### Phase 0a — Foundation: app shell (no database)
 **Scope**
@@ -753,6 +753,7 @@ Added at Amir's request. Every item is mapped to an **existing** phase; no phase
 
 ### PRE-GATE (before the 20 pre-orders; all three land in the remaining P.2; build order F2 → F3 → F1, D-27)
 **F1 — Payout CSV import** (Airbnb earnings CSV, Booking.com payout export). *Lands in: P.2 (browser-only slice); persistence in Phase 6.*
+- **Status (2026-10-19, founder D6): deferred until after 2027-01-16 per GTM v1.2 (no imports this window).** No F1 work starts before then. F2 → F3 → F1 (D-27) stays the order when it resumes; F1's sample-file prerequisites (questions 7 and 20) are unchanged. This is the roadmap feature F1, not GTM approval F1 (founder hours).
 - The visitor drops the file; it is parsed in the browser (Web Worker), guest names and contacts are stripped there, a listing is mapped to a unit, and the unit's bookings and its net payout and commission (computed from the unit's agreement, §4.2) appear after a row-level preview. No API, no account linking, the file is never uploaded or stored.
 - Pre-gate there is no ledger (`stays` arrives in Phase 5), so the imported bookings live in this browser only, like the visitor's apartment. They do not follow a signed-in account to another device until Phase 5/6.
 - "Commissions" are **computed**, not stored: commission transactions exist only as a snapshot when a statement is finalized (`AGENTS.md` §6.8).
