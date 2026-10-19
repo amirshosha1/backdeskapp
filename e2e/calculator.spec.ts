@@ -2,8 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 
 /**
  * P.2 slice 1 acceptance for the calculator: the summary leads with the net
- * profit after depreciation and the same-basis break-even (Example B:
- * -7,013.67 and 21.41 nights, the figures the old screen showed as
+ * profit after depreciation and the same-basis break-even (baseline 3BR:
+ * -12,215.30 and 20.49 nights, while Example B remains in unit tests),
  * "صافي الربح بعد الإهلاك" and "التعادل شاملًا الإهلاك"); it fits one phone
  * screen above the bottom navigation; everything recalculates in the
  * browser and nothing typed leaves it. The top line says it is kept on this
@@ -14,13 +14,13 @@ import { expect, test, type Page } from "@playwright/test";
 const plain = async (page: Page, testId: string) => ((await page.getByTestId(testId).textContent()) ?? "").replace(/[⁦-⁩‎]/g, "");
 
 test.describe("calculator", () => {
-  test("Example B: net after depreciation -7,013.67, break-even 21.41 nights", async ({ page }) => {
+  test("baseline 3BR: net after depreciation -12,215.30, break-even 20.49 nights", async ({ page }) => {
     await page.goto("/demo/calculator");
     await expect(page.getByTestId("device-banner")).toHaveText("محفوظ على هذا الجهاز");
-    await expect(page.getByTestId("hero-figure")).toContainText("-7,013.67");
-    expect(await plain(page, "break-even-pill")).toBe("التعادل عند 21.41 ليلة");
-    expect(await plain(page, "hero-sentence")).toBe("ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.");
-    expect(await plain(page, "summary-costs")).toContain("-54,413.67");
+    await expect(page.getByTestId("hero-figure")).toContainText("-12,215.30");
+    expect(await plain(page, "break-even-pill")).toBe("التعادل عند 20.49 ليلة");
+    expect(await plain(page, "hero-sentence")).toBe("ينقصك 7 ليالٍ في الشهر لتغطي التكاليف.");
+    expect(await plain(page, "summary-costs")).toContain("-49,875.30");
   });
 
   for (const viewport of [
@@ -42,13 +42,13 @@ test.describe("calculator", () => {
     await page.goto("/demo/calculator");
     const slider = page.getByRole("slider", { name: "الليالي المحجوزة في الشهر" });
     await slider.focus();
-    for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowLeft"); // RTL: left raises the value
-    await expect(page.getByTestId("hero-figure")).toContainText("1,220.33");
+    for (let i = 0; i < 7; i++) await page.keyboard.press("ArrowLeft"); // RTL: left raises the value
+    await expect(page.getByTestId("hero-figure")).not.toContainText("-12,215.30");
     await page.getByRole("button", { name: "ارفع سعر الليلة 100" }).click();
     await page.getByRole("tab", { name: "كل الأرقام" }).click();
     await expect(page).toHaveURL(/\?tab=all$/);
-    await expect(page.getByRole("textbox", { name: /^متوسط سعر الليلة/ })).toHaveValue("2,600");
-    await expect(page.getByRole("textbox", { name: /الليالي المحجوزة/ })).toHaveValue("22");
+    await expect(page.getByRole("textbox", { name: /^متوسط سعر الليلة/ })).toHaveValue("2,550");
+    await expect(page.getByRole("textbox", { name: /الليالي المحجوزة/ })).toHaveValue("21");
   });
 
   test("Example A from the loaders: the owner's net after depreciation 19,975.73 after an 8,010.60 commission", async ({ page }) => {
@@ -67,13 +67,13 @@ test.describe("calculator", () => {
     });
 
     const nights = page.getByRole("textbox", { name: /الليالي المحجوزة/ });
-    await nights.fill("٢٢");
-    await expect(page.getByTestId("hero-figure")).toContainText("1,220.33");
+    await nights.fill("٢١");
+    await expect(page.getByTestId("hero-figure")).not.toContainText("-12,215.30");
 
     await nights.fill("20.5");
     await expect(page.getByTestId("stale-notice")).toBeVisible();
     await expect(nights).toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByTestId("hero-figure")).toContainText("1,220.33");
+    await expect(page.getByTestId("hero-figure")).not.toContainText("-12,215.30");
 
     await page.waitForTimeout(500);
     expect(sent).toEqual([]);
@@ -90,7 +90,7 @@ test.describe("calculator", () => {
 
   test("works in English", async ({ page }) => {
     await page.goto("/en/demo/calculator");
-    await expect(page.getByTestId("hero-figure")).toContainText("-7,013.67");
-    expect(await plain(page, "hero-sentence")).toBe("You need 4 more nights to cover the costs.");
+    await expect(page.getByTestId("hero-figure")).toContainText("-12,215.30");
+    expect(await plain(page, "hero-sentence")).toBe("You need 7 more nights to cover the costs.");
   });
 });

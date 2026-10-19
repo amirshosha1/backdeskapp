@@ -40,20 +40,27 @@ async function setup(context: BrowserContext, baseURL: string) {
   let pendingAction: ReturnType<typeof deferred<void>> | null = null;
   const requests: string[] = [];
   const actionRequests: string[] = [];
+  const actionHandlers: Promise<void>[] = [];
   await context.addCookies([authCookie("A", baseURL)]);
-  await context.route("**/en/demo/units", async (route) => {
+  await context.route("**/en/demo/units", (route) => {
     if (route.request().method() !== "POST" || !route.request().headers()["next-action"]) return route.continue();
     actionRequests.push(route.request().postData() ?? "");
     const hold = pendingAction;
     pendingAction = null;
-    if (hold) await hold.promise;
-    // Keep Next's build-specific Flight envelope, replacing only the action
-    // result. The server uses the .invalid host and cannot reach a database.
-    const response = await route.fetch();
-    const envelope = (await response.text()).split("\n")[0];
-    expect(response.status()).toBe(200);
-    expect(envelope).toContain('"a":"$@1"');
-    return route.fulfill({ response, body: `${envelope}\n1:${JSON.stringify({ ok: true, data: row("A", "A renamed") })}\n` });
+    // Recorded so a test can await it: a handler still running when the
+    // context closes throws outside any test and skips the next one.
+    const handled = (async () => {
+      if (hold) await hold.promise;
+      // Keep Next's build-specific Flight envelope, replacing only the action
+      // result. The server uses the .invalid host and cannot reach a database.
+      const response = await route.fetch();
+      const envelope = (await response.text()).split("\n")[0];
+      expect(response.status()).toBe(200);
+      expect(envelope).toContain('"a":"$@1"');
+      await route.fulfill({ response, body: `${envelope}\n1:${JSON.stringify({ ok: true, data: row("A", "A renamed") })}\n` });
+    })();
+    actionHandlers.push(handled);
+    return handled;
   });
   await context.route(`${SUPABASE_URL}/**`, async (route) => {
     const url = new URL(route.request().url());
@@ -74,6 +81,7 @@ async function setup(context: BrowserContext, baseURL: string) {
   return {
     requests,
     actionRequests,
+    actionsSettled: () => Promise.all(actionHandlers),
     holdUnits: () => { pendingUnits = deferred<void>(); return pendingUnits; },
     holdAction: () => { pendingAction = deferred<void>(); return pendingAction; },
     switchTo: async (who: Identity) => { identity = who; await context.addCookies([authCookie(who, baseURL)]); },
@@ -154,6 +162,7 @@ test("a pending A write cannot publish after an A to B transition", async ({ pag
   await refocus(page);
   await expect(page.getByTestId("account-unit-card")).toContainText(USERS.B.name);
   held.resolve();
+  await mock.actionsSettled();
   await expect(page.getByText("A renamed")).toHaveCount(0);
   await expect(page.getByText(USERS.A.name)).toHaveCount(0);
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CALCULATOR_PRESETS } from "@/demo/sample-data/calculator-presets";
+import { LEGACY_EXAMPLE_FORM } from "@/test/legacy-calculator-example";
 import { parseCalculatorForm } from "@/lib/calculator/form";
 import {
   assumedAfterFlow,
@@ -15,7 +15,7 @@ import {
   stepsFor,
 } from "./flow";
 
-const example = CALCULATOR_PRESETS[0]!.form;
+const example = LEGACY_EXAMPLE_FORM;
 
 describe("first-run flow order", () => {
   it("owner-operated skips the cost question: 3 questions, then verdict and count", () => {
