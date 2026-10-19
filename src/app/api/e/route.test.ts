@@ -141,3 +141,54 @@ describe("POST /api/e", () => {
     expect(sent().body.properties).toMatchObject({ utm_source: "facebook", utm_campaign: "launch-1", env: "preview" });
   });
 });
+
+describe("POST /api/e: campaign labels and calc_start (GTM:D-063)", () => {
+  const common = { locale: "ar", display_mode: "browser" };
+  const tags = { utm_source: "facebook", utm_medium: "social", utm_campaign: "oct-1", utm_content: "hook-a" };
+
+  it("accepts calc_start with the labels and a model, and forwards them unchanged", async () => {
+    const res = await POST(post({ event: "calc_start", properties: { ...common, ...tags, model: "rental_arbitrage" } }));
+    expect(res.status).toBe(204);
+    expect(sent().body.properties).toMatchObject({ ...tags, model: "rental_arbitrage" });
+  });
+
+  it("calc_start without a model is refused: it never fires before a model is picked", async () => {
+    expect((await POST(post({ event: "calc_start", properties: { ...common, ...tags } }))).status).toBe(400);
+    expect((await POST(post({ event: "calc_start", properties: { ...common, model: "default" } }))).status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts verdict_shown with the labels and the model, and landing_view with utm_content", async () => {
+    expect((await POST(post({ event: "verdict_shown", properties: { ...common, ...tags, entry: "landing", outcome: "loss", model: "managed_for_owner" } }))).status).toBe(204);
+    expect((await POST(post({ event: "landing_view", properties: { ...common, ...tags } }))).status).toBe(204);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("first_run_started stays model-free and label-free", async () => {
+    const base = { event: "first_run_started", properties: { ...common, entry: "landing" } };
+    expect((await POST(post({ ...base, properties: { ...base.properties, model: "owner_operated" } }))).status).toBe(400);
+    expect((await POST(post({ ...base, properties: { ...base.properties, utm_source: "facebook" } }))).status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("refuses a URL, path, referrer, identifier or any other key, and values that are not a bucket", async () => {
+    const extras: Record<string, unknown>[] = [
+      { url: "https://backdeskapp.com/demo/start?utm_source=fb" },
+      { path: "/demo/start" },
+      { referrer: "https://l.facebook.com/" },
+      { session_id: "abc" },
+      { distinct_id: "abc" },
+      { utm_term: "x" },
+      { utm_source: "https://evil.example/?a=1" },
+      { utm_content: "Hook A" },
+    ];
+    for (const extra of extras) {
+      for (const event of ["landing_view", "calc_start", "verdict_shown"] as const) {
+        const own = event === "calc_start" ? { model: "owner_operated" } : event === "verdict_shown" ? { entry: "other", outcome: "loss", model: "owner_operated" } : {};
+        const res = await POST(post({ event, properties: { ...common, ...own, ...extra } }));
+        expect(res.status, `${event} + ${Object.keys(extra)[0]}`).toBe(400);
+      }
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});

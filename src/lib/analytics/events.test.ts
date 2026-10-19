@@ -1,9 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { ANALYTICS_EVENTS, utmValue } from "./events";
+import { ANALYTICS_EVENTS, MODELS, utmFromParams, utmValue } from "./events";
 
 describe("analytics catalogue", () => {
-  it("is exactly the four approved events", () => {
-    expect([...ANALYTICS_EVENTS]).toEqual(["landing_view", "landing_cta_click", "first_run_started", "verdict_shown"]);
+  it("is exactly the five approved events", () => {
+    expect([...ANALYTICS_EVENTS]).toEqual(["landing_view", "landing_cta_click", "first_run_started", "calc_start", "verdict_shown"]);
+  });
+});
+
+describe("models", () => {
+  it("are the three operating models and nothing else", () => {
+    expect([...MODELS]).toEqual(["owner_operated", "rental_arbitrage", "managed_for_owner"]);
+  });
+});
+
+describe("utmFromParams: the four labels, each a bucket (src = utm_source, campaign = utm_campaign, variant = utm_content)", () => {
+  it("reads utm_source, utm_medium, utm_campaign and utm_content through utmValue", () => {
+    const params = new URLSearchParams("utm_source=Facebook&utm_medium=social&utm_campaign=Oct%20post&utm_content=Hook-A&gclid=abc&q=1");
+    expect(utmFromParams(params)).toEqual({ utm_source: "facebook", utm_medium: "social", utm_campaign: "other", utm_content: "hook-a" });
+  });
+
+  it("absent stays absent; nothing else in the query is read", () => {
+    expect(utmFromParams(new URLSearchParams("from=landing&fbclid=xyz"))).toEqual({});
+    expect(utmFromParams(new URLSearchParams("utm_content="))).toEqual({});
   });
 });
 

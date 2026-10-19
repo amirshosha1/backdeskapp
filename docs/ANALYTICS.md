@@ -58,13 +58,31 @@ Every event carries `locale` (`ar` | `en`) and `display_mode`
 
 | Event | When | Own properties | Status |
 |---|---|---|---|
-| `landing_view` | The landing page is shown to a new visitor (not to one sent on to the app) | `utm_source`, `utm_medium`, `utm_campaign`: lowercased, `[a-z0-9_-]{1,40}`, otherwise `other`; absent when the link has none. Not sent when the visitor arrives from the other language's landing (a language switch) | Sent from PR 2 |
+| `landing_view` | The landing page is shown to a new visitor (not to one sent on to the app) | `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`: lowercased, `[a-z0-9_-]{1,40}`, otherwise `other`; absent when the link has none. Not sent when the visitor arrives from the other language's landing (a language switch) | Sent from PR 2; `utm_content` from the G1 fix |
 | `landing_cta_click` | Tap on the landing page's one button | none | Sent from PR 2 |
 | `first_run_started` | `/demo/start` shows its first question with nothing answered yet | `entry`: `landing` (opened from the landing button, `?from=landing`) or `other` | Sent from PR 1 |
-| `verdict_shown` | The flow's result (مكسب / خسارة) is on screen | `entry` (as above, for this page view); `outcome`: `profit` or `loss` (never the amount) | Sent from PR 1 |
+| `calc_start` | A model is **actually picked** on the flow's first question (`onPick`). Once per page view; never on load, never for a default | the four `utm_*` labels (as above, when the visit has them) and `model`: `owner_operated`, `rental_arbitrage` or `managed_for_owner` | G1 fix (GTM:D-063) |
+| `verdict_shown` | The flow's result (مكسب / خسارة) is on screen | `entry` (as above, for this page view); `outcome`: `profit` or `loss` (never the amount); the four `utm_*` labels (when the visit has them); `model` | Sent from PR 1; labels and `model` from the G1 fix |
+
+### Campaign labels (G1, GTM:D-063)
+
+The property keys are the ones PostHog already holds; the GTM contract's names map to them:
+
+| GTM:D-063 name | Property | URL parameter |
+|---|---|---|
+| `src` | `utm_source` | `utm_source` |
+| `campaign` | `utm_campaign` | `utm_campaign` |
+| `variant` | `utm_content` | `utm_content` |
+| (not in the contract, kept) | `utm_medium` | `utm_medium` |
+
+- Every value goes through `utmValue()`: lowercased, `[a-z0-9_-]{1,40}`, otherwise `other`, absent stays absent. Never free text, a URL, a path or a referrer.
+- **No cookie, no browser storage, no identifier, no pixel, no financial input.** The landing's inline script appends the visit's `utm_*` labels to its button's link, so they cross the page load into the app in the URL. The app reads them once (`campaign-tags.ts`), removes them from the address bar and keeps them in memory for that page view. A reload, or a visit without them, starts untagged. A visitor with JavaScript off, or a returning visitor sent straight to the app, is untagged.
+- `first_run_started` is unchanged: first visit only, no model, no labels, never counted as a landing. `landing_view` is the only landing count; `first_run_started` is never added to it.
+- Each event keeps its own fresh random id (D-15): there is no session id and no event is linked to another, so the labels slice counts, not people.
+- `calc_start` needs a model: the route refuses it without one. `verdict_shown` carries `model` too; the route accepts it without, only so a page served before this release (cached script) is still counted.
 
 `entry` is read once per page view from `?from=landing` and removed from
-the address bar at once. A verdict reached in a later page view (after a
+the address bar at once (the `utm_*` labels leave with it). A verdict reached in a later page view (after a
 reload) counts with `entry: other`.
 
 The landing page's two events are not sent by `track()` but by a small
@@ -99,7 +117,8 @@ Filter every insight to `env = production`.
    `landing_view` → `landing_cta_click` → `first_run_started` where
    `entry = landing` → `verdict_shown` where `entry = landing`.
    Read it as step-over-step ratios (for example clicks ÷ views). Break
-   down by `utm_source` and by `in_app_browser`.
+   down by `utm_source`, `utm_campaign`, `utm_content` (the variant) and by `in_app_browser`. After the G1 fix
+   add `calc_start` (by `model`) between `first_run_started` and `verdict_shown`.
 2. **Flow completion, all entries:** `verdict_shown` ÷ `first_run_started`
    (BUILD_PLAN.md §1 target: calculator completion ≥ 60%). Break down by
    `entry`.
@@ -121,11 +140,13 @@ there is no way to deduplicate, by design.
   id, no IP and no user agent; refuses other sites, robots, extra fields,
   unknown events, bad utm values and oversized bodies; 204 without the key
   or when PostHog is unreachable.
-- `src/test/screens/first-run.test.tsx`: the flow sends the two events once,
-  with `entry` and `outcome`, and nothing without the key.
+- `src/test/screens/first-run.test.tsx`: the flow sends its three events
+  once, with `entry`, `outcome`, `model` and the labels, no `calc_start`
+  before a model is picked, no payload with a URL, path, referrer or key
+  outside the allowlist, and nothing without the key.
 - `e2e/analytics-env.spec.ts` (`playwright.analytics.config.ts`, a build
   with a placeholder key and a `.invalid` host): the real flow in Chromium
-  sends exactly the two events in order, with no run of three digits, no
+  sends exactly the events in order (tagged and untagged, Arabic and English), with no run of three digits, no
   cookie, no new storage and no other host; the real route answers 204,
   403 and 400. The main e2e build has no key, and `e2e/first-run.spec.ts`
   and `e2e/calculator.spec.ts` fail on any non-GET request there.

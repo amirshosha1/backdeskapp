@@ -37,7 +37,7 @@ import { currencyLabel, formatMoney } from "@/lib/format/money";
 import { formatPercent } from "@/lib/format/percent";
 import { readFirstRunAnswers, useFirstRunAnswers, writeFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { flowSentence } from "@/lib/first-run/sentence";
-import { firstRunEntry, trackFirstRunStarted, trackVerdictShown } from "@/lib/analytics/flow-events";
+import { firstRunEntry, trackCalcStart, trackFirstRunStarted, trackVerdictShown } from "@/lib/analytics/flow-events";
 import { readAccount, saveCount } from "@/lib/account/store";
 import { APARTMENT_COUNTS, saveOwnUnit, setApartmentCount, setFirstRunSeen, useGuest, type ApartmentCount } from "@/lib/guest/store";
 import { setQueryParam, useQueryParam } from "@/lib/url-state";
@@ -91,6 +91,7 @@ export function FirstRunScreen({ example }: { example: CalculatorForm }) {
         <ModelStep
           value={answers.model}
           onPick={(model) => {
+            trackCalcStart(model);
             setAnswers({ model });
             setStep("price");
           }}
@@ -376,8 +377,8 @@ function VerdictStep({
   const outcome = view?.outcome ?? null;
   // Counted once per page view: profit or loss only, never the amount.
   useEffect(() => {
-    if (outcome) trackVerdictShown(outcome);
-  }, [outcome]);
+    if (outcome && model) trackVerdictShown(outcome, model);
+  }, [outcome, model]);
 
   if (!parsed.ok || !result || !view) return null;
   const owner = model === "managed_for_owner" ? "yes" : "no";

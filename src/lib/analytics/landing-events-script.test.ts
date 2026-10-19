@@ -57,19 +57,31 @@ afterEach(() => {
 
 describe("landingEventsScript()", () => {
   it("sends landing_view once, with the same body track() sends", async () => {
-    load({ search: "?utm_source=Facebook&utm_medium=social&utm_campaign=post%201" });
+    load({ search: "?utm_source=Facebook&utm_medium=social&utm_campaign=post%201&utm_content=Hook-A" });
     expect(beacon).toHaveBeenCalledTimes(1);
     expect(beacon.mock.calls[0]![0]).toBe("/api/e");
     const [view] = await sentBodies();
     expect(view).toEqual({
       event: "landing_view",
-      properties: { utm_source: "facebook", utm_medium: "social", utm_campaign: "other", locale: "ar", display_mode: "browser" },
+      properties: { utm_source: "facebook", utm_medium: "social", utm_campaign: "other", utm_content: "hook-a", locale: "ar", display_mode: "browser" },
     });
 
     beacon.mockClear();
-    track("landing_view", { utm_source: "facebook", utm_medium: "social", utm_campaign: "other" });
+    track("landing_view", { utm_source: "facebook", utm_medium: "social", utm_campaign: "other", utm_content: "hook-a" });
     const [fromTrack] = await sentBodies();
     expect(view).toEqual(fromTrack);
+  });
+
+  it("the button's link carries the labels into the app (full page load), as buckets; other links are untouched", () => {
+    load({ search: "?utm_source=Facebook&utm_campaign=post%201&utm_content=Hook-A&fbclid=zzz" });
+    const cta = document.querySelector("[data-cta]") as HTMLAnchorElement;
+    expect(cta.getAttribute("href")).toBe("/demo/start?from=landing&utm_source=facebook&utm_campaign=other&utm_content=hook-a");
+    expect((document.querySelector("a[href='/privacy']") as HTMLAnchorElement).getAttribute("href")).toBe("/privacy");
+  });
+
+  it("an untagged landing leaves the button's link as it is", () => {
+    load({ search: "?fbclid=zzz" });
+    expect((document.querySelector("[data-cta]") as HTMLAnchorElement).getAttribute("href")).toBe("/demo/start?from=landing");
   });
 
   it("buckets utm values exactly like utmValue()", async () => {

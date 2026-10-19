@@ -7,6 +7,7 @@ import { FirstRunGate } from "@/components/first-run/first-run-gate";
 import { LEGACY_EXAMPLE_FORM } from "@/test/legacy-calculator-example";
 import { readFirstRunAnswers } from "@/lib/guest/first-run-answers";
 import { resetFlowEventsForTests } from "@/lib/analytics/flow-events";
+import { resetCampaignTagsForTests } from "@/lib/analytics/campaign-tags";
 import { GUEST_KEY, parseGuest, readGuest, saveOwnUnit, setFirstRunSeen } from "@/lib/guest/store";
 
 vi.mock("@/i18n/navigation", () => import("@/test/mocks/navigation"));
@@ -242,13 +243,18 @@ describe("first-run flow: anonymous counting (docs/ANALYTICS.md)", () => {
     );
 
   // One page view per test: earlier tests already "used" this module's once-per-page state.
-  beforeEach(() => resetFlowEventsForTests());
+  beforeEach(() => {
+    resetFlowEventsForTests();
+    resetCampaignTagsForTests();
+    beacon.mockClear();
+  });
+  const tags = { utm_source: "facebook", utm_campaign: "oct-1", utm_content: "hook-a" };
   afterEach(() => vi.unstubAllEnvs());
 
-  it("from the landing button: first_run_started then verdict_shown (outcome only), each once", async () => {
+  it("from the landing button: first_run_started, calc_start then verdict_shown (outcome and model only), each once", async () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
     Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true, writable: true });
-    window.history.replaceState(null, "", "/demo/start?from=landing");
+    window.history.replaceState(null, "", "/demo/start?from=landing&utm_source=facebook&utm_campaign=oct-1&utm_content=hook-a");
     const { rerender } = renderFlow();
     expect(window.location.search).toBe("");
     pick("أستأجرها وأعيد تأجيرها");
@@ -258,8 +264,43 @@ describe("first-run flow: anonymous counting (docs/ANALYTICS.md)", () => {
     rerender(<FirstRunScreen example={EXAMPLE} />);
     expect(await events()).toEqual([
       { event: "first_run_started", properties: { entry: "landing", locale: "ar", display_mode: "browser" } },
-      { event: "verdict_shown", properties: { entry: "landing", outcome: "loss", locale: "ar", display_mode: "browser" } },
+      { event: "calc_start", properties: { ...tags, model: "rental_arbitrage", locale: "ar", display_mode: "browser" } },
+      { event: "verdict_shown", properties: { ...tags, entry: "landing", outcome: "loss", model: "rental_arbitrage", locale: "ar", display_mode: "browser" } },
     ]);
+    // The marker and the labels left the address bar at the first read; only the flow's own step remains.
+    expect(window.location.search).toBe("?step=verdict");
+  });
+
+  it("calc_start is absent until a model is picked: no event while the first question is only on screen", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true, writable: true });
+    window.history.replaceState(null, "", "/demo/start?utm_source=facebook");
+    renderFlow();
+    expect((await events()).map((e) => e.event)).toEqual(["first_run_started"]);
+    expect(JSON.stringify(await events())).not.toMatch(/model|facebook/);
+    pick("أملكها وأديرها");
+    expect((await events()).map((e) => e.event)).toEqual(["first_run_started", "calc_start"]);
+  });
+
+  it("no payload holds a URL, path, referrer or any key outside the allowlist", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true, writable: true });
+    window.history.replaceState(null, "", "/demo/start?from=landing&utm_source=Facebook&utm_medium=social&utm_campaign=oct-1&utm_content=hook-a");
+    Object.defineProperty(document, "referrer", { value: "https://l.facebook.com/", configurable: true });
+    const { rerender } = renderFlow();
+    pick("أستأجرها وأعيد تأجيرها");
+    tap("التالي");
+    tap("التالي");
+    tap("اعرض النتيجة");
+    rerender(<FirstRunScreen example={EXAMPLE} />);
+    const allowed = new Set(["locale", "display_mode", "entry", "outcome", "model", "utm_source", "utm_medium", "utm_campaign", "utm_content"]);
+    const sent = await events();
+    expect(sent.length).toBe(3);
+    for (const e of sent) {
+      expect(Object.keys(e).sort()).toEqual(["event", "properties"]);
+      for (const key of Object.keys(e.properties)) expect(allowed.has(key), key).toBe(true);
+    }
+    expect(JSON.stringify(sent)).not.toMatch(/https?:|\/demo|referrer|facebook\.com|\d{3}/i);
   });
 
   it("nothing is sent without the key", () => {
