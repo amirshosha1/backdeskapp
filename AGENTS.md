@@ -44,7 +44,7 @@ Full list and architecture: `docs/project/ARCHITECTURE.md`. Planned, not install
 11. **Timezone** is `Africa/Cairo` by default and stored per org.
 
 ## 7. i18n, RTL and UX: key rules (all of them: `docs/project/UX_RULES.md`)
-Arabic default, English complete, no hardcoded strings (`messages/*.json`), logical CSS properties only, Western digits with tabular numbers on money. Real data is never labelled sample; sample screens carry "مثال · أرقام توضيحية". No silent taps. Headline profit is after depreciation. Visitor analytics are anonymous counting only (`docs/ANALYTICS.md`). The landing sells only what works today; public pages must not ship app code.
+Arabic default, English complete, no hardcoded strings (`messages/*.json`), logical CSS properties only, Western digits with tabular numbers on money. Real data is never labelled sample; sample screens carry "مثال · أرقام توضيحية". No silent taps. Headline profit is after depreciation. Visitor analytics are anonymous counting only (`docs/ANALYTICS.md`). The landing sells only what works today; public pages must not ship app code. Marketing claims, campaign numbers and attribution follow `docs/project/GTM.md`.
 
 ## 8. How to work in this repo
 

@@ -18,11 +18,12 @@
 | `VERIFICATION.md` | Evidence levels V0–V6, check record, what is still unverified | Recording or questioning a check |
 | `OPERATIONS.md` | Commands, environments, CI/CD, migrations, rollback, limits | Running, deploying, migrating |
 | `UX_RULES.md` | i18n, RTL, UX, landing and analytics display rules | Any UI or copy work |
+| `GTM.md` | 90-day go-to-market plan: public claims register, canonical marketing numbers, copy rules, launch gates, campaign measurement, calendar | Any marketing, landing, social, ad or outreach copy; analytics attribution (utm) work |
 | `../BUILD_PLAN.md` | Full spec: formulas, data model, worked examples, phases | One section at a time: `grep -n '^#' docs/BUILD_PLAN.md` |
 | `../PROGRESS.md` | Dated history (592 lines) | Rarely; search a date or term, never read in full |
 | `../ANALYTICS.md`, `../SETUP_AUTH.md`, `../FINANCIAL_BASELINE.md` | Event catalogue; Google/Supabase setup; sourced default figures | Analytics, auth setup, presets |
 
-Task shortcuts: auth → `ARCHITECTURE.md` (AuthN/AuthZ), `CODEBASE_MAP.md`, `docs/SETUP_AUTH.md`, `tests/db/` · database → migrations, `OPERATIONS.md`, `KNOWN_ISSUES.md` · billing → `PRODUCT_SCOPE.md`, `DECISIONS.md` D-07..D-09, `BUILD_PLAN.md` §2 · deployment → `OPERATIONS.md`, `.github/workflows/` · UI → `UX_RULES.md`.
+Task shortcuts: auth → `ARCHITECTURE.md` (AuthN/AuthZ), `CODEBASE_MAP.md`, `docs/SETUP_AUTH.md`, `tests/db/` · database → migrations, `OPERATIONS.md`, `KNOWN_ISSUES.md` · billing → `PRODUCT_SCOPE.md`, `DECISIONS.md` D-07..D-09, `BUILD_PLAN.md` §2 · deployment → `OPERATIONS.md`, `.github/workflows/` · UI → `UX_RULES.md` · marketing / campaigns / utm → `GTM.md`, `docs/ANALYTICS.md`.
 
 ## 2. Resume procedure (any agent)
 1. Read `AGENTS.md` and `SESSION_HANDOFF.md` (this file only for the map).

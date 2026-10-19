@@ -9,3 +9,4 @@ Canonical project instructions: `AGENTS.md`. Documentation map: `docs/project/IN
 - UI: no hardcoded strings (`messages/ar.json`, `messages/en.json`), logical CSS properties only, tabular numbers on money, no silent taps.
 - Sample or unsourced numbers are labelled SAMPLE; real data is never labelled sample.
 - Do not claim a feature works unless code and tests show it (`docs/project/PROJECT_STATUS.md`).
+- Marketing or landing copy: only claims marked VERIFIED LIVE and only the canonical examples in `docs/project/GTM.md`.
