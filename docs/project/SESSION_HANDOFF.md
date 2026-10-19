@@ -31,6 +31,9 @@ Still not built: the stored income/expense ledger, plan gating, payments, report
   - **#32**, a test-only workaround, was closed as superseded.
 - **Main CI on `0d68a58` failed once.** The cause was that property, not #22. It passed on `72903c6`, and the property file then passed 50 local runs in a row.
 
+## 3a. GTM consolidation (2026-10-19)
+GTM is consolidated into `docs/project/GTM.md` (verbatim sources in `docs/project/gtm/`), documentation only. Founder decisions recorded: D1 canonical strategy is GTM v1.1/v1.2; D2 v1.1 approval of record stays PENDING (unrecorded, not rejected); D3 the shipped `utmValue` length (40) is kept. Open: F1–F15 in the v1.2 archive; the repository D-n recording GTM adoption waits on #29 (D-26..D-29). No gate passed, no spend, publication or deployment authorized; the G1 fix (ROADMAP P1-7) is not started.
+
 ## 4. Active task
 None approved. Open PRs (live list 2026-10-18), all draft:
 - **#21** delete-account security, **BLOCKED** until the real backup/restore and disposable-account acceptance are verified (KI-19 migration).
