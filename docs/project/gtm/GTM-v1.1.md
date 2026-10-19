@@ -1,4 +1,4 @@
-> **Repository archive — not the operative summary.** Verbatim export of the owner's "Backdesk — 90-Day GTM Master Plan v1.1" doc, supplied 2026-10-19. Agents read `docs/project/GTM.md`; this file is the source it cites. Founder approval of record: **not on file** (see GTM.md §1). Do not edit the body; supersede it.
+> **Repository archive — not the operative summary.** Verbatim export of the owner's "Backdesk — 90-Day GTM Master Plan v1.1" doc, supplied 2026-10-19. Agents read `docs/project/GTM.md`; this file is the source it cites. **SUPERSEDED by v1.2 on 2026-10-19** (history only; see GTM.md §1). Do not edit the body; supersede it.
 
 # Backdesk — 90-Day GTM Master Plan v1.1
 

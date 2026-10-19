@@ -1,4 +1,4 @@
-> **Repository archive — not the operative summary.** Verbatim export of the owner's "Backdesk — 90-Day GTM Master Plan v1.2 (Final Draft)" doc, supplied 2026-10-19. **FINAL DRAFT — pending founder approval (F15).** It does not replace v1.1 and authorizes nothing. Agents read `docs/project/GTM.md`. Do not edit the body; supersede it.
+> **Repository archive — not the operative summary.** Verbatim export of the owner's "Backdesk — 90-Day GTM Master Plan v1.2 (Final Draft)" doc, supplied 2026-10-19. **APPROVED 2026-10-19 (founder) — operating plan.** The body below is unchanged and still reads "final draft"; see `docs/project/GTM.md` §1 for what the approval covers (it authorizes no spend, publication, deployment or production access). Agents read `docs/project/GTM.md`. Do not edit the body; supersede it.
 
 # Backdesk — 90-Day GTM Master Plan v1.2 (Final Draft)
 
