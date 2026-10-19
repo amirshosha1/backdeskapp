@@ -1,5 +1,12 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
+## Stabilization: account deletion security (draft, 2026-10-17)
+
+- PR #21 adds `supabase/migrations/20261012100000_preserve_fk_set_null.sql` and the forward-only follow-up `20261017142500_guard_shared_org_deletion.sql`. They permit the foreign key's `ON DELETE SET NULL` only for a deleted author, serialize concurrent account deletions, and require another owner/admin to remain in a shared org. Merging this PR could apply both migrations to production; no production database operation was performed during PR review.
+- Disposable database tests cover direct and nested authorship edits, shared-org survival, concurrent deletion, last-manager refusal, and stale-token isolation. The migration-specific read-only check is `docs/verify_preserve_fk_set_null.sql`. Arabic and English deletion/privacy copy now describes shared-org retention.
+- At code head `c413b23`, CI and disposable database tests passed. An external reviewer reported PASS on that head after 97 database tests and seven adversarial probes; the review also identified the unsafe direct Auth-deletion path (KI-23), now prohibited in the support runbook. Recheck CI after this documentation follow-up.
+- Open: disposable-account Preview acceptance, confirmed Supabase integration and backup procedure, and explicit owner approval for PR #21's merge. Hosted shared-org behavior needs an approved post-merge disposable-account smoke test. Keep the PR Draft until these gates are met.
+
 ## Stabilization: UX and private beta gate (draft, 2026-10-12)
 
 - Added direct numeric input to first-run dials, a clear example warning inside the owner statement, and a cleaning-fee note under the landing example. Arabic and English screen tests cover these paths.
@@ -20,7 +27,7 @@
 - Open: the manual Preview results and green CI are required before calling persistence and isolation verified for private beta.
 
 > Dated history, not the entry point. Start at `AGENTS.md` (rules) and `docs/project/SESSION_HANDOFF.md` (current state); `docs/BUILD_PLAN.md` is the spec and phases; `CLAUDE.md` is now a pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations below resolve through `docs/project/INDEX.md` §5. Do not read this file in full. Update it at the end of every phase.
-> Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
+> Last updated: 2026-10-17 (PR #21 migration disclosure and branch refresh; the landing page, #17, was merged on 2026-10-11 and the repository is `amirshosha1/backdeskapp`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
 
 ## Current status
 

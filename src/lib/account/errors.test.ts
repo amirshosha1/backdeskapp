@@ -9,6 +9,11 @@ describe("mapDbError", () => {
     expect(mapDbError({ code: "P0001", message: "unit_limit_reached!" }, 400)).toBe("unknown");
   });
 
+  it("explains why the last manager of a shared org cannot delete their account", () => {
+    expect(mapDbError({ code: "P0001", message: "shared_org_requires_owner_transfer" }, 400)).toBe("shared_org_requires_owner_transfer");
+    expect(mapDbError({ code: "P0001", message: "shared_org_requires_owner_transfer!" }, 400)).toBe("unknown");
+  });
+
   it("maps a missing grant or an RLS refusal to forbidden", () => {
     expect(mapDbError({ code: "42501", message: 'new row violates row-level security policy for table "units"' }, 403)).toBe("forbidden");
   });
