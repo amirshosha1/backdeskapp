@@ -1,40 +1,71 @@
-# GTM — 90-day go-to-market plan (Oct 19, 2026 – Jan 16, 2027)
+# GTM — 90-day go-to-market (Oct 19, 2026 – Jan 16, 2027)
 
-> Canonical go-to-market rules for any agent or person writing marketing, landing, social, ad or outreach material for Backdesk, or touching analytics attribution. Version **1.1 + G0-N evidence** (2026-10-18). Agreed in a six-round Claude × ChatGPT review and accepted by the owner. A human-readable copy lives in the owner's "Backdesk — 90-Day GTM Master Plan" doc; if the two differ, this file plus current evidence wins and the difference is reported.
+> **The one canonical go-to-market file** for any agent or person writing marketing, landing, social, ad or outreach material, touching analytics attribution, or planning GTM-gated work. Sources it summarises are archived verbatim in `docs/project/gtm/`; read them only for a detail this file does not carry.
 >
-> **Precedence:** this file is subordinate to `AGENTS.md` §0. It never changes the phase order, the Validation Gate (D-02) or any architecture rule. It governs what may be **said** publicly and how campaigns are **measured**.
+> **Precedence:** subordinate to `AGENTS.md` §0. It never changes the phase order, the Validation Gate (D-02) or an architecture rule. If this file and an archived source disagree, report the difference; do not pick one silently. Last reviewed: 2026-10-19.
 
-## 1. Strategy in one paragraph
-Market the free calculator in public; validate paying buyers in private. Acquisition audience: rental-arbitrage (sublet) operators in Greater Cairo and Alexandria at the "before I sign the lease" moment. Revenue hypothesis: co-hosts managing 3–30 apartments. Paid media is capped at **EGP 10,000** for the window and buys message learning, not customers. Egypt only; no GCC spend before Jan 16.
+## 1. Version status
 
-**Never:** advertise unverified features, earnings outcomes or market benchmarks; fabricate testimonials, screenshots, customer statements or a synthetic founder; present financial feasibility as legal permission to sublet; install an ad pixel or retarget; claim user-level attribution; count concierge sales as software pre-orders.
-
-## 2. Claims register — what public material may say
-Only **VERIFIED LIVE** claims may appear. Re-check before each campaign.
-
-| Claim | Status | Evidence / next check |
+| Version | Archived source | Status |
 |---|---|---|
-| Free Arabic profitability calculator, no sign-up | VERIFIED LIVE | Production, 2026-10-18 |
-| Arabic RTL + English | VERIFIED LIVE | Production, 2026-10-18 |
-| Owner / sublet / managed-for-owner flows | VERIFIED LIVE | All three answered in production, 2026-10-18 (§3) |
-| Break-even nights | VERIFIED LIVE | 20.49 nights for S01 (§3) |
-| Save apartments to an account | NEEDS RECHECK | Gate G0-A; `KNOWN_ISSUES.md` KI-01 |
-| Real monthly income/expense entry | NOT BUILT | KI-02; gate G6 |
-| Reports, portfolio, owner statements, import, PDF, payments | PLANNED | Never advertise |
-| Mobile apps (iOS / Android) | UNSAFE | Web only |
-| Market benchmarks ("apartments like yours earn X") | UNSAFE | Needs a dated source and n ≥ 30 (D-17) |
-| Any earnings / "increase your profit" outcome | UNSAFE | Never |
-| Year-end or historical reports | UNSAFE | Year-end content stays manual and educational |
+| v1.1 (2026-10-18) | `gtm/GTM-v1.1.md` | **Operating baseline.** Its own text declares it approved and frozen, and v1.2 (GTM:D-029) keeps it in force. **Founder approval of record: PENDING** — no attributable approval by Amir is on file in this repository. |
+| v1.2 Final Draft (2026-10-19) | `gtm/GTM-v1.2-final-draft.md` | **FINAL DRAFT — pending founder approval (F15, due Oct 25).** Does not replace v1.1. Where this file uses a v1.2 rule it says so; such rules are proposals until F15. |
 
-## 3. Canonical financial examples (only these numbers go public)
-All non-input values are the engine's sample defaults (labelled «تجريبي» in the app). **If presets or defaults change, these examples are void until re-verified** (same trigger as `pnpm og:render`, D-16).
+Exception: the evidence corrections in v1.2 (gate statuses, O01-v2, G1 finding) record observed facts, not strategy, so this file applies them now.
 
-**S01 — sublet (public flagship).** Inputs 2,450 EGP/night, 14 of 30 nights, rent 35,000. Verified in production 2026-10-18 at 14, 20 and 21 nights; independent recalculation matches to the piastre.
+## 2. Authorization boundary
+
+Strategy text, a target date, a passing CI run, a merged documentation PR or an agent recommendation **never** authorizes:
+spending money · publishing public creative or claims · deploying or changing production · reading or writing production data · collecting customer financial data · taking payment.
+
+Each of those needs an explicit, dated founder authorization for that specific action (what, channel or environment, limit, date). Documentation merge approval, strategy activation (e.g. v1.2) and action authorization are three separate decisions. Code tasks still follow `AGENTS.md` §5 and §8 (plan first, owner approval, no merge or deploy unasked).
+
+## 3. Decision namespace
+
+GTM decisions keep their original IDs with a `GTM:` prefix: `GTM:D-001` … `GTM:D-063`, approvals `GTM:F1` … `GTM:F15`. They are **not** repository decisions: `D-n` in `DECISIONS.md` is a separate sequence; never renumber or equate the two. Statuses are copied from the archived source, never upgraded here.
+
+Decisions that bind engineering work (full text in the v1.2 draft):
+
+| ID | Rule | Status in source |
+|---|---|---|
+| GTM:D-030 | Calculator stays free and unchanged through Jan 16; no lease-evaluator paywall | Accepted (v1.2 draft) |
+| GTM:D-038 | Validation-ledger exception (narrow monthly entry + reviewed report) under six conditions | **Blocked: founder (F13)** — do not plan or build |
+| GTM:D-051 | Paid tests need G2 as well as G0-N and G1 | Accepted (v1.2 draft) |
+| GTM:D-052 | Revenue, collections and owner settlements stay distinct; a payout settles revenue, never adds to it; an owner transfer is a settlement, not an expense | Accepted (v1.2 draft) |
+| GTM:D-055 | Read-only Vercel / PostHog / Supabase / CI inspection by an agent | **Blocked: founder (F11)** — no delegated access until approved |
+| GTM:D-060 | G0-N tracked per scenario (S01, O01-v2) | Accepted (v1.2 draft) |
+| GTM:D-062 / D-063 | G1 status and event contract (§7) | Accepted (v1.2 draft) |
+
+## 4. Claims register
+
+Two separate columns: **product truth** (technical verification) and **public-use approval** (founder sign-off on exact wording for a channel). A claim may appear in public only if it is VERIFIED LIVE **and** APPROVED FOR SPECIFIED USE. Public-use states: PROPOSED · BLOCKED · APPROVED FOR SPECIFIED USE · RETIRED. Approval requires exact Arabic/English wording, channel, evidence link with date and build, and the founder's dated approval. **Nothing is APPROVED today.**
+
+| Claim | Product truth | Public use |
+|---|---|---|
+| Free Arabic profitability calculator, no sign-up | VERIFIED LIVE (landing, Oct 19) | PROPOSED |
+| Arabic RTL + English (`/en`) | VERIFIED LIVE (Oct 19) | PROPOSED |
+| Sublet and managed-for-owner flows | VERIFIED LIVE (Oct 18 audit); owner flow not walked | PROPOSED (sublet, managed only) |
+| Break-even nights; 21 nights first profitable for S01 | VERIFIED LIVE (Oct 18) | PROPOSED |
+| Calculation accuracy, S01 / O01-v2 | Calculation verified Oct 18; deployed commit not yet recorded (G0-N) | BLOCKED until G0-N evidence is complete |
+| Save apartments to an account | NEEDS RECHECK (G0-A; KI-01) | BLOCKED |
+| Real monthly income/expense entry | NOT BUILT (KI-02; G6) | BLOCKED |
+| Reports, portfolio, owner statements, import, PDF, payments | PLANNED | BLOCKED — never advertise |
+| Concierge reports presented as software | — | BLOCKED — always a manual service |
+| Mobile apps | Web only | BLOCKED |
+| Market benchmarks ("apartments like yours earn X") | No dated source with n ≥ 30 (D-17) | BLOCKED |
+| Any earnings or "increase your profit" outcome | — | BLOCKED — never |
+| Year-end or historical reports | — | BLOCKED — educational only |
+
+## 5. Canonical financial examples (only these numbers may go public)
+
+All non-input values are engine sample defaults (labelled «تجريبي» in the app). **If presets or defaults change, these examples are void until re-verified** (same trigger as `pnpm og:render`, D-16). Status per scenario (GTM:D-060): **calculation verified in production 2026-10-18, reconciled to the piastre; gate evidence open until the deployed commit is recorded**, then reconfirmed on the advertised build at each go/no-go.
+
+**S01 — sublet (public flagship).** 2,450 EGP/night, 14 of 30 nights, rent 35,000, other fields at defaults. Also corroborated by the calculator unit test (`src/lib/calculator/form.test.ts`).
 
 | Line (14 nights) | EGP | Derivation |
 |---|---|---|
 | Accommodation revenue | 34,300.00 | 2,450 × 14 |
-| Cleaning fees collected | 3,360.00 | 14 ÷ 2.5-night stay = 5.6 modelled stays × 600 |
+| Cleaning fees collected | 3,360.00 | 14 ÷ 2.5-night stay = 5.6 stays × 600 |
 | Gross revenue | 37,660.00 | — |
 | Platform commission | −5,837.30 | 15.5% of gross incl. cleaning |
 | Operating costs | −9,038.00 | 3,550 + 392 per booked night (inferred from two runs) |
@@ -42,95 +73,69 @@ All non-input values are the engine's sample defaults (labelled «تجريبي»
 | Setup depreciation | 0.00 | default setup 0 |
 | **Net** | **−12,215.30** | engine |
 
-Checkpoints: 20 nights −929.00 · 21 nights +952.05 · break-even 20.49 nights ("7 more nights" from 14).
+Checkpoints: 20 nights −929.00 · 21 nights +952.05 · break-even 20.49 nights.
 
-**O01-v2 — managed for an owner (education only, never shown beside S01 as comparable).** Inputs 2,500 × 18 nights, 20% manager commission on platform payout. Verified 2026-10-18 at 18 and 20 nights: accommodation 45,000 + cleaning 4,320 = 49,320 − platform 7,644.60 = payout 41,675.40 − operating 10,606 (owner pays) − manager 8,335.08 = **owner 22,734.32** (20 nights: 25,654.80). Break-even 2.43 nights.
+**O01-v2 — managed for an owner (education only; never shown beside S01 as comparable).** 2,500 × 18 nights, manager 20% of platform payout, owner pays operating costs: accommodation 45,000 + cleaning 4,320 = 49,320 − platform 7,644.60 = payout 41,675.40 − operating 10,606 − manager 8,335.08 = **owner 22,734.32** (20 nights: 25,654.80). Its inputs differ from the managed preset; record a full input snapshot with the deployed commit.
 
-**Retired, internal only:** STR-QA-001 (47,400 → −7,013.67, pre-#23 preset) and STR-QA-002 (old O01, 24,142.40); both used the old 3-night stay / flat 7,900 opex defaults.
+**Internal fixtures, never public:** STR-QA-001 (−7,013.67) and STR-QA-002 (historical O01, 24,142.40; not reproducible on current defaults).
 
-**Public rendering rules:** whole pounds on graphics (34,300 + 3,360 = 37,660 − 5,837 − 9,038 − 35,000 = −12,215 reconciles); write «خسارة 12,215 ج.م.», never a minus sign plus «خسارة»; S01 has **no setup/تجهيز line**; always show cleaning fees; always say «باقي الأرقام قيم افتراضية تقدر تغيّرها».
+**Public rendering:** whole pounds on graphics; write «خسارة 12,215 ج.م.», never a minus sign plus «خسارة»; true minus sign (−) elsewhere; S01 has **no setup/تجهيز line**; always show cleaning fees; always say «باقي الأرقام قيم افتراضية تقدر تغيّرها».
 
-## 4. Copy and creative rules
+## 6. Copy and creative rules
 | Layer | Wording |
 |---|---|
 | Category | «حسابات الشقة» |
 | Tool | «حاسبة ربحية الشقة» |
 | Landing headline (unchanged) | «شقتك مكسب ولا خسارة؟» |
-| Default CTA | «احسب صافي شقتك» |
-| Creative device only | «آخر سطر هو المهم» (lexical test vs «الصافي» in week 12; keep it out of other assets) |
+| Landing button (live) | «احسب شقتك مجانًا» |
+| Campaign CTA | «احسب صافي شقتك» |
+| Creative device only | «آخر سطر هو المهم» |
 
-- **Register:** Egyptian colloquial for social hooks and video voiceover; plain Arabic for numbers, labels and disclaimers. In-app and landing copy keep `UX_RULES.md` (simple MSA with hosts' own terms).
+- Egyptian colloquial for social hooks; plain Arabic for numbers, labels and disclaimers. In-app and landing copy keep `UX_RULES.md`.
 - Every hypothetical asset carries «مثال توضيحي» inside the image, not only the caption.
-- **Legal-permissibility line** on every sublet asset (draft, pending lawyer review): «قبل التأجير قصير المدة، راجع شروط عقد الإيجار ولوائح المكان وأي موافقات أو تراخيص مطلوبة للنشاط.»
-- Write «دخل الشقة مش هو مكسبها», «احسبها على أرقامك». Never «ضاعف أرباحك», «الربح المضمون», «أرباح شقق زي شقتك» without a source.
-- Visual system "Profit Bridge": revenue → deductions → estimated net. Navy #071A4F, blue #1D4ED8 / #2563EB, paper #F3F6FA, mint #7FE3B3 sparingly; positive #0F766E, negative #B42318 on white; IBM Plex Sans Arabic; numbers LTR-isolated; never colour alone.
-- Facebook groups: value-first post, founder affiliation disclosed, no link unless asked and allowed; no bulk posting, fake engagement or unsolicited DMs.
-- WhatsApp hand-raise (after G2): a click is intent, not a lead; no financial documents over WhatsApp, ever.
+- Legal-permissibility line on every sublet asset (draft, pending lawyer review): «قبل التأجير قصير المدة، راجع شروط عقد الإيجار ولوائح المكان وأي موافقات أو تراخيص مطلوبة للنشاط.»
+- Never «ضاعف أرباحك», «الربح المضمون», «أرباح شقق زي شقتك» without a source. No fabricated testimonials, screenshots, customer statements or synthetic founder. No pixel, retargeting or user-level attribution claims.
+- Visual system "Profit Bridge" and colours: archived v1.1, "Positioning and creative system".
 
-## 5. Launch gates (owner: Amir)
-| Gate | Unlocks | Evidence | Target | Status |
-|---|---|---|---|---|
-| G0-N financial examples | Numeric creative | §3 production runs + recalculation | Oct 25 | **PASS** 2026-10-18 |
-| G0-A account truth | Any saving claim | Sign in → save apartment → sign out → back after 24 h intact; OAuth basic scopes; consent screen published | Oct 25 | PENDING (KI-01) |
-| G1 measurement | Paid tests | Tagged visit carries source + variant onto `verdict_shown` (§6) | Nov 1 | **FAIL** 2026-10-18 (KI-25) |
-| G2 WhatsApp capture | Hand-raise CTA | Business number; verdict button + event; privacy page updated; manual lead register | Nov 8 | PENDING |
-| G3 paid readiness | Test spend | G0-N + G1; ad account; creative QA; campaign ID; spend authorised; 5 monitoring hours booked | Nov 7 / Nov 21 | PENDING |
-| G4 concierge legal + data | Concierge offer | Written terms; restricted per-customer folder, 2FA, initials only, 90-day retention; lawyer + accountant | Nov 29 | PENDING |
-| G5 concierge QA | Paid December reports | Free baseline report reconciled and accepted | Dec 10 | PENDING |
-| G6 software pre-orders | D-02 counter starts | G0-A + real monthly entry persists in production + written terms | ≥ Dec 14 | PENDING |
+## 7. Gates and measurement (owner: Amir)
 
-## 6. Measurement (G1)
-Rules from `docs/ANALYTICS.md` and D-15 stay: anonymous counts only, no identifier, no cookie or storage, strict allowlist, privacy page changes in the same PR.
+A gate closes only with filed evidence: date, environment, deployed commit. "Reported PASS" is not PASS (GTM:D-035).
 
-**Finding (2026-10-18, production):** `landing_view` records `utm_source/medium/campaign`, but calculator events do not. `first_run_started` and `verdict_shown` carry only `entry` (`landing`/`other`, from `?from=`). There is no `utm_content`. Because events are deliberately unlinked, a paid test cannot attribute calculator results to a variant. A tagged run produced `verdict_shown {entry:"other", outcome:"loss"}`.
+| Gate | Unlocks | Status (2026-10-19) |
+|---|---|---|
+| G0-N/S01, G0-N/O01-v2 | Numeric creative for that scenario | Calculation VERIFIED Oct 18; evidence OPEN (deployed commit) |
+| Property-test check | Any numeric spend | PENDING (`scenario-view` CI seed, or fresh targeted tests; GTM:D-061) |
+| G0-A account truth | Any saving claim | PENDING (24 h journey, two-account isolation, OAuth basic scopes, consent screen; KI-01) |
+| G1 measurement | Paid tests | **FAIL** (Oct 18; KI-25) |
+| G2 WhatsApp capture | Hand-raise CTA; paid tests (v1.2) | PENDING |
+| G3 paid readiness | Test spend | BLOCKED by prerequisites + written spend authorization |
+| G4 / G5 concierge | Offer; taking payment | PENDING |
+| G6 software pre-orders | D-02 counter | PENDING (not before Dec 14) |
 
-**Required fix (ROADMAP P1-7):** add `utm_content` to the allowlist via the existing `utmValue` (`[a-z0-9_-]{1,40}`, else `other`); read the utm values once per page view (on `/demo/start` directly, or passed through the landing button alongside `from=landing`); attach `utm_source`, `utm_campaign`, `utm_content` and `model` to `first_run_started` and `verdict_shown`; update `docs/ANALYTICS.md`, `/privacy` and the tests listed there. G1 passes when a production visit to `/demo/start?utm_source=g1test&utm_campaign=t1&utm_content=a` shows those values on both events.
+**G1 event contract (GTM:D-063).** Anonymous counting rules from `docs/ANALYTICS.md` and D-15 stay: no cookie, storage, identifier, pixel or financial input in any payload.
+- Every eligible tagged landing emits one landing event with `src`, `campaign`, `variant`.
+- `calc_start` fires **only after a model is actually selected**, carrying the same three plus that `model`. An earlier interaction sends no `calc_start` and no model. Never a default model.
+- Verdict event: the same plus `model` and `verdict`.
+- `first_run_started` stays a separate first-visit metric; it fires before any answer, so it carries no model and is never counted as a landing.
+- `wa_cta_click {src, variant}` after G2. The WhatsApp prefill may carry a cohort code such as `BD-T1A-M`, never personal data.
+- Shipped event names (`landing_view`, `verdict_shown`) may stay if the mapping is documented in `docs/ANALYTICS.md`.
 
-**Link convention:** `utm_source=meta|facebook_group|whatsapp`, `utm_campaign=t1|t2|w<week>`, `utm_content=a|b`. Lowercase only. Read funnels as event ratios, never unique users.
+**G1 implementation is not authorized.** The fix (ROADMAP P1-7) needs the founder's go-ahead and ships as one narrow PR that also updates `docs/ANALYTICS.md` and `/privacy`.
 
-## 7. Calendar (one core idea per week; content ≤3 h/week in Phase 0, ≤6 h after)
-| Wk | Start | Core idea | Pillar | Note |
-|---|---|---|---|---|
-| 1 | Oct 19 | «دخل الشقة مش هو مكسبها» (A-01 static) | Numbers truth | Publish ≥ Oct 25 after QA + approval |
-| 2 | Oct 26 | «قبل ما تمضي، راجع ٥ أرقام» (carousel) | Decide first | Legal line |
-| 3 | Nov 2 | «الإيراد مش الصافي» (A-06 reel) | Numbers truth | Test 1 assets |
-| 4 | Nov 9 | Hidden operating costs | Numbers truth | **Test 1** (needs G1, G3) |
-| 5 | Nov 16 | «محتاج كام ليلة؟» (A-08 reel) | Decide first | Test 2 assets |
-| 6 | Nov 23 | Owner vs manager money | Owner/manager | **Test 2** (needs founder footage) |
-| 7 | Nov 30 | «إشغال عالي = مكسب؟» | Numbers truth | Concierge offer opens |
-| 8 | Dec 7 | Gross vs payout vs net | Numbers truth | — |
-| 9 | Dec 14 | «ورّي الحساب» | Owner/manager | — |
-| 10 | Dec 21 | Light week, remix best post | Decide first | — |
-| 11 | Dec 28 | Year review questions (educational) | Numbers truth | No report claims |
-| 12 | Jan 4 | «جرّب أرقامك» | Product | Lexical test |
-| 13 | Jan 11 | 90 days of real numbers | Owner/manager | Window review Jan 16 |
+## 8. Tests and budget (v1.2 proposals unless noted)
+- Hard cap **EGP 10,000** for the window, released one test at a time (v1.1, unchanged).
+- Test 1 (first 2 s hook): default **Nov 16**; Nov 9 only if all early gates pass by Nov 7. EGP 4,000, needs F6.
+- Test 2 (presenter): unfunded by default; earliest Nov 30, separate approval.
+- Test 3 (CTA wording): organic, Jan 4–10.
+- Kill an arm after EGP 1,500 if under 30 result events or over EGP 50 per result. Differences under 50% relative are inconclusive.
 
-## 8. Creative tests and budget
-| Test | Variable only | A | B | Budget |
-|---|---|---|---|---|
-| T1 (Nov 9) | First 2 s hook | «شقتك بتدخل فلوس… وممكن تكون بتخسر.» | «شقتك بتدخل فلوس… اعرف كام صافي.» | EGP 4,000 |
-| T2 (Nov 23) | Presenter | Numbers animation | Real founder on camera | EGP 4,000 |
-| T3 (Jan 4) | CTA wording | «احسب صافي شقتك» | «احسب آخر سطر في شقتك» | Organic |
+## 9. Concierge pilot
+A founder-prepared monthly P&L per apartment: a **service, not software**. Max 2 customers / 5 apartments; free November baseline before any paid December report; payment only after G4 and G5. Counters never merged; **concierge sales never count toward the D-02 gate.** The v1.2 merge of the Oct 12 free-report experiment into these baselines (GTM:D-047) is **pending founder approval (F12)**.
 
-Any unchecked go/no-go item postpones a test by 7 days. Kill an arm after EGP 1,500 if it has under 30 result events or costs more than EGP 50 per result. A difference under 50% relative is inconclusive and defaults to clarity framing with the numbers format. Hard cap EGP 10,000 in total, released one test at a time.
+## 10. Open conflicts (founder decisions needed)
+1. **Competing strategy in draft PR #42** ("War Room Freeze, Rounds 1–9", `docs/strategy/90-day-launch.md`): paid concierge at 250/300 EGP per unit per month and cash-based G1/G2 gates, versus this plan's free baseline, internal 249 + 125 hypothesis and measurement-based G1/G2. The same gate names mean different things. Until Amir chooses, agents treat **this file** as canonical and #42's content as unapproved.
+2. **Repository decision numbers:** draft PR #29 already uses D-26 … D-29. This file assigns no `D-n`; a repository decision recording GTM adoption waits until #29 is resolved.
+3. **utm value length:** v1.2 says ≤32 characters; the shipped `utmValue` allows 40. Keep the shipped rule unless Amir decides otherwise.
 
-## 9. Concierge pilot (pending owner decision D-27)
-A founder-prepared monthly P&L per apartment («تقرير مالي شهري مُعد يدويًا»): a service, not software. Pilot 2 customers / ≤5 apartments. Free November baseline report first; paid December only after G4 and G5. Counters kept separate: service customers · serviced apartments · service revenue · refunds · software commitments · software pre-orders. **Concierge sales never count toward the D-02 gate.** Target metric: minutes per apartment-month (software must reach ≤15).
-
-## 10. Asset register
-| ID | Asset | Status | Blocker |
-|---|---|---|---|
-| A-01 | W1 static «دخل الشقة مش هو مكسبها» + caption (copy v1.2) | NEEDS QA | Final graphic, mobile QA, owner approval |
-| A-06 | W3 reel + T1 hooks (copy v1.2) | BLOCKED | G1, G3 |
-| A-08 | W5 break-even reel (copy v1.2; VO says «حوالي عشرين ليلة ونص») | BLOCKED | G1, G3; founder footage for B |
-| A-09 | Facebook group post + moderator message | NEEDS QA | Per-group permission |
-| A-10 | WhatsApp prefilled message + 3 replies | BLOCKED | G2 |
-| A-11/12 | Concierge one-pager + report layout | BLOCKED | G4, price |
-
-Copy of record for A-01/A-06/A-08 is ChatGPT "Final Creative Copy v1.2" (2026-10-18). Store final exported files outside the repo; record their location here.
-
-## 11. Open owner decisions
-Weekly hours (25/15/8) · founder proof on camera (by Nov 15) · test price 249 + 125 per extra apartment (D-07) · concierge pilot yes/no (D-27) · lawyer + accountant · EGP 8,000 ad authorisation.
-
-## 12. Updating this file
-Change a status only with evidence (production run, CI id, commit), dated. Strategy changes need new customer or product evidence and a `DECISIONS.md` entry. After any preset change: re-verify §3 before any numeric post.
+## 11. Updating this file
+Change a status only with evidence (production run, CI id, commit), dated. Strategy changes come from a new archived source version and the founder's decision, never from an agent's summary. When v1.2 is approved, update §1, the statuses in §3 and §8, and archive the approval reference in the same PR.

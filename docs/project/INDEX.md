@@ -18,7 +18,7 @@
 | `VERIFICATION.md` | Evidence levels V0–V6, check record, what is still unverified | Recording or questioning a check |
 | `OPERATIONS.md` | Commands, environments, CI/CD, migrations, rollback, limits | Running, deploying, migrating |
 | `UX_RULES.md` | i18n, RTL, UX, landing and analytics display rules | Any UI or copy work |
-| `GTM.md` | 90-day go-to-market plan: public claims register, canonical marketing numbers, copy rules, launch gates, campaign measurement, calendar | Any marketing, landing, social, ad or outreach copy; analytics attribution (utm) work |
+| `GTM.md` | Canonical go-to-market file: version status, authorization boundary, `GTM:D-xxx` decisions, claims register, canonical numbers, copy rules, gates, G1 event contract, open conflicts. Verbatim sources in `gtm/` (v1.1 baseline, v1.2 final draft) | Any marketing, landing, social, ad or outreach copy; pricing or launch questions; analytics attribution (utm) work |
 | `../BUILD_PLAN.md` | Full spec: formulas, data model, worked examples, phases | One section at a time: `grep -n '^#' docs/BUILD_PLAN.md` |
 | `../PROGRESS.md` | Dated history (592 lines) | Rarely; search a date or term, never read in full |
 | `../ANALYTICS.md`, `../SETUP_AUTH.md`, `../FINANCIAL_BASELINE.md` | Event catalogue; Google/Supabase setup; sourced default figures | Analytics, auth setup, presets |
