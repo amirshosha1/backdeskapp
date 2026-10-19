@@ -8,7 +8,7 @@
 
 | Version | Archived source | Status |
 |---|---|---|
-| v1.1 (2026-10-18) | `gtm/GTM-v1.1.md` | **Operating baseline.** Its own text declares it approved and frozen, and v1.2 (GTM:D-029) keeps it in force. **Founder approval of record: PENDING** — no attributable approval by Amir is on file in this repository. |
+| v1.1 (2026-10-18) | `gtm/GTM-v1.1.md` | **Operating baseline.** Its own text declares it approved and frozen, and v1.2 (GTM:D-029) keeps it in force. **Founder approval of record: PENDING — v1.1 remains the operating baseline; no approval has been recorded (founder, 2026-10-19).** |
 | v1.2 Final Draft (2026-10-19) | `gtm/GTM-v1.2-final-draft.md` | **FINAL DRAFT — pending founder approval (F15, due Oct 25).** Does not replace v1.1. Where this file uses a v1.2 rule it says so; such rules are proposals until F15. |
 
 Exception: the evidence corrections in v1.2 (gate statuses, O01-v2, G1 finding) record observed facts, not strategy, so this file applies them now.
@@ -133,9 +133,9 @@ A gate closes only with filed evidence: date, environment, deployed commit. "Rep
 A founder-prepared monthly P&L per apartment: a **service, not software**. Max 2 customers / 5 apartments; free November baseline before any paid December report; payment only after G4 and G5. Counters never merged; **concierge sales never count toward the D-02 gate.** The v1.2 merge of the Oct 12 free-report experiment into these baselines (GTM:D-047) is **pending founder approval (F12)**.
 
 ## 10. Open conflicts (founder decisions needed)
-1. **Competing strategy in draft PR #42** ("War Room Freeze, Rounds 1–9", `docs/strategy/90-day-launch.md`): paid concierge at 250/300 EGP per unit per month and cash-based G1/G2 gates, versus this plan's free baseline, internal 249 + 125 hypothesis and measurement-based G1/G2. The same gate names mean different things. Until Amir chooses, agents treat **this file** as canonical and #42's content as unapproved.
+1. **Competing strategy in draft PR #42** ("War Room Freeze, Rounds 1–9"; closed): paid concierge at 250/300 EGP per unit per month and cash-based G1/G2 gates, versus this plan's free baseline, internal 249 + 125 hypothesis and measurement-based G1/G2. **Resolved 2026-10-19 (founder D1):** v1.1/v1.2 is the canonical strategy and #42's freeze is superseded; its content is unapproved and not carried here.
 2. **Repository decision numbers:** draft PR #29 already uses D-26 … D-29. This file assigns no `D-n`; a repository decision recording GTM adoption waits until #29 is resolved.
-3. **utm value length:** v1.2 says ≤32 characters; the shipped `utmValue` allows 40. Keep the shipped rule unless Amir decides otherwise.
+3. **utm value length:** v1.2 says ≤32 characters; the shipped `utmValue` allows 40. **Resolved 2026-10-19 (founder D3):** keep the shipped 40; v1.2's 32 is not adopted. ROADMAP P1-7 is unchanged.
 
 ## 11. Updating this file
 Change a status only with evidence (production run, CI id, commit), dated. Strategy changes come from a new archived source version and the founder's decision, never from an agent's summary. When v1.2 is approved, update §1, the statuses in §3 and §8, and archive the approval reference in the same PR.
