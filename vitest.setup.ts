@@ -1,6 +1,14 @@
 import "@testing-library/jest-dom/vitest";
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
+import fc from "fast-check";
+
+// Property tests: every run uses an explicit seed and every failure reports it
+// (with the shrink path and counterexample), so a CI failure can be replayed
+// locally with `FC_SEED=<seed> pnpm test <file>`. Without FC_SEED a fresh
+// random seed is drawn per test file, as before.
+const fcSeed = process.env.FC_SEED === undefined ? Date.now() ^ (Math.random() * 0x100000000) : Number(process.env.FC_SEED);
+fc.configureGlobal({ seed: fcSeed, verbose: 1 });
 
 // vitest.config.mts doesn't enable `test.globals`, so @testing-library/react
 // can't auto-detect the test runner to register its own cleanup — without
