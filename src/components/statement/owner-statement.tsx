@@ -21,6 +21,7 @@ export function OwnerStatement({ statement }: { statement: typeof STATEMENT }) {
       <div className="px-4 pt-3">
         <article className="rounded-card bg-paper px-5 pt-5 pb-3 shadow-[0_1px_2px_rgb(10_18_36/0.04),0_16px_32px_-20px_rgb(10_18_36/0.25)]">
           <header className="border-b-2 border-ink pb-4">
+            <p className="mb-3 rounded-tile bg-amber-soft px-3 py-2 text-sm font-semibold text-amber" data-testid="statement-example-warning">{t("exampleNotReal")}</p>
             <h2 className="text-xl font-bold">{statement.unitName[locale]}</h2>
             <p className="mt-0.5 text-sm text-ink-2">
               {statement.ownerName[locale]} · {statement.period[locale]}

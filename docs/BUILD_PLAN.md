@@ -1,18 +1,18 @@
 # BUILD_PLAN.md — Backdesk · باك ديسك (formerly Safi / صافي)
 
 Arabic-first financial OS for STR hosts: feasibility calculator, setup guide, and an accounting ERP (data entry free for one apartment; outputs and more apartments on Pro).
-Read together with `CLAUDE.md` at the repo root and `docs/PROGRESS.md`. Section 0 is for Amir; Claude Code starts at Section 1.
+Agents start at `AGENTS.md` (repo root) and `docs/project/SESSION_HANDOFF.md`, then read this file one section at a time; `docs/PROGRESS.md` is the dated history. Section 0 is for Amir; agents start at Section 1. *(Updated 2026-10-17: this line used to point to `CLAUDE.md`, which is now a thin pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations in this file resolve through `docs/project/INDEX.md` §5.)*
 
 ---
 
 ## 0. Before you start (for Amir — Claude Code may skip this section)
 
 ### Workflow: cloud-first
-No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the dev database on a hosted Supabase project, and migrations and database tests run in GitHub Actions. You test on Vercel preview links on your phone. Details: `CLAUDE.md` §5.
+No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the database on one hosted Supabase project, and migrations and database tests run in GitHub Actions. That project is **production; there is no separate dev database** (decided 2026-10-08), and Vercel Preview shares it with Production: use disposable accounts and no destructive actions when testing on a preview. You test on Vercel preview links on your phone. Details: `AGENTS.md` §5 and `docs/project/OPERATIONS.md`.
 
 ### Accounts and tools
 - [x] Node.js LTS, pnpm, Git and Claude Code installed and signed in
-- [x] GitHub repo `amirshosha1/str-money-finder` (keep it private): `CLAUDE.md` at the root, this file at `docs/BUILD_PLAN.md`
+- [x] GitHub repo `amirshosha1/str-money-finder` (now `amirshosha1/backdeskapp`; keep it private): `AGENTS.md` (with `CLAUDE.md` as a pointer) at the root, this file at `docs/BUILD_PLAN.md`
 - [ ] Vercel account connected to the repo — needed for the Phase P preview
 - [x] Supabase project "Backdesk" (ref `kmmfhaypqgzhoptmljki`, West EU / Ireland `eu-west-1`, Free plan), created by Amir. **It is the production project; there is no separate dev or prod project** (decided 2026-10-08). The Supabase GitHub integration applies `supabase/migrations/` when they merge to `main`. Database tests never touch it: they run on a throwaway local Postgres (`pnpm test:db`)
 - [ ] Resend account with a verified sending domain — needed once there is a domain: for email sign-in codes (Google is the only sign-in until then, §6 question 16) and for every email Backdesk sends, starting with Phase 5's team invitations
@@ -32,7 +32,7 @@ No Docker, WSL or local database. Code lives on GitHub, previews on Vercel, the 
 ### How to run the build
 1. For each phase, send the **Standard phase prompt** (§5.0) with the phase id, in this order: **P, P.1, 1, P.2, 0a, 0b, 2, 3 → Validation Gate → 5, 6, 7, 8, 4, 10 → LAUNCH → 9**.
 2. Approve the plan, let it build, review the diff, and test the Vercel preview on your phone.
-3. Clear the context between phases (`/clear`); `CLAUDE.md` and `docs/PROGRESS.md` carry the memory. A Claude Code on the web session can continue any phase the same way.
+3. Clear the context between phases (`/clear`); `AGENTS.md` and `docs/project/SESSION_HANDOFF.md` carry the memory (`docs/PROGRESS.md` is history). A Claude Code on the web session can continue any phase the same way.
 4. The prototype stays for your review only until **P.2 slice 1** lands (first-run flow, the visitor's own unit, the calculator's Summary / All numbers; built after Phase 1). Then run a **host review with 3–5 hosts** on their phones, before the rest of P.2 is built, and start selling founding-member pre-orders. Until Phase 5, track InstaPay pre-orders outside the app. Do not skip the **Validation Gate** before Phase 5.
 
 ---
@@ -59,7 +59,7 @@ Most Egyptian STR hosts do not know their true net profit. They track payouts in
 | Paid month-2 retention | ≥ 80% | Subscriptions table |
 
 ### Non-goals
-See `CLAUDE.md` §2. Anything booking-related is permanently out of scope.
+See `AGENTS.md` §2. Anything booking-related is permanently out of scope.
 
 ---
 
@@ -239,7 +239,7 @@ commission(n):
 - **`irregular` costs (e.g. repairs) and any monthly maintenance/irregular allowance are included in `fixed_costs` by default** — a host who never budgets for the odd repair or replacement is not actually at break-even. A per-scenario toggle excludes them (decided 2026-09-28, after `docs/PROGRESS.md`'s Phase P.1 review found the excluded-by-default figure understated how many nights a unit needs: at 19 booked nights — one below the excluded-default figure of ~19 — Example B's unit still loses 788.50). The UI shows the included-by-default figure as the primary break-even result, with the excluded variant as a secondary line (Example B2).
 - **Whole-night display.** Because a night is not divisible, a host needs the *ceiling* of `break_even_nights`, not the nearest whole night, to actually reach break-even (Example B: 19.38 rounds up to 20, not 19 — at 19 nights the unit still runs a loss). Any UI showing "nights needed" rounds up. (Precisely: the first whole night whose displayed, piastre-rounded profit is ≥ 0 — the ceiling, except in a sub-half-piastre tie.)
 - **Same cost basis (decided 2026-10-01, Phase 1 review).** Any break-even shown next to a profit figure covers the same costs as that profit (maintenance/irregular costs, depreciation); if it doesn't, its label states which costs it covers. The engine evaluates both through one function with an explicit basis, and tests that at `ceil(break_even_nights)` the displayed profit is ≥ 0 and at `floor` it is < 0, on the same basis.
-- **The calculator's headline is net profit after depreciation (decided 2026-10-06, P.2 slice 1).** The break-even beside it is on that basis too (repairs and depreciation included), and is not capped at the month: `scenarioView` (`src/lib/finance/scenario-view.ts`) returns it with a status — within the month, beyond the available nights (with the nights it would need), or no break-even (per-night contribution after commission ≤ 0). Before-depreciation figures (profit before depreciation, the primary and without-maintenance break-evens, payback and return) stay visible as rows labelled "قبل الإهلاك". Rows shown together reconcile at displayed precision: total costs with depreciation = revenue − net, and the leftover piastre of a section total goes to a computed line (operating expenses, then platform fees, then commission), never to a typed amount such as rent. The owner statement's `owner_net` is unchanged (no depreciation by definition, §4.2).
+- **The calculator's headline is net profit after depreciation (decided 2026-10-06, P.2 slice 1).** The break-even beside it is on that basis too (repairs and depreciation included), and is not capped at the month: `scenarioView` (`src/lib/finance/scenario-view.ts`) returns it with a status — within the month, beyond the available nights (with the nights it would need), or no break-even (per-night contribution after commission ≤ 0). Before-depreciation figures (profit before depreciation, the primary and without-maintenance break-evens, payback and return) stay visible as rows labelled "قبل الإهلاك". Rows shown together reconcile at displayed precision: total costs with depreciation = revenue − net, and the leftover piastre of a section total goes to a computed line (operating expenses, then platform fees, then commission), never to a typed amount such as rent. **Ties of opposite sign (decided 2026-10-18, D-24):** half-up rounds away from zero, so when two tied figures have opposite signs the rows can only add up if one figure takes the other half of its tie; that figure is profit before depreciation when depreciation is in whole piastres, and revenue when every cost line is in whole piastres. Each stays within half a piastre of its exact value; the headline net stays `round_half_up(net)` and every typed amount and exact depreciation is shown exactly. The owner statement's `owner_net` is unchanged (no depreciation by definition, §4.2).
 
 ### 4.4 Revenue recognition
 - **Accrual by night** (default for KPIs and P&L): stays crossing a month boundary are prorated by nights; cleaning fees are recognized on the check-in date; platform fees follow the component they were allocated to (the accommodation share is prorated by night, the cleaning share is recognized on check-in); refunds and adjustments on their own date.
@@ -320,7 +320,7 @@ Projections: 12-month model with monthly occupancy and ADR multipliers (seasonal
 **Order:** P → P.1 → 1 → P.2 → 0a → 0b → 2 → 3 → ⛔ Validation Gate → 5 → 6 → 7 → 8 → 4 → 10 → 🚀 LAUNCH → 9.
 Phase numbers are kept stable and the sections below follow execution order. P.1 fixes and redesigns the prototype after Amir's phone review. Phase 1 runs right after it because the engine needs no database or auth. P.2 then makes the demo interactive on the real engine, with data kept in the browser only; it is built in two parts: **slice 1** (UI batch 2), then a **host review with 3–5 hosts**, then the rest of P.2. Phase 4 (payments and legal) runs just before launch. Phase 9 is post-launch growth.
 
-**Kickoff prompt (sent once on 2026-09-26; kept for reference):**
+**Kickoff prompt (sent once on 2026-09-26; kept for reference as sent — today an agent reads `AGENTS.md` and `docs/project/SESSION_HANDOFF.md` instead of `CLAUDE.md` in full):**
 ```
 Read CLAUDE.md and docs/BUILD_PLAN.md in full. Do not write any code yet.
 Reply with:
@@ -332,11 +332,11 @@ Then wait for my answers.
 
 **Standard phase prompt (send once per phase, replace {N} with P, 1, 0a, 0b, …):**
 ```
-Execute Phase {N} from docs/BUILD_PLAN.md.
+Execute Phase {N} from docs/BUILD_PLAN.md (read AGENTS.md and docs/project/SESSION_HANDOFF.md first; open only this phase's section of the plan).
 1. Plan first: list the files, migrations, RLS policies and tests you will create or change. Wait for my approval.
-2. Build in small commits, following every rule in CLAUDE.md.
+2. Build in small commits, following every rule in AGENTS.md.
 3. Verify each acceptance criterion of the phase and show the evidence (test names, commands run, screenshot paths).
-4. Run pnpm lint && pnpm typecheck && pnpm test, update docs/PROGRESS.md, then stop.
+4. Run pnpm lint && pnpm typecheck && pnpm test, update docs/PROGRESS.md and docs/project/SESSION_HANDOFF.md, then stop.
 ```
 
 **Review prompt (optional, after each phase):**
@@ -433,7 +433,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
 
 ### Phase 0a — Foundation: app shell (no database)
 **Scope**
-- Prettier and the remaining pnpm scripts in `CLAUDE.md` §4 that do not need a database (ESLint, Vitest and the core scripts exist since Phase P).
+- Prettier and the remaining pnpm scripts in `AGENTS.md` §4 that do not need a database (ESLint, Vitest and the core scripts exist since Phase P).
 - English messages kept complete for any new strings (the locale switch arrived in Phase P.1, and the `ar.json`/`en.json` key-parity test exists since Phase P).
 - Light and dark themes from the design tokens; empty states for every tab.
 - PWA: manifest with the Arabic name "باك ديسك", placeholder icons, Serwist service worker, offline fallback page. Check that Serwist works with the current Next.js bundler; if it needs webpack, build production with webpack.

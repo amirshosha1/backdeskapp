@@ -197,9 +197,87 @@ describe("scenarioView — break-even status and sentence edge cases", () => {
   });
 });
 
+// Half-up rounds away from zero: round(+0.005) = 0.01 but round(−0.005) =
+// −0.01, so subtracting a whole-piastre amount does not commute with
+// rounding when two tied figures have opposite signs. The tie is resolved
+// in a tied figure, never by moving a line that needed no rounding.
+describe("scenarioView — half-piastre ties of opposite sign", () => {
+  const TINY: ScenarioInput = {
+    operatingModel: "owner_operated",
+    daysInPeriod: 30,
+    blockedNights: 0,
+    bookedNights: 1,
+    adr: 0,
+    avgLengthOfStay: 1,
+    cleaningFeePerStay: 0,
+    platformFeeRate: 0,
+    rent: 0,
+    fixedCosts: [],
+    perStayCosts: [],
+    perNightCosts: [],
+    irregularCosts: [],
+    setupCost: 0,
+    usefulLifeMonths: 1,
+    deposit: 0,
+    commission: NO_COMMISSION,
+  };
+
+  it("an exact depreciation stays exact when profit before depreciation is +0.005", () => {
+    // Revenue 0.01, fees 0.005 → before +0.005; depreciation exactly 0.01 → net −0.005.
+    const view = scenarioView({ ...TINY, adr: "0.01", platformFeeRate: "0.5", setupCost: "0.01" });
+    const s = view.sections;
+    expect(money(view.netAfterDepreciation)).toBe("-0.01");
+    expect(money(s.depreciation)).toBe("0.01");
+    expect(money(s.profitBeforeDepreciation)).toBe("0.00");
+    expect([s.revenue, s.platformFees, s.operatingExpenses].map(money)).toEqual(["0.01", "0.01", "0.00"]);
+    expect(view.outcome).toBe("loss");
+  });
+
+  it("a typed cost stays as typed when revenue is the only rounded line", () => {
+    // Half a stay's cleaning fee: revenue 0.005; one typed cost of 0.01 → before and net −0.005.
+    const view = scenarioView({ ...TINY, avgLengthOfStay: 2, cleaningFeePerStay: "0.01", fixedCosts: [{ id: "utilities", amount: "0.01" }] });
+    const s = view.sections;
+    expect(money(view.netAfterDepreciation)).toBe("-0.01");
+    expect(money(s.operatingExpenses)).toBe("0.01");
+    expect(money(s.profitBeforeDepreciation)).toBe("-0.01");
+    expect(money(s.revenue)).toBe("0.00");
+    expect(money(view.revenue)).toBe("0.00");
+    expect(money(view.totalCostsWithDepreciation)).toBe("0.01");
+  });
+
+  // Counterexamples the property found (fast-check seeds 35, 30 and 26, 10,000 runs each).
+  it("seed 35: a typed setup cost over one month shows as its own depreciation", () => {
+    const view = scenarioView({ ...TINY, adr: "30.58", avgLengthOfStay: 2, cleaningFeePerStay: "152.54", perStayCosts: [{ id: "cleaning", amount: "213.69" }], setupCost: "0.01" });
+    expect([view.sections.profitBeforeDepreciation, view.sections.depreciation, view.netAfterDepreciation].map(money)).toEqual(["0.00", "0.01", "-0.01"]);
+  });
+
+  it("seed 30: a revenue tie and a subtotal tie of opposite signs leave the typed per-stay cost as typed", () => {
+    // 21 nights of 4-night stays: 5.25 stays → revenue +1,673.175, profit −243.285.
+    const view = scenarioView({ ...TINY, bookedNights: 21, avgLengthOfStay: 4, cleaningFeePerStay: "318.7", perStayCosts: [{ id: "cleaning", amount: "365.04" }] });
+    const s = view.sections;
+    expect([s.revenue, s.operatingExpenses, s.profitBeforeDepreciation, view.netAfterDepreciation].map(money)).toEqual(["1673.17", "1916.46", "-243.29", "-243.29"]);
+  });
+
+  it("seed 1850402200 (main CI, 0d68a58): a typed setup cost over one month shows as its own depreciation", () => {
+    // 3 nights of 1.2-night stays: 2.5 stays → revenue and profit before depreciation +183.325, net −0.005.
+    // With no costs, revenue equals profit before depreciation, so both take the other half of the tie.
+    const view = scenarioView({ ...TINY, bookedNights: 3, avgLengthOfStay: "1.2", cleaningFeePerStay: "73.33", setupCost: "183.33" });
+    const s = view.sections;
+    expect([s.revenue, s.profitBeforeDepreciation, s.depreciation, view.netAfterDepreciation].map(money)).toEqual(["183.32", "183.32", "183.33", "-0.01"]);
+  });
+
+  it("seed 26: a tie carried by a repeating stays count keeps depreciation exact", () => {
+    // 7 nights ÷ 3.6 per stay repeats; profit before depreciation is −999.985 (−999.98499999999999995 at 20 digits).
+    const view = scenarioView({ ...TINY, bookedNights: 7, adr: "13.87", avgLengthOfStay: "3.6", cleaningFeePerStay: "435.75", perStayCosts: [{ id: "cleaning", amount: "999.96" }], setupCost: "0.02" });
+    const s = view.sections;
+    expect([s.revenue, s.operatingExpenses, s.profitBeforeDepreciation, s.depreciation, view.netAfterDepreciation].map(money)).toEqual(["944.38", "1944.37", "-999.99", "0.02", "-1000.01"]);
+  });
+});
+
 // ---------------------------------------------------------------- properties
 
 const RUNS = { numRuns: 300 };
+const HALF_PIASTRE = new Decimal("0.005").plus("1e-12");
 const cents = (min: number, max: number) => fc.integer({ min, max }).map((c) => new Decimal(c).dividedBy(100));
 const rate = (maxBasisPoints: number) => fc.integer({ min: 0, max: maxBasisPoints }).map((bp) => new Decimal(bp).dividedBy(10_000));
 
@@ -288,6 +366,12 @@ describe("scenarioView — properties", () => {
           // A line already in whole piastres (e.g. one typed amount) never takes the leftover.
           if (new Decimal(exact).decimalPlaces() <= 2) expect(shown.equals(exact)).toBe(true);
         }
+        // Revenue and the subtotal are each a half-up rounding of their own value,
+        // or the other half of a tie: never more than half a piastre away. The
+        // allowance is decimal.js's 20-digit noise on a repeating stays count
+        // (seed 26: −999.98499999999999995 for an exact −999.985).
+        expect(s.revenue.minus(r.pnl.grossRevenue).abs().lessThanOrEqualTo(HALF_PIASTRE)).toBe(true);
+        expect(s.profitBeforeDepreciation.minus(r.profitBeforeDepreciation).abs().lessThanOrEqualTo(HALF_PIASTRE)).toBe(true);
         // Typed amounts are shown as typed.
         if (s.rent) expect(s.rent.equals(input.rent)).toBe(true);
         if (input.commission.basis === "fixed_monthly") expect(s.managementCommission!.equals(input.commission.fixedFee)).toBe(true);

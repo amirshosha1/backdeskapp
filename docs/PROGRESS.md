@@ -1,8 +1,5 @@
 # PROGRESS — Backdesk · باك ديسك (formerly Safi / صافي)
 
-> Read together with `CLAUDE.md` (rules) and `docs/BUILD_PLAN.md` (spec and phases). Updated at the end of every phase.
-> Last updated: 2026-10-14 (analytics consent session fix in draft; earlier status entries are historical).
-
 ## 2026-10-14 — Analytics consent session fix (draft PR)
 
 The consent choice adds a six-hour signed HttpOnly cookie only after explicit
@@ -14,7 +11,32 @@ the stateless copied-cookie replay limitation. This is the scoped consent
 fix only; the rest of the old PR C ideas are still pending. Deployment and
 merge require Amir's separate approval.
 
+## Stabilization: UX and private beta gate (draft, 2026-10-12)
+
+- Added direct numeric input to first-run dials, a clear example warning inside the owner statement, and a cleaning-fee note under the landing example. Arabic and English screen tests cover these paths.
+- Recorded the full regression matrix and the private-beta decision in `docs/STABILIZATION_BETA_GATE.md`.
+- Decision: the calculator remains suitable for clearly labelled early access; private beta as an operating ledger is blocked by real expense persistence and the pending two-account Google test.
+
+## Stabilization: pricing truth (draft, 2026-10-12)
+
+- Done on `stabilization/pricing-truth`: each Free and Pro feature now states whether it is available or in development; the free result is described as an estimate from user inputs. Setup Kit is labelled in development and has no order action. First-month access and monthly payment terms are labelled planned.
+- Decision: keep the existing sample prices visible with their SAMPLE badges; do not treat the page as proof that paid access or payment works.
+- Verification: TypeScript and `git diff --check` passed locally. Vitest could not start on this Windows runtime (`ERR_PACKAGE_IMPORT_NOT_DEFINED`); require green CI on the PR before any merge.
+- Open: confirm each planned feature with a live end-to-end check before changing its badge to available.
+
+## Stabilization: account persistence (draft, 2026-10-12)
+
+- Done on `stabilization/account-persistence`: hide old account data during sign-in and sign-out transitions; reject stale read and write results; add account-switch and race regression tests and a two-account Preview checklist.
+- Decision: do not run account or RLS tests against the hosted Supabase project. CI uses a disposable database; Amir will complete the live two-account Google checks on Preview.
+- Open: the manual Preview results and green CI are required before calling persistence and isolation verified for private beta.
+
+> Dated history, not the entry point. Start at `AGENTS.md` (rules) and `docs/project/SESSION_HANDOFF.md` (current state); `docs/BUILD_PLAN.md` is the spec and phases; `CLAUDE.md` is now a pointer to `AGENTS.md`. Older `CLAUDE.md §n` citations below resolve through `docs/project/INDEX.md` §5. Do not read this file in full. Update it at the end of every phase.
+> Last updated: 2026-10-16 (header corrected by the audit: the landing page, #17, was merged on 2026-10-11 and the repository is now `amirshosha1/backdeskapp`; draft stabilization PRs #19–#24 are open and described in `docs/project/PROJECT_STATUS.md`). The dated sections below are history and were not rewritten. For current state read `docs/project/SESSION_HANDOFF.md`.
+
 ## Current status
+
+- 2026-10-19: Lease evaluator spec v2 drafted (docs only; L1 not authorized).
+- **Stabilization step 3 (draft, 2026-10-12):** furnished and empty 3BR examples now follow the financial baseline's booked ADR, 14 nights and per-stay laundry. The engine formulas are unchanged. Saved older forms keep their former result with a zero laundry default. See `docs/STABILIZATION_PRESETS.md`; this branch still requires CI and review before any merge.
 
 - **Phase P (clickable prototype)** was merged into `main` (amirshosha1/str-money-finder#1). Amir reviewed it on his phone: it felt broken (silent taps) and the design was weak, which led to Phase P.1.
 - **Phase P.1 (prototype fixes and redesign) is built**: tap audit (no silent taps, enforced by an e2e crawler), design direction A2 on every screen, an expense-details screen, the Arabic/English switch, the Arabic copy pass, and bidi/404/safe-area fixes. See "Phase P.1 decisions" and "Phase P.1 build notes" below.
@@ -65,7 +87,7 @@ merge require Amir's separate approval.
 
 - Local machine: Windows 11, Node 24.15, pnpm 9.15, Git 2.54. **No Docker, WSL, Supabase CLI or `gh`, by design.** Do not ask Amir to install anything.
 - The local path `I:\AI\STR App` contains a space. If a tool misbehaves, check that first.
-- Repo: `github.com/amirshosha1/str-money-finder`, branch `main`.
+- Repo: `github.com/amirshosha1/backdeskapp` (renamed from `str-money-finder`; older text here and in PR descriptions still uses the old name), branch `main`.
 - Supabase: the **Backdesk project exists** (created by Amir).
   - Ref `kmmfhaypqgzhoptmljki`, West EU / Ireland (`eu-west-1`), Free plan.
   - **It is production; there is no separate dev or prod project** (2026-10-08).
@@ -598,6 +620,6 @@ Recorded ahead of the phase starting — a docs-only change, nothing implemented
 
 ## How to resume in a fresh session (including Claude Code on the web)
 
-1. Read `CLAUDE.md`, `docs/BUILD_PLAN.md` and this file in full.
-2. Send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
-3. At the end of the phase, update this file: status, decisions, open issues, next step.
+1. Read `AGENTS.md` and `docs/project/SESSION_HANDOFF.md` (map: `docs/project/INDEX.md`) (Claude Code: `/project-resume`). Open `docs/BUILD_PLAN.md` and this file only by section, with `grep -n '^#'`.
+2. For phase work, send the standard phase prompt (`docs/BUILD_PLAN.md` §5.0) for the phase marked ⏭ above.
+3. At the end of a session run `/project-sync`; at the end of a phase also update this file: status, decisions, open issues, next step.

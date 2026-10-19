@@ -114,28 +114,31 @@ export function MoreScreen() {
 
         <ListRow href="/privacy" icon={<ShieldCheck className="h-5 w-5" aria-hidden="true" />} title={tAccount("privacy")} className="py-4" />
 
-        {signedIn && (
+        {(signedIn || account?.status === "sign_out_error") && (
           <>
             <button
               type="button"
               data-testid="sign-out"
               onClick={async () => {
-                await signOut();
-                show(tAccount("signedOut"));
+                const result = await signOut();
+                if (result.ok) show(tAccount("signedOut"));
+                else if (result.error !== "superseded") show(tAccount("signOutFailed"));
               }}
               className={`tap ${ROW}`}
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-fill text-ink-2">
                 <LogOut className="h-5 w-5 rtl:-scale-x-100" aria-hidden="true" />
               </span>
-              <span className="min-w-0 flex-1 text-[0.9375rem] font-medium">{tAccount("signOut")}</span>
+              <span className="min-w-0 flex-1 text-[0.9375rem] font-medium">
+                {tAccount(account?.status === "sign_out_error" ? "retrySignOut" : "signOut")}
+              </span>
             </button>
-            <button type="button" data-testid="delete-account" onClick={() => setDeleteOpen(true)} className={`tap ${ROW}`}>
+            {signedIn && <button type="button" data-testid="delete-account" onClick={() => setDeleteOpen(true)} className={`tap ${ROW}`}>
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-loss-soft text-loss">
                 <Trash2 className="h-5 w-5" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1 text-[0.9375rem] font-medium text-loss">{tAccount("deleteAccount")}</span>
-            </button>
+            </button>}
           </>
         )}
       </div>

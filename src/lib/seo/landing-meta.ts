@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/format/money";
 import { landingExample } from "@/lib/landing/example";
 import { openGraphDefaults } from "./share";
 
-/** The share image's alt text names the example and its verdict ("a loss of 7,014": the word carries the sign), from the same engine figure. */
+/** The share image's alt text names the example and its verdict, from the same engine figure. */
 async function shareAlt(locale: AppLocale): Promise<string> {
   const t = await getTranslations({ locale, namespace: "landing" });
   const example = landingExample();
