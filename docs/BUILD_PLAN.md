@@ -77,7 +77,8 @@ See `AGENTS.md` §2. Anything booking-related is permanently out of scope.
 | Area benchmark comparison (server-only; hidden entirely while no sourced figures exist) | Blurred placeholder teaser | ✅ | — |
 | The current month's result (profit or loss, the full figure) | ✅ | ✅ | — |
 | The current month's occupancy and average nightly rate (ADR), from actual figures | ✅ (added 2026-10-08) | ✅ | — |
-| The full month breakdown (P&L lines, RevPAR, break-even, payback, portfolio) | — | ✅ | — |
+| Break-even nights **for the current month only** (F2: needed / booked / remaining; decided 2026-10-17, D-26) | ✅ | ✅ | — |
+| The full month breakdown (P&L lines, RevPAR, profit margin, payback, portfolio; break-even for other months) | — | ✅ | — |
 | Past months | — (entries are kept, never deleted) | ✅ all | — |
 | Monthly PDF report | — | ✅ | — |
 | Owner statements (finalize, PDF, signed links) | — | ✅ | — |
@@ -430,6 +431,7 @@ The first part of P.2, not a separate phase. Approved boards: first-run flow, Un
   - The calculator becomes two tabs on one state: "الملخص" (one screen) and "كل الأرقام" (every input and figure). The headline is net profit **after** depreciation (see §4.3).
 - **Remaining in P.2:** adding expenses and recording income; Home updating live (Home does not show the visitor's unit yet); "تقرير الشهر" per unit; resetting to the fixtures; more than one own unit; turning the scenario-based own unit into a ledger unit; the sign-up migration (Phase 0b slice 1 moves the apartment; expenses and income follow when they exist).
 - **Then:** the host review (3–5 hosts), before the remaining P.2 items are built.
+- **Roadmap items landing in the remaining P.2 (§8):** F1 (browser-only payout import), F2 (break-even nights this month) and F3 (per-unit KPIs) F1 is deferred until after 2027-01-16 per GTM v1.2 (no imports this window).
 
 ### Phase 0a — Foundation: app shell (no database)
 **Scope**
@@ -570,13 +572,14 @@ Not a separate phase: the first public page, built between Phase 0b slice 1 and 
 ### ⛔ VALIDATION GATE (before Phase 5)
 - Hosts see the Phase P prototype (plus whatever of Phases 1–3 is live) and pay a founding-member pre-order by **manual InstaPay transfer**. Amir tracks the payments outside the app until Phase 5. No code and no payment integration are needed for this.
 - Stop after Phase 3. **Do not start Phase 5** until Amir sends this exact line: `Gate passed: {number} paid pre-orders.` The target is ≥ 20. If the target is not met, the next work is distribution (content, outreach, host groups), not code. Claude Code must ask for this line before planning Phase 5.
+- *Roadmap (§8): F1–F3 are built inside the remaining P.2, before this gate. They do not change the gate, its line or the rule above (a missed target means distribution work, not more code).*
 
 ### Phase 5 — ERP core
 **Scope**
 - Migrations: extend `units` (created in Phase 3), add `unit_month_settings`, `parties`, `agreements`, `categories` (seeded Egyptian STR chart of accounts in AR/EN; utilities `fixed`), `transactions`, `recurring_rules`, `capex_assets`, `period_locks`, `stays`, `stay_month_allocations`.
 - Units CRUD with operating model; one effective agreement per unit; agreement editor (commission basis including the hybrid basis, statement basis, tax rate and base, expense bearers) with a live preview of the commission on a sample month. For owner-operated and rental-arbitrage units the same editor is labelled "unit settings" and shows only what applies (tax, statement basis).
 - Blocked nights per unit per month, entered by hand.
-- **Manual entry of a booking** (a stay's dates, nights and amounts; no guest data) **and of other income**, free on every plan (§2: Free's month result depends on it, and the payout import is Pro). The form and its mapping to `stays` and `transactions` are set in the Phase 5 plan.
+- **Manual entry of a booking** (a stay's dates, nights and amounts; no guest data) **and of other income**, free on every plan (§2: Free's month result depends on it, and the payout import is Pro). The form and its mapping to `stays` and `transactions` are set in the Phase 5 plan. *Roadmap (§8): this is the stored data that F2 and F3 read from here on, and the first-run `setupCost` becomes the unit's opening CAPEX asset when a scenario-based unit turns into a ledger unit (F6).*
 - **Add expense in ≤ 4 taps:** amount keypad first, then category chips (most recent first), unit (preselected when there is one unit, otherwise the last used), date defaulting to today, save. Optional receipt photo to a private Storage bucket served by signed URLs; on Free (from Phase 7, §2), photos are compressed in the browser before upload and capped by `receipt_photos_max` in the plan entitlements. PostHog `expense_added` event with `duration_ms`.
 - FX: a transaction in a currency other than the unit's requires an explicit rate; the unit-currency amount is shown before saving.
 - Portfolio-level costs (no unit) are recorded as manager overhead.
@@ -597,7 +600,8 @@ Not a separate phase: the first public page, built between Phase 0b slice 1 and 
 
 ### Phase 6 — Payout import
 **Scope**
-- Parse the CSV in the browser (Web Worker) → detect preset (Airbnb earnings export first; Booking.com later) → column-mapping UI saved per org → preview with row-level validation → upload sanitized rows only → commit. The file itself is never uploaded or stored.
+- *Roadmap (§8, F1): the browser-only slice of this phase is built earlier, inside P.2, and both presets (Airbnb earnings export and Booking.com payout export) are in scope; this phase adds persistence, server-side deduplication and the engine's stored allocations.*
+- Parse the CSV in the browser (Web Worker) → detect preset (Airbnb earnings export and Booking.com payout export, §8 F1) → column-mapping UI saved per org → preview with row-level validation → upload sanitized rows only → commit. The file itself is never uploaded or stored.
 - Strip guest names and contact details in the browser before upload.
 - Map rows to `stays` and transactions: reservation, payout, resolution/adjustment, cancellation fee, refund.
 - Deduplicate by HMAC-SHA256 of confirmation code + row type + date + amount, computed on the server with a per-org key derived from a server secret; raw confirmation codes are never persisted.
@@ -616,10 +620,11 @@ Not a separate phase: the first public page, built between Phase 0b slice 1 and 
 - Owner statements: basis from the agreement (cash by default); opening balance (carried forward; entered by hand on an owner's first statement), revenue, fees, owner-borne expenses, commission, owner payouts and balance due; draft → review → finalize (locks the period and snapshots the commission transaction) → PDF in AR or EN → signed, expiring share link (`statement_links`). Render HTML and print with headless Chromium to guarantee correct Arabic shaping and bidi; avoid PDF libraries with weak Arabic support. Sequential statement numbering per org.
 - Commission payable summary for managers across all owners.
 - Exports: CSV and XLSX for transactions and P&L.
+- *Roadmap items landing here (§8): F2 and F3 on stored data (Home break-even progress, per-unit KPIs), F4 (owner statement, PDF and signed link), F6 (ROI and payback on actual data) and F7 (accountant exports: XLSX, CSV, PDF).*
 - **The trial clock and all gating (§2), built here together with the month report** (decided 2026-10-08, §6 question 17); before this phase every account works with everything open.
   - `getEntitlements(orgId)` (server-only) and a `useEntitlements` hook that reads flags only; an org with no subscription is Free once its trial ends.
   - The one-month trial for every declared apartment.
-  - Free sees the current month's result, occupancy and average nightly rate (ADR), the same engine figures as Pro. Everything else is Pro: the breakdown (P&L lines, RevPAR, break-even, payback, portfolio), past months, the month report, statements and exports.
+  - Free sees the current month's result, occupancy and average nightly rate (ADR), the same engine figures as Pro. Free also sees the current month's break-even nights (F2, D-26). Everything else is Pro: the breakdown (P&L lines, RevPAR, profit margin, payback, portfolio), past months, the month report, statements and exports.
   - The apartment limits and freezing extra apartments; the receipt-photo cap (Phase 5); the saved-scenario limit, projection and benchmarks (Phase 2); the guide's paid sections and the inventory preview (Phase 3).
   - The phase plan settles how the declared apartment count is captured, which apartment stays active after the trial, and when the trial clock starts for accounts created before this phase.
 
@@ -630,7 +635,7 @@ Not a separate phase: the first public page, built between Phase 0b slice 1 and 
 - [ ] The home hero number equals `org-profit` output for owner-operated, managed and mixed portfolio fixtures.
 - [ ] Revoked or expired statement links return nothing.
 - [ ] `getEntitlements` returns the trial for a new org, Free after it, and the paid limits for a `manual` subscription.
-- [ ] On Free, the current month's result, occupancy and ADR equal Pro's figures for the same data, and no breakdown or past-month data reaches the client (network check).
+- [ ] On Free, the current month's result, occupancy, ADR and break-even nights (F2) equal Pro's figures for the same data, and no other breakdown (RevPAR, margin, payback) or past-month data reaches the client (network check).
 - [ ] A Free org cannot create a second unit or exceed its receipt-photo limit; the guide's paid sections are gated on the server.
 
 ### Phase 8 — Smart entry and alerts
@@ -641,6 +646,7 @@ Not a separate phase: the first public page, built between Phase 0b slice 1 and 
 - Personalization: include the org's last 20 confirmed corrections as few-shot examples.
 - Cost guardrails: per-org daily AI quota, response caching, token usage logged per org.
 - Alerts engine (daily job): category spend > 30% above its trailing 3-month average; month tracking below break-even pace by day 20; expected recurring expense missing; owner statement due; utility spike. In-app plus weekly email digest.
+- *Roadmap (§8): F5 (receipt photo → expense draft) is the receipt-reading item above; no scope change.*
 - Suggested env defaults: `AI_MODEL_FAST=claude-haiku-4-5-20251001`, `AI_MODEL_VISION=claude-sonnet-5` (configurable, never hardcoded).
 
 **Acceptance**
@@ -683,6 +689,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 - Benchmarks: anonymized aggregates from opted-in orgs (minimum 5 units per cell, no org identifiable), next to the curated benchmarks from Phase 2.
 - GCC: SAR and AED presets and locale presets (per-transaction FX already exists from Phase 5).
 - Referral program: one month of a paid plan per paid referral.
+- *Roadmap items landing here (§8): F8 (the aggregated-benchmark line above), F9 (the WhatsApp entry line above, text and voice) and F10 (the GCC line above; starts only if a Gulf design partner commits).*
 
 ---
 
@@ -696,7 +703,7 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 4 | Phase 2 benchmark pre-build gates: the AirROI coverage spike (Madinaty, New Cairo, North Coast, Hurghada) and confirmation that AirROI's terms allow storing and displaying derived medians (see Phase 2 scope in §5) | Phase 2 implementation | — (a gate, not a default: nothing is built until both results are recorded) |
 | 5 | Is `inventory.csv` ready in the specified columns? | Phase 3 | — |
 | 6 | Paymob account status (one-time payments only: there is no auto-renewal, §2) | Phase 4 | Manual payments (InstaPay) only |
-| 7 | Real Airbnb earnings CSV sample (guest names removed) | Phase 6 | — |
+| 7 | Real Airbnb earnings CSV sample (guest names removed) | Phase 6; also F1's browser-only slice in P.2 (§8) | — |
 | 8 | Speech-to-text provider | Phase 8 | — |
 | 9 | WhatsApp Business API number | Phase 9 (post-launch) | — |
 | 10 | Calibrate `MIN_SAMPLE` after the first data pull; 30 may push most areas up to governorate level | Phase 2 (after the first pull) | 30 |
@@ -707,6 +714,8 @@ Launch happens when every item in `docs/LAUNCH.md` is checked and Amir confirms.
 | 15 | Setup-cost benchmarks: the revised `benchmarks` table has no setup-cost column, but the earlier long format could hold one and §0's `benchmarks.csv` listed setup-cost figures (raised while reconciling, 2026-09-30) | Phase 2 | Setup-cost references come from Phase 3's inventory budget planner, not from `benchmarks` |
 | 18 | Smart entry (AI) is data entry, which §2 makes free, but each call costs money: Free or Pro? (raised while updating §2, 2026-10-07) | Phase 8 | Pro, as before; the manual form is always free (Amir kept this default on 2026-10-08; the question stays open) |
 | 19 | ~~The Supabase project is in Ireland (`eu-west-1`) but Vercel functions are pinned to Frankfurt (`fra1`, CLAUDE.md §3): move them to Dublin (`dub1`)?~~ **Decided 2026-10-08: `dub1`** (in PR B), next to Supabase | — | — |
+| 20 | Real Booking.com payout export sample (guest names removed). No parser is written without a real file (raised 2026-10-17, F1) | F1's Booking.com preset (P.2 slice, then Phase 6) | The Booking.com preset waits; the Airbnb preset ships alone |
+| 21 | ~~Gating of F2 (break-even nights this month) and F3's RevPAR~~ **Decided 2026-10-17 (D-26):** F2 is Free for the current month only; RevPAR and profit margin stay Pro | — | — |
 
 Resolved on 2026-09-26: tax base (§4.1), booked nights above available nights (§4.1), and the minimal `units` table in Phase 3.
 
@@ -717,7 +726,7 @@ Decided on 2026-10-07: the plan model (§2): Free and one paid plan, Pro, priced
 Decided on 2026-10-08:
 - **Question 16, sign-in:** Google only for now (Phase 0b). Email codes come later, once there is a domain and a custom SMTP sender (question 1), because Supabase's built-in mailer delivers only to the project's team members.
 - **Question 17, trial and gating:** the trial clock and all gating are built together with the month report, in Phase 7 (§2). Until then every account works with everything open.
-- Also: Free shows the current month's occupancy and average nightly rate from actual figures; break-even, payback and the rest of the month breakdown stay Pro (§2).
+- Also: Free shows the current month's occupancy and average nightly rate from actual figures; payback and the rest of the month breakdown stay Pro (§2); *revised 2026-10-17 (D-26): the current month's break-even nights is also Free*.
 - **Question 19, region:** Vercel functions move to Dublin (`dub1`), next to Supabase in Ireland (Batch 3 PR B).
 
 Question 18 stays open, with its default.
@@ -733,3 +742,55 @@ Question 18 stays open, with its default.
 - Supplier and cleaner marketplace (take-rate revenue).
 - Egyptian e-invoicing export for registered companies.
 - Co-host ↔ owner matching.
+- **Recorded 2026-10-17 so they are not built (permanent, see `AGENTS.md` §2):** calendar sync, booking management, channel-manager features, and dynamic pricing (recommending or pushing nightly prices). The sensitivity grid and break-even ADR are the user's own what-if arithmetic on their own numbers, not pricing advice.
+- Unscheduled ideas live in `docs/IDEAS.md`; none is planned. An idea enters this file only by Amir's explicit decision.
+
+---
+
+## 8. Feature roadmap F1–F10 (added 2026-10-17, from `docs/COMPETITORS.md`)
+
+Added at Amir's request. Every item is mapped to an **existing** phase; no phase is added or renumbered, and the order in §5.0 is unchanged. How an item is sliced inside its phase is settled in that phase's plan (§5.0 step 1). All figures come from `src/lib/finance/` (`AGENTS.md` §6.1). Nothing is gated before Phase 7 (§2).
+
+### PRE-GATE (before the 20 pre-orders; all three land in the remaining P.2; build order F2 → F3 → F1, D-27)
+**F1 — Payout CSV import** (Airbnb earnings CSV, Booking.com payout export). *Lands in: P.2 (browser-only slice); persistence in Phase 6.*
+- **Status (2026-10-19, founder D6): deferred until after 2027-01-16 per GTM v1.2 (no imports this window).** No F1 work starts before then. F2 → F3 → F1 (D-27) stays the order when it resumes; F1's sample-file prerequisites (questions 7 and 20) are unchanged. This is the roadmap feature F1, not GTM approval F1 (founder hours).
+- The visitor drops the file; it is parsed in the browser (Web Worker), guest names and contacts are stripped there, a listing is mapped to a unit, and the unit's bookings and its net payout and commission (computed from the unit's agreement, §4.2) appear after a row-level preview. No API, no account linking, the file is never uploaded or stored.
+- Pre-gate there is no ledger (`stays` arrives in Phase 5), so the imported bookings live in this browser only, like the visitor's apartment. They do not follow a signed-in account to another device until Phase 5/6.
+- "Commissions" are **computed**, not stored: commission transactions exist only as a snapshot when a statement is finalized (`AGENTS.md` §6.8).
+- Re-importing the same file adds nothing: browser-side dedupe by a one-way hash of confirmation code + row type + date + amount; the raw code is not kept. Server-side HMAC dedupe stays in Phase 6 (`AGENTS.md` §6.9).
+- A payout in another currency than the unit's needs an explicit rate (§4.1); no implicit FX.
+- Built last of the three, **time-boxed to 3 working days**, and blocked until real anonymised sample files exist: questions 7 (Airbnb) and 20 (Booking.com) (D-27). Import is Pro in §2; ungated until Phase 7.
+
+**F2 — Break-even nights this month.** *Lands in: P.2 (own-unit card and Home, browser data); continues in Phase 7 (Home break-even progress) on stored data.*
+- "You need X nights to cover this month's costs, you have Y booked, Z remaining": X = the whole-night ceiling of the engine's break-even (§4.3) on the **same cost basis as the headline profit** (after depreciation, maintenance included; the label states the basis, §4.3 "Same cost basis"); Y = nights booked in the month (§4.4 proration), from F1 or a hand-entered number; Z = max(0, X − Y).
+- Edge states reuse `scenarioView`: break-even beyond the month's available nights, or no break-even. They show the status, never a made-up number.
+- Same-basis test as §4.3 (at X profit ≥ 0, at X − 1 profit < 0). Gating (D-26): Free for the current month only; other months Pro. Built first of the three (D-27).
+
+**F3 — Per-unit KPIs.** *Lands in: P.2 (per own unit); Phase 7 (P&L per unit, Home).*
+- Occupancy, ADR and RevPAR already exist (§4.1, `kpis.ts`). **Profit margin is new** and needs one pure engine function with tests; proposed definition for the phase plan to confirm: net profit (after depreciation) ÷ gross revenue, null at zero revenue.
+- Displayed occupancy stays capped at 100% with the availability warning (§4.1). Gating: occupancy and ADR Free; RevPAR and profit margin Pro (§2, D-26). Built second (D-27).
+
+### POST-GATE (justifies Pro)
+**F4 — Owner statement.** *Lands in: Phase 7 (already specified there; no scope change).* Managed units only. The requested line "revenue − platform commission − expenses − management fee" is the engine's `owner_net` (§4.2): gross revenue − platform fees − **owner-borne** expenses − commission. "Net due to owner" is `balance_due`, which also carries the opening balance and payouts made. PDF and signed, expiring link as in Phase 7.
+
+**F5 — Receipt photo → AI expense draft.** *Lands in: Phase 8 (already specified; no scope change).* Saved `unconfirmed` until the user confirms (`AGENTS.md` §6.7). Photo storage comes from Phase 5. Pro by default (question 18).
+
+**F6 — ROI and payback period.** *Lands in: Phase 7 for stored data; the calculator already shows payback and cash-on-cash (Phase 2).* ROI is the existing cash-on-cash (§4.5), not a second definition. The first-run `setupCost` becomes the unit's opening CAPEX asset when a scenario-based unit turns into a ledger unit; the Phase 5 plan must avoid counting it twice with a Phase 3 checklist cost. Pro (§2).
+
+**F7 — Export for the accountant (Excel, PDF).** *Lands in: Phase 7 (exports: CSV, XLSX, PDF; already specified).* P&L per unit and portfolio plus the transaction list; the Phase 5 `accountant` role can read them. No tax filing or advice (`AGENTS.md` §2); tax lines only from user-configured rates. Pro.
+
+### LATER (moat)
+**F8 — Benchmark vs similar units from anonymised user data.** *Lands in: Phase 9 (the `aggregated` source).* "Similar" means the existing cell: region × bedrooms × season. It follows the Phase 2 lookup rule unchanged: opted-in orgs only, at least 5 units per cell, `MIN_SAMPLE` 30 (a thinner cell rolls up to its parent; "عينة محدودة" shows at the national fallback), and the comparison is hidden when no source exists. Never SAMPLE data for paying users. (Decided 2026-10-17, D-28.)
+
+**F9 — Log expenses by WhatsApp text or voice note.** *Lands in: Phase 9 (the WhatsApp entry line).* Text uses the Phase 8 parser; voice goes through the speech-to-text interface (question 8). Everything lands `unconfirmed`. To confirm in the phase plan: raw message text and audio are discarded after parsing, and `/privacy` names the processors first.
+
+**F10 — Gulf variant (AED/SAR, VAT, per-bed profit).** *Lands in: Phase 9 (the GCC line). Starts only if a Gulf design partner commits;* until then it is not scheduled. VAT is a user-configured rate (the engine already excludes `taxes_collected` from gross revenue), never a hardcoded Gulf rate or advice. Per-bed profit is a new engine function over a bed count on the unit (a migration), for shared apartments. Units in different currencies keep separate totals.
+
+### OUT OF SCOPE
+Calendar sync, booking management, channel manager and dynamic pricing are recorded in §7.
+
+---
+
+## 9. Backlog — unassigned
+
+Empty. All of F1–F10 fit an existing phase (§8). An item that fits no phase cleanly goes here with the reason, and still gets no phase number.
