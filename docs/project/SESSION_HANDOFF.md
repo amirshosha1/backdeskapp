@@ -43,7 +43,9 @@ GTM v1.2 approved (F15) and v1.1 superseded; F1 hours 25–30 (25 h model); F11 
 ## 3d. UX audits and fix plan (2026-10-19)
 #29 merged. Public audit (#45, local build) and signed-in audit (production) recorded; founder decisions D7–D10 recorded as D-31…D-34; D-30 supersedes D-27's F1 timing only; ROADMAP UX-1…UX-8 map every UX-P and UX-S ID, UX-S16 sits under P0-4. Queue: G1 fix (Step 5, plan first) → UX-1 … UX-8, one PR each, founder merges, plan before code.
 
-## 3e. G1 fix in a draft PR (2026-10-19)
+## 3e. G1 fix shipped and verified (2026-10-19)
+**Update: #46 merged (`ba1434a`), production check PASS, G1 = PASS in `GTM.md` §7 (evidence in `VERIFICATION.md`). Next in the queue: UX-1 → UX-8, one PR each, plan first. The paragraph below is the pre-merge note.**
+
 Branch `fix/g1-campaign-attribution`: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` on `landing_view`, new `calc_start` (only after a model is picked) and `verdict_shown`, carried from the landing button's link into the app and held in memory only; docs and privacy text updated. Local: lint, typecheck, 612 unit tests, build, `check:bundle` and the analytics Playwright config (8) pass. G1 stays FAIL in `GTM.md` §7 until a production check passes with filed evidence.
 
 ## 4. Active task
