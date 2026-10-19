@@ -40,6 +40,9 @@ GTM v1.2 approved (F15) and v1.1 superseded; F1 hours 25–30 (25 h model); F11 
 ## 3c. Queue progress (2026-10-19, evening)
 #43 and #21 merged. Founder reports the production verify SQL all PASS (20 checks) and the #21 Preview deletion flow PASSED on mobile. #24 closed (D5) and commented. New findings recorded as KI-26 (mobile Google sign-in, High, blocks G0-A), KI-27 and KI-28 (UX); ROADMAP P1-8 added (property-test check before any paid spend). Next in the queue: #29 (Step 4), then the G1 fix (Step 5, plan first).
 
+## 3d. UX audits and fix plan (2026-10-19)
+#29 merged. Public audit (#45, local build) and signed-in audit (production) recorded; founder decisions D7–D10 recorded as D-31…D-34; D-30 supersedes D-27's F1 timing only; ROADMAP UX-1…UX-8 map every UX-P and UX-S ID, UX-S16 sits under P0-4. Queue: G1 fix (Step 5, plan first) → UX-1 … UX-8, one PR each, founder merges, plan before code.
+
 ## 4. Active task
 None approved. Open PRs (live list 2026-10-18), all draft:
 - **#21** delete-account security, **BLOCKED** until the real backup/restore and disposable-account acceptance are verified (KI-19 migration).
