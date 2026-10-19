@@ -55,7 +55,7 @@ Arabic default, English complete, no hardcoded strings (`messages/*.json`), logi
 - Small conventional commits (`feat:`, `fix:`, `test:`, `chore:`, `docs:`).
 - End of every phase: run `pnpm lint && pnpm typecheck && pnpm test` (plus `pnpm test:db` from Phase 0b), update `docs/PROGRESS.md` (done / decisions / open issues / next step), then stop.
 - Never start Phase 5 without the Validation Gate confirmation described in `docs/BUILD_PLAN.md`.
-- Tests: every change to finance logic, entitlements or RLS ships with tests; reproduce a bug with a failing test first.
+- Tests: every change to finance logic, entitlements or RLS ships with tests; reproduce a bug with a failing test first. Property tests (fast-check) print their seed on every failure; replay one with `FC_SEED=<seed> pnpm test <file>`.
 
 ## 9. Knowledge, resume and sync
 Map of every document, the resume and sync procedures, and the agent compatibility notes: `docs/project/INDEX.md`. Claude Code users also have `/project-resume` and `/project-sync`; they only wrap those procedures. After meaningful work, update `SESSION_HANDOFF.md` and any status, roadmap, issue or decision entry whose facts changed, with evidence (command, CI run, commit). Never record unverified claims or invented percentages.
