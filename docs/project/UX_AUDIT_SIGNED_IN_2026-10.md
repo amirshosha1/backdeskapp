@@ -1,9 +1,11 @@
 > **Report only; nothing here is a decision or a build.** Run on **production** (`backdeskapp.com`) with a disposable test account via Claude in Chrome, 2026-10-19. It complements `UX_AUDIT_PUBLIC_2026-10.md` (IDs UX-P01…P25), which ran on a **local production build** of `main` @ `adeab33` because production was unreachable from that sandbox: the public findings still need a production re-check. The fix plan and the batch for every UX-P and UX-S ID are in `ROADMAP.md` (UX-1…UX-8). Founder decisions that apply: D7 (type lock), D8 (Home summary), D9 (5-apartment limit, no "Free = 1 apartment" or "custom plan" wording), D10 (hide prices and the pre-order button until gate G6); recorded as D-31…D-34 in `DECISIONS.md`. Fixes touching the calculator stay bug fixes (GTM:D-030). Imported verbatim from the founder's upload; the only change is this banner.
+>
+> **Count note:** the report's header says 30 findings (0 Blocker, 8 High, 8 Medium, 14 Low); its table rows give 7 High, 9 Medium and 14 Low (UX-S01–S07 High, S08–S16 Medium, S17–S30 Low), also 30. The rows are kept as written and no severity was changed here; the founder can confirm which one is right. Journey 6 (account deletion) passed on production on 2026-10-19; UX-S28…S30 come from it.
 
 # Backdesk: Signed-in UX audit (UX-S series)
 
 **Run:** Mon 19 Oct 2026, 16:55–17:25 (Africa/Cairo) · **Env:** PROD `backdeskapp.com` · **Account:** disposable test Google account · **Tool:** Claude in Chrome (Windows)
-**Status:** Journeys 1–5 complete. Journey 6 (account deletion) **pending "OK delete"**.
+**Status:** All 6 journeys complete. 30 findings: 0 Blocker, 8 High, 8 Medium, 14 Low (UX-S28 to S30 are in the Journey 6 section).
 
 ## Method limits (read first)
 
@@ -72,6 +74,14 @@
 4. **Pin the bottom nav** by removing the shell transform (UX-S04), and add a desktop side rail (UX-S15).
 5. **Enforce the product rules in signed-in screens:** badge samples on Summary, relabel paid-plan promises «قيد التطوير», stop prompting to import a sample-only device apartment (UX-S07, S09, S10).
 
-## Journey 6: account deletion (pending)
+## Journey 6: account deletion (done, 19 Oct 2026 17:25)
 
-Confirmation sheet reviewed and cancelled; nothing deleted. Awaiting "OK delete".
+**Result: PASS.** More → «احذف حسابي وبياناتي» → «احذف نهائيًا». Toast confirmed deletion; the app returned to the signed-out state and browser storage was cleared (`backdesk:guest` removed). After Back, Reload, `/demo/units`, `/` and a direct link to a deleted unit's calculator, none of the 5 apartments or their figures returned.
+
+Additional findings from this step:
+
+| ID | Severity | Category | Screen | Lang | Size | Steps → observed | Suggested fix |
+|---|---|---|---|---|---|---|---|
+| UX-S28 | Low | copy · rule violation | More, after delete | AR | 619 | Toast: "حُذف حسابك. الشقق المشتركة باقية لأعضائها الآخرين." Shared apartments are not a live feature. | "حُذف حسابك وكل شققك." |
+| UX-S29 | Low | copy | All tabs, signed out | AR | 619 | Banner "محفوظ على هذا الجهاز · سجّل الدخول لتحفظه في حسابك" shows while nothing is stored on the device. | Show the banner only when a device apartment exists. |
+| UX-S30 | Low | navigation | Calculator, deleted unit link | AR | 619 | `/demo/calculator?unit=<deleted id>` silently shows the sample calculator (-12,215.30) with no "not found" notice. | "هذه الشقة لم تعد موجودة" + link to Units. |
