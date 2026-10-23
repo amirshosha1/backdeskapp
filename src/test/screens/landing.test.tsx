@@ -27,11 +27,15 @@ describe("<LandingScreen /> in Arabic", () => {
     expect(card).toHaveTextContent("إعادة تأجير · مثال عام");
     expect(within(card).getByTestId("landing-verdict")).toHaveTextContent(example.outcome === "loss" ? "خسارة" : "مكسب");
     const figure = plain(within(card).getByTestId("hero-figure"));
-    expect(figure).toContain(`${wholeNet.isNegative() ? "-" : ""}${wholeNet.abs().toNumber().toLocaleString("en-US")}`);
+    // «خسارة 12,215 ج.م.»: the word carries the sign, so the figure repeats neither "-" nor "−" (GTM.md §5).
+    expect(figure).toContain(wholeNet.abs().toNumber().toLocaleString("en-US"));
+    expect(figure).not.toMatch(/[-\u2212]/);
     expect(figure).not.toMatch(/\.\d/);
     expect(plain(within(card).getByTestId("landing-inputs"))).toBe("2,450 ج.م. لليلة · 14 من 30 ليلة · إيجار 35,000 ج.م.");
     expect(card).toHaveTextContent("الإيراد يشمل رسوم تنظيف مفترضة لكل حجز.");
-    expect(within(card).getByTestId("landing-sentence")).toHaveTextContent(/ينقصك/);
+    // The break-even only: "you need N more nights" is derived and not a GTM.md §5 checkpoint (UX-P25).
+    expect(within(card).getByTestId("landing-sentence")).toHaveTextContent(/^تتعادل عند [\d.]+ ليلة وأنت عند \d+\.$/);
+    expect(within(card).getByTestId("landing-sentence")).not.toHaveTextContent(/ينقصك/);
   });
 
   it("has one button into the first-run flow, marked for counting; no top line, no sample-data banner", () => {

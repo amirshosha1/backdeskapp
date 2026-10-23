@@ -46,7 +46,7 @@ describe("first-run flow: order per model", () => {
     expect(plain(screen.getByTestId("dial-value"))).toBe("35,000");
     tap("اعرض النتيجة");
     expect(screen.getByTestId("verdict-word")).toHaveTextContent("خسارة");
-    expect(plain(screen.getByTestId("hero-figure"))).toContain("-7,013.67");
+    expect(plain(screen.getByTestId("hero-figure"))).toContain("−7,013.67");
     expect(plain(screen.getByTestId("verdict-sentence"))).toBe("تتعادل عند 21.41 ليلة وأنت عند 18. ينقصك 4 ليالٍ.");
     expect(screen.getByTestId("estimate-note")).toHaveTextContent("تقدير من الأرقام التي أدخلتها، وليس نتيجة فعلية.");
   });

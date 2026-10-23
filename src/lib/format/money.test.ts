@@ -1,5 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { currencyLabel, formatMoney, formatMoneyParts, formatNumber, LRI, PDI } from "./money";
+import { currencyLabel, formatMoney, formatMoneyParts, formatNumber, LRI, MINUS, PDI } from "./money";
 
 describe("formatMoney", () => {
   it("formats a positive amount in Arabic with a trailing currency label", () => {
@@ -11,8 +12,8 @@ describe("formatMoney", () => {
   });
 
   it("keeps the minus sign attached to the number, not the currency label", () => {
-    expect(formatMoney("-2847.00", { locale: "ar" })).toBe("-2,847.00 ج.م.");
-    expect(formatMoney("-2847.00", { locale: "en" })).toBe("EGP -2,847.00");
+    expect(formatMoney("-2847.00", { locale: "ar" })).toBe("−2,847.00 ج.م.");
+    expect(formatMoney("-2847.00", { locale: "en" })).toBe("EGP −2,847.00");
   });
 
   it("shows a leading plus for positive amounts when signDisplay is always", () => {
@@ -23,7 +24,7 @@ describe("formatMoney", () => {
 
   it("wraps the signed number in LTR isolate marks when asked, for use inside Arabic sentences", () => {
     expect(formatMoney("-1500.00", { locale: "ar", isolate: true })).toBe(
-      `${LRI}-1,500.00${PDI} ج.م.`,
+      `${LRI}−1,500.00${PDI} ج.م.`,
     );
   });
 
@@ -67,7 +68,7 @@ describe("formatMoney", () => {
 describe("formatMoneyParts", () => {
   it("splits an amount into sign, integer, fraction and currency (for dimmed decimals)", () => {
     expect(formatMoneyParts("-7347.005", { locale: "ar" })).toEqual({
-      sign: "-",
+      sign: "−",
       integer: "7,347",
       fraction: ".01",
       currency: "ج.م.",
@@ -100,5 +101,33 @@ describe("formatNumber", () => {
 
   it("respects a custom decimal count", () => {
     expect(formatNumber("18.99", { locale: "en", decimals: 0 })).toBe("19");
+  });
+});
+
+describe("the true minus sign (GTM.md §5/§6, D-35)", () => {
+  it("is U+2212, never the ASCII hyphen, on every displayed negative amount", () => {
+    expect(MINUS).toBe("\u2212");
+    for (const locale of ["ar", "en"] as const) {
+      const shown = formatMoney("-12215.30", { locale, decimals: 0 });
+      expect(shown).toContain("\u221212,215");
+      expect(shown).not.toMatch(/-\d/);
+    }
+  });
+
+  it("in an Arabic sentence the sign stays on the left of the digits, in an LTR isolate, never \"12,215−\"", () => {
+    const sentence = `خسارة هذا الشهر ${formatMoney("-12215.30", { locale: "ar", decimals: 0, isolate: true })} بعد التكاليف.`;
+    expect(sentence).toContain(`${LRI}\u221212,215${PDI}`);
+    expect(sentence).not.toMatch(/12,215\s*\u2212/);
+    expect(sentence).not.toMatch(/12,215\s*-/);
+    // The isolate puts the whole signed number in one left-to-right run: the sign is first inside it.
+    const isolated = sentence.slice(sentence.indexOf(LRI) + 1, sentence.indexOf(PDI));
+    expect(isolated.startsWith("\u2212")).toBe(true);
+  });
+
+  it("typed input parsing does not depend on the display formatter", () => {
+    for (const file of ["src/lib/format/amount.ts", "src/lib/calculator/form.ts"]) {
+      const source = readFileSync(file, "utf8");
+      expect(source, file).not.toMatch(/formatMoney|MINUS|\\u2212|\u2212/);
+    }
   });
 });

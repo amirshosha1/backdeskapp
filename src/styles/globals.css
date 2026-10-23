@@ -60,12 +60,11 @@
     backdrop-filter: blur(18px) saturate(150%);
   }
 
-  /* The landing's numbered stations use a quieter glass treatment than the example card. */
+  /* The landing's numbered stations sit on the white page, so they carry their own dark
+     surface: white text on a translucent card over white was invisible (UX-P02). */
   .landing-step-card {
     border: 1px solid rgb(255 255 255 / 0.08);
-    background: rgb(255 255 255 / 0.04);
-    -webkit-backdrop-filter: blur(18px);
-    backdrop-filter: blur(18px);
+    background: var(--color-navy-900);
   }
 
   .nav-pill {
@@ -80,9 +79,6 @@
   /* Solid fallback where backdrop blur isn't supported. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass {
-      background: #2f5bc4;
-    }
-    .landing-step-card {
       background: #2f5bc4;
     }
     .nav-pill {

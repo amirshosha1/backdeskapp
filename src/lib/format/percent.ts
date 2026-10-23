@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import type { AppLocale } from "@/i18n/routing";
-import { intlLocaleTag, LRI, PDI, type DigitStyle } from "./money";
+import { intlLocaleTag, LRI, MINUS, PDI, type DigitStyle } from "./money";
 
 /**
  * Occupancy is never clamped silently (CLAUDE.md §7, BUILD_PLAN.md §4.1).
@@ -44,7 +44,7 @@ export function formatPercent(
   }).format(percentValue.abs().toNumber());
   const sign =
     percentValue.isNegative() && !percentValue.isZero()
-      ? "-"
+      ? MINUS
       : signDisplay === "always" && !percentValue.isZero()
         ? "+"
         : "";

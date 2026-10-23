@@ -26,7 +26,7 @@ describe("formatPercent", () => {
 
   it("shows a sign on changes only when asked, never on zero", () => {
     expect(formatPercent(0.084, { locale: "ar", signDisplay: "always" })).toBe("+8.4%");
-    expect(formatPercent(-0.052, { locale: "en" })).toBe("-5.2%");
+    expect(formatPercent(-0.052, { locale: "en" })).toBe("−5.2%");
     expect(formatPercent(0, { locale: "en", signDisplay: "always" })).toBe("0.0%");
   });
 

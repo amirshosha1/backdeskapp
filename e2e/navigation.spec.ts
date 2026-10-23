@@ -117,7 +117,7 @@ test.describe("360 px layout", () => {
 test.describe("right-to-left numbers", () => {
   test("a negative amount shows its minus sign to the left of the digits", async ({ page }) => {
     await page.goto("/demo/units/downtown-cairo/statement");
-    const fees = page.locator("bdi", { hasText: /^-7,347\.00$/ });
+    const fees = page.locator("bdi", { hasText: /^\u22127,347\.00$/ });
     await expect(fees).toBeVisible();
     const [minusX, digitX] = await fees.evaluate((el) => {
       // React renders the sign and the digits as separate text nodes.
@@ -136,7 +136,7 @@ test.describe("right-to-left numbers", () => {
         range.setEnd(found.node, found.offset + 1);
         return range.getBoundingClientRect().left;
       };
-      return [left((c) => c === "-"), left((c) => /[0-9]/.test(c))];
+      return [left((c) => c === "\u2212"), left((c) => /[0-9]/.test(c))];
     });
     expect(minusX).toBeLessThan(digitX);
   });

@@ -24,6 +24,13 @@ describe("<Money />", () => {
     const { container } = renderWithIntl(<Money amount="-7347.00" />, { locale: "ar" });
     const number = container.querySelector("bdi");
     expect(number).toHaveAttribute("dir", "ltr");
-    expect(number).toHaveTextContent(/^-7,347\.00$/);
+    expect(number).toHaveTextContent(/^−7,347\.00$/);
+  });
+
+  it("renders an Arabic negative with the true minus sign and no ASCII hyphen before a digit", () => {
+    const { container } = renderWithIntl(<Money amount="-12215.30" decimals={0} />, { locale: "ar" });
+    expect(container.textContent).toContain("\u221212,215");
+    expect(container.textContent).not.toMatch(/-\d/);
+    expect(container.querySelector("bdi")?.textContent?.startsWith("\u2212")).toBe(true);
   });
 });

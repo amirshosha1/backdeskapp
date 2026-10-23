@@ -164,3 +164,46 @@ test("robots.txt lets search engines read the landing and keeps them out of the 
   expect(sitemap).toContain("<loc>https://backdeskapp.com/en</loc>");
   expect(sitemap).not.toContain("/demo");
 });
+
+test("the 'How it works' stations are readable: text contrast against the surface it sits on is at least 4.5:1 (UX-P02)", async ({ page }) => {
+  await page.goto("/");
+  const ratios = await page.evaluate(() => {
+    // Tailwind v4 serves colours as oklch()/color-mix(): let the canvas resolve any CSS colour to sRGB.
+    const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
+    const parse = (value: string): [number, number, number, number] => {
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = "#000";
+      ctx.fillStyle = value;
+      ctx.fillRect(0, 0, 1, 1);
+      const [r = 0, g = 0, b = 0, a = 255] = ctx.getImageData(0, 0, 1, 1).data;
+      return [r, g, b, a / 255];
+    };
+    const lum = ([r, g, b]: number[]) => {
+      const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+      return 0.2126 * f(r!) + 0.7152 * f(g!) + 0.0722 * f(b!);
+    };
+    // The first opaque background walking up from the element.
+    const surface = (el: Element): number[] => {
+      for (let node: Element | null = el; node; node = node.parentElement) {
+        const c = parse(getComputedStyle(node).backgroundColor);
+        if (c[3] === 1) return c;
+      }
+      return [255, 255, 255, 1];
+    };
+    const out: { text: string; ratio: number }[] = [];
+    const targets = [...document.querySelectorAll('[data-testid="landing-how"] ol li p, [data-testid="landing-how"] ol li h3, [data-testid="landing-how"] > p')];
+    for (const el of targets) {
+      const fg = parse(getComputedStyle(el).color);
+      const bg = surface(el);
+      // Blend a translucent text colour over its surface.
+      const a = fg[3]!;
+      const blended = [0, 1, 2].map((i) => fg[i]! * a + bg[i]! * (1 - a));
+      const l1 = lum(blended);
+      const l2 = lum(bg);
+      out.push({ text: (el.textContent ?? "").slice(0, 24), ratio: (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05) });
+    }
+    return out;
+  });
+  expect(ratios.length).toBeGreaterThanOrEqual(9);
+  for (const { text, ratio } of ratios) expect(ratio, text).toBeGreaterThanOrEqual(4.5);
+});
