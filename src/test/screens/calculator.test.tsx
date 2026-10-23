@@ -26,9 +26,9 @@ function withOwnUnit(form: CalculatorForm = EXAMPLE, assumed: AssumedField[] = [
 }
 
 describe("<CalculatorScreen /> — Summary (rental-arbitrage example)", () => {
-  it("leads with the net after depreciation, -7,013.67, and the same-basis break-even, 21.41 nights", () => {
+  it("leads with the net after depreciation, −7,013.67, and the same-basis break-even, 21.41 nights", () => {
     renderCalculator();
-    expect(byTestId("hero-figure")).toContain("-7,013.67");
+    expect(byTestId("hero-figure")).toContain("−7,013.67");
     expect(screen.getByText("صافي الربح الشهري بعد الإهلاك")).toBeInTheDocument();
     expect(byTestId("break-even-pill")).toBe("التعادل عند 21.41 ليلة");
     expect(sentence()).toBe("ينقصك 4 ليالٍ في الشهر لتغطي التكاليف.");
@@ -46,9 +46,9 @@ describe("<CalculatorScreen /> — Summary (rental-arbitrage example)", () => {
   it("the three rows add up as displayed: revenue − all costs with depreciation = net", () => {
     renderCalculator();
     expect(byTestId("summary-revenue")).toContain("47,400.00");
-    expect(byTestId("summary-costs")).toContain("-54,413.67");
+    expect(byTestId("summary-costs")).toContain("−54,413.67");
     expect(byTestId("summary-net")).toContain("الصافي بعد الإهلاك");
-    expect(byTestId("summary-net")).toContain("-7,013.67");
+    expect(byTestId("summary-net")).toContain("−7,013.67");
   });
 
   it("the slider moves booked nights: whole nights short, the first profitable night, then nights above", () => {
@@ -137,7 +137,7 @@ describe("<CalculatorScreen /> — Summary (rental-arbitrage example)", () => {
     openSection("مصاريف التشغيل");
     type(/الإنترنت/, "abc");
     act(() => setQueryParam("tab", null));
-    expect(byTestId("hero-figure")).toContain("-7,013.67");
+    expect(byTestId("hero-figure")).toContain("−7,013.67");
     fireEvent.click(screen.getByTestId("stale-summary"));
     expect(screen.getByRole("tab", { name: "كل الأرقام" })).toHaveAttribute("aria-selected", "true");
     expect(field(/الإنترنت/)).toHaveAttribute("aria-invalid", "true");
@@ -166,13 +166,13 @@ describe("<CalculatorScreen /> — كل الأرقام", () => {
     openTab("كل الأرقام");
     const total = (id: string) => plain(screen.getByTestId(id).querySelector("button") ?? screen.getByTestId(id));
     expect(total("section-revenue")).toContain("47,400.00");
-    expect(total("section-platformFee")).toContain("-7,347.00");
-    expect(total("section-opex")).toContain("-7,900.00");
-    expect(total("section-rent")).toContain("-35,000.00");
+    expect(total("section-platformFee")).toContain("−7,347.00");
+    expect(total("section-opex")).toContain("−7,900.00");
+    expect(total("section-rent")).toContain("−35,000.00");
     expect(byTestId("subtotal-before-depreciation")).toContain("الربح قبل الإهلاك");
-    expect(byTestId("subtotal-before-depreciation")).toContain("-2,847.00");
-    expect(total("section-depreciation")).toContain("-4,166.67");
-    expect(byTestId("total-net")).toContain("-7,013.67");
+    expect(byTestId("subtotal-before-depreciation")).toContain("−2,847.00");
+    expect(total("section-depreciation")).toContain("−4,166.67");
+    expect(byTestId("total-net")).toContain("−7,013.67");
   });
 
   it("one section is open at a time", () => {
@@ -216,7 +216,7 @@ describe("<CalculatorScreen /> — كل الأرقام", () => {
     openSection("مؤشرات أخرى");
     const other = screen.getByTestId("section-other");
     expect(plain(other)).toContain("المحوَّل من المنصة40,053.00");
-    expect(plain(other)).toContain("صافي الدخل التشغيلي-2,847.00");
+    expect(plain(other)).toContain("صافي الدخل التشغيلي−2,847.00");
     expect(byTestId("result-break-even-after")).toContain("21.41 ليلة (71.4%)");
     expect(byTestId("result-first-profitable-night")).toContain("الليلة 22");
     expect(byTestId("result-contribution")).toContain("2,058.50");
@@ -224,7 +224,7 @@ describe("<CalculatorScreen /> — كل الأرقام", () => {
     expect(byTestId("result-break-even-before")).toContain("19.38 ليلة (64.6%)");
     expect(byTestId("result-break-even-before-no-maintenance")).toContain("18.99 ليلة (63.3%)");
     expect(byTestId("result-payback")).toContain("لا يُسترد بهذه الأرقام");
-    expect(byTestId("result-cash-on-cash")).toContain("-10.7%");
+    expect(byTestId("result-cash-on-cash")).toContain("−10.7%");
     expect(byTestId("return-note")).toContain("قبل الإهلاك");
   });
 
@@ -248,7 +248,7 @@ describe("<CalculatorScreen /> — كل الأرقام", () => {
     withOwnUnit({ ...EXAMPLE, operatingModel: "managed_for_owner" });
     renderCalculator();
     openTab("كل الأرقام");
-    expect(plain(screen.getByTestId("section-commission"))).toContain("-8,010.60");
+    expect(plain(screen.getByTestId("section-commission"))).toContain("−8,010.60");
     openSection("مؤشرات أخرى");
     expect(byTestId("result-manager-profit")).toContain("8,010.60");
     expect(byTestId("result-contribution-before-commission")).toContain("2,058.50");

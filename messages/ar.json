@@ -31,6 +31,7 @@
     "cardRevenueNote": "الإيراد يشمل رسوم تنظيف مفترضة لكل حجز.",
     "cta": "احسب شقتك مجانًا",
     "ctaNote": "بدون حساب",
+    "exampleSentence": "تتعادل عند {breakEven} ليلة وأنت عند {booked}.",
     "howTitle": "كيف تعمل",
     "station": "المحطة {number}",
     "steps": {

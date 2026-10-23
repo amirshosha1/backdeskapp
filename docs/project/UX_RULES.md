@@ -9,6 +9,7 @@
 - No hardcoded UI strings: everything lives in `messages/ar.json` and `messages/en.json`.
 - Use CSS logical properties only (`ms-`, `me-`, `ps-`, `pe-`, `start`, `end`); never `left`/`right` for layout. Verify every screen in RTL.
 - Digits: Western digits by default for financial clarity (format Arabic with `ar-EG-u-nu-latn`); Arabic-Indic digits as a user setting.
+- Negative amounts and percents use the true minus sign (U+2212 "−"), never the ASCII hyphen, inside an LTR isolate so the sign stays left of the digits in Arabic text (D-35; `formatMoneyParts`). Beside the word «خسارة» (the landing example, the share image) the figure is shown without a sign: «خسارة 12,215 ج.م.» (`GTM.md` §5).
 - Font: IBM Plex Sans Arabic, with tabular numerals on every money column.
 - Mobile-first PWA (360 px baseline), thumb-reachable primary actions, bottom navigation, numeric keypads (`inputMode="decimal"`).
 - Occupancy is never clamped silently: if booked nights exceed available nights, show a data warning and cap the displayed occupancy at 100%.

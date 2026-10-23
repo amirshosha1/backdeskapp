@@ -13,8 +13,9 @@ import type { AppLocale } from "@/i18n/routing";
  * Digits are Western (`latn`) by default; Arabic-Indic (`arab`) is wired
  * here as a user setting for a later phase (CLAUDE.md §7).
  *
- * Right-to-left safety: a signed number dropped into Arabic text reorders
- * badly ("7,347.00-"). Components render the number part inside an LTR
+ * A negative amount is written with the true minus sign (U+2212, GTM.md §5),
+ * never the ASCII hyphen. Right-to-left safety: a signed number dropped into
+ * Arabic text reorders badly ("7,347.00−"). Components render the number part inside an LTR
  * isolate (`<bdi dir="ltr">`, see `formatMoneyParts`); plain strings that
  * get interpolated into sentences use `isolate: true`, which wraps the
  * number in Unicode isolate marks (U+2066 … U+2069).
@@ -36,6 +37,9 @@ export function currencyLabel(currency: SupportedCurrency, locale: AppLocale): s
   return CURRENCY_LABEL[currency][locale];
 }
 
+/** The true minus sign (U+2212) used for every displayed negative amount or percent. */
+export const MINUS = "\u2212";
+
 /** Left-to-right isolate and pop-directional-isolate marks. */
 export const LRI = "⁦";
 export const PDI = "⁩";
@@ -56,7 +60,7 @@ export interface FormatMoneyOptions {
 }
 
 export interface MoneyParts {
-  /** "-", "+" or "". Uses ASCII hyphen-minus and plus. */
+  /** "−" (U+2212), "+" or "". The true minus sign, never the ASCII hyphen. */
   sign: string;
   /** Integer part with group separators, e.g. "29,306". */
   integer: string;
@@ -98,7 +102,7 @@ export function formatMoneyParts(
     else if (part.type === "decimal" || part.type === "fraction") fraction += part.value;
   }
 
-  const sign = isNegative ? "-" : signDisplay === "always" && !isZero ? "+" : "";
+  const sign = isNegative ? MINUS : signDisplay === "always" && !isZero ? "+" : "";
   return { sign, integer, fraction, currency: CURRENCY_LABEL[currency][locale], isNegative };
 }
 

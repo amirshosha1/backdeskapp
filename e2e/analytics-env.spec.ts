@@ -38,6 +38,8 @@ test("the whole funnel from the landing page: five events, fixed values only, an
   const { sent, hosts } = await record(page);
   await page.goto("/?utm_source=Facebook&utm_medium=social&utm_campaign=Oct%20post&utm_content=Hook-A");
   await expect.poll(() => sent.length).toBe(1);
+  // G1 regression (UX-1a touches the landing): the button's link still carries the campaign labels into the app.
+  await expect(page.getByTestId("landing-cta")).toHaveAttribute("href", /from=landing&utm_source=facebook&utm_medium=social&utm_campaign=other&utm_content=hook-a$/);
   await page.getByTestId("landing-cta").click();
   await expect(page).toHaveURL(/\/demo\/start$/);
   await page.getByRole("radio", { name: /أستأجرها وأعيد تأجيرها/ }).click();

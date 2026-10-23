@@ -12,6 +12,8 @@ export interface HeroFigureProps {
   size?: "lg" | "md" | "sm";
   /** Decimals shown (default 2); 0 for whole pounds. Presentation only (half-up). */
   decimals?: number;
+  /** Hide the sign: for a figure shown beside the word that already says loss or profit (the landing example). */
+  unsigned?: boolean;
   className?: string;
 }
 
@@ -19,7 +21,7 @@ export interface HeroFigureProps {
  * The one number a screen leads with (≥ 48px, same sans as everything else):
  * whole units in full weight, decimals dimmed, currency small.
  */
-export function HeroFigure({ amount, size = "lg", decimals, className }: HeroFigureProps) {
+export function HeroFigure({ amount, size = "lg", decimals, unsigned = false, className }: HeroFigureProps) {
   const locale = useLocale() as AppLocale;
   const parts = formatMoneyParts(amount, { locale, decimals });
   const number = (
@@ -30,7 +32,7 @@ export function HeroFigure({ amount, size = "lg", decimals, className }: HeroFig
         size === "lg" ? "text-[3.5rem]" : size === "md" ? "text-[3rem] [@media(max-height:820px)]:text-[2.5rem]" : "text-[2.5rem]",
       )}
     >
-      {parts.sign}
+      {unsigned ? "" : parts.sign}
       {parts.integer}
       <span className="opacity-45">{parts.fraction}</span>
     </bdi>

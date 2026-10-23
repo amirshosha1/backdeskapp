@@ -78,7 +78,7 @@ describe("<UnitsScreen /> — the visitor's own unit", () => {
     expect(plain(card)).toContain("60%");
     expect(plain(card)).toContain("2,500");
     expect(plain(card)).toContain("الصافي بعد الإهلاك");
-    expect(plain(screen.getByTestId("own-unit-profit"))).toBe("-7,014");
+    expect(plain(screen.getByTestId("own-unit-profit"))).toBe("−7,014");
     expect(screen.getByRole("meter", { name: "الليالي المحجوزة مقارنةً بليالي التعادل" })).toBeInTheDocument();
     expect(plain(card)).toContain("18 ليلة محجوزة");
     expect(plain(card)).toContain("التعادل عند 21.41 ليلة");
@@ -140,7 +140,7 @@ describe("<OwnerStatement />", () => {
 
   it("puts the minus sign of negative amounts inside an LTR isolate", () => {
     const { container } = renderWithIntl(<OwnerStatement statement={STATEMENT} />);
-    const fees = [...container.querySelectorAll("bdi")].find((el) => el.textContent === "-7,347.00");
+    const fees = [...container.querySelectorAll("bdi")].find((el) => el.textContent === "−7,347.00");
     expect(fees).toBeDefined();
     expect(fees).toHaveAttribute("dir", "ltr");
   });

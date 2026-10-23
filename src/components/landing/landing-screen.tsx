@@ -8,6 +8,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { SUPPORT_EMAIL, supportMailto } from "@/lib/contact";
 import { flowSentence } from "@/lib/first-run/sentence";
 import { formatMoney } from "@/lib/format/money";
+import { formatNights } from "@/lib/format/nights";
 import type { LandingExample } from "@/lib/landing/example";
 import { cn } from "@/lib/utils";
 
@@ -106,10 +107,14 @@ export function LandingScreen({ example }: { example: LandingExample }) {
               <p className={cn("text-[1.625rem] leading-snug font-bold", example.outcome === "profit" ? "text-hero-profit" : "text-hero-loss")} data-testid="landing-verdict">
                 {tFirstRun("verdictWord", { outcome: example.outcome, owner: "no" })}
               </p>
-              <HeroFigure amount={example.net} decimals={0} size="sm" />
+              {/* «خسارة 12,215 ج.م.»: the word carries the sign, so the figure never repeats it (GTM.md §5). */}
+              <HeroFigure amount={example.net} decimals={0} size="sm" unsigned />
               <p className="text-xs text-white/75">{tFirstRun("perMonth")}</p>
               <p className="mt-1.5 text-[0.8125rem] leading-relaxed font-semibold" data-testid="landing-sentence">
-                {tFirstRun(sentence.key, sentence.values)}
+                {/* The "you need N more nights" clause is derived, not a GTM.md §5 checkpoint: the landing states the break-even only (UX-P25). */}
+                {example.sentence.kind === "short"
+                  ? t("exampleSentence", { breakEven: formatNights(example.sentence.nights, locale), booked: example.bookedNights })
+                  : tFirstRun(sentence.key, sentence.values)}
               </p>
             </section>
 
@@ -134,17 +139,17 @@ export function LandingScreen({ example }: { example: LandingExample }) {
               {STEPS.map(({ number, Icon }) => (
                 <li key={number} className="landing-step-card flex min-h-28 items-center gap-4 rounded-card p-4">
                   <div className="min-w-0 flex-1">
-                    <p className="mb-1 text-xs font-medium text-white/50">
+                    <p className="mb-1 text-xs font-medium text-white/75">
                       {t("station", { number })}
                     </p>
                     <h3 className="text-base font-semibold text-white">{t(`steps.${number}.title`)}</h3>
-                    <p className="mt-1 text-sm leading-relaxed font-normal text-white/70">{t(`steps.${number}.description`)}</p>
+                    <p className="mt-1 text-sm leading-relaxed font-normal text-white/85">{t(`steps.${number}.description`)}</p>
                   </div>
-                  <Icon className="h-4 w-4 shrink-0 text-white/70" aria-hidden="true" />
+                  <Icon className="h-4 w-4 shrink-0 text-white/75" aria-hidden="true" />
                 </li>
               ))}
             </ol>
-            <p className="text-[0.8125rem] leading-relaxed text-white/50">{t("ownerNote")}</p>
+            <p className="text-[0.8125rem] leading-relaxed text-ink-2">{t("ownerNote")}</p>
           </section>
         </main>
 

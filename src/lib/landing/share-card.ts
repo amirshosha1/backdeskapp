@@ -51,7 +51,7 @@ export function shareCardHtml(locale: (typeof SHARE_LOCALES)[number], fontCss = 
   const t = createTranslator({ locale, messages: MESSAGES[locale] });
   const example = landingExample();
   const parts = formatMoneyParts(example.net, { locale, decimals: 0 });
-  const number = `<bdi dir="ltr" class="num">${escape(parts.sign + parts.integer)}</bdi>`;
+  const number = `<bdi dir="ltr" class="num">${escape(parts.integer)}</bdi>`;
   const currency = `<span class="cur">${escape(parts.currency)}</span>`;
   const wordmark = t.markup("landing.wordmark", {
     latin: (chunks) => `<span lang="en" dir="ltr">${chunks}</span>`,
